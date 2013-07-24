@@ -1,0 +1,218 @@
+@import "util";
+
+.credit-card-input.js-enabled {
+  
+  .face.front{
+    -webkit-border-radius: 23px;
+    border-radius: 23px;
+    background-color: #eee;
+    background-position: right bottom;
+    border: 1px solid #ddd;
+    -webkit-transition: background 0.25s linear;
+    -moz-transition: background 0.25s linear;
+    -o-transition: background 0.25s linear;
+    transition: background 0.25s linear;
+  }
+  .face.back{
+     -webkit-border-radius: 23px;
+    border-radius: 23px;
+    background-color: #eee;
+    background-position: right bottom;
+    border: 1px solid #ddd;
+    -webkit-transition: background 0.25s linear;
+    -moz-transition: background 0.25s linear;
+    -o-transition: background 0.25s linear;
+    transition: background 0.25s linear;
+  }
+
+  .value{ display: none; }
+  .field{ position: absolute; }
+
+  /* Generic product **********************************************************/
+  &.product-generic {
+    .face.front {
+      background: #eee url('/images/products/generic-front.png') no-repeat right bottom;
+      .cc-number{ 
+        display: block; 
+        color: #333;
+        background-color: #ddd;
+        font-family: $cc-font-family;
+        font-size:30px;
+        left:34px;
+        top:161px;
+      }
+      .cc-exp{ display: none; }
+      .cc-name{ display: none; }
+    }
+  }
+
+  /* Visa product *************************************************************/
+  &.product-visa {
+    .face.front{
+      background: #eee url('/images/products/visa-front.png') no-repeat right bottom;
+      .cc-number{
+        background-color: #ddd;
+        left:34px;
+        top:161px;
+        padding: 2px;
+        input{
+          color: #333;
+          font-family: $cc-font-family;
+          font-size:30px;
+          background: transparent;
+          border: none;
+        }
+        input + input{
+          margin-left: 16px;
+        }
+      }
+      .cc-exp{
+        left:218px;
+        top:224px;
+        font-size: 20px;
+        width: 100px;
+        input, .separator{ margin: 0; padding: 0; font-size: 20px; font-family: $cc-font-family; }
+      }
+      .cc-name{
+        left:43px;
+        top:259px;
+        font-family: $cc-font-family;
+        font-size: 20px;
+      }
+    }
+
+    /* Customizations for specific issuers (.issuer-<issuerShortname>) */
+
+    &.issuer-simple{
+      .face.front{
+        background-image: url('/images/issuers/visa-simple-front.png');
+        input,.separator {
+          color: #eee;
+          background-color: transparent;
+          text-shadow: 1px 1px 1px #aaa;
+          filter: dropshadow(color=#aaa, offx=1, offy=1);
+          border: none;
+          @include input-placeholder{ 
+            color: #fff; 
+            text-shadow: 1px 1px 1px #ccc;
+            filter: dropshadow(color=#ddd, offx=1, offy=1);
+          };
+        }
+        .cc-number{
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
+  /* Amex product *************************************************************/
+  &.product-amex{
+    .face.front {
+      background: #eee url('/images/products/amex-front.png') no-repeat right bottom;
+      .cc-number{
+        background-color: #ddd;
+        left: 64px;
+        top:161px;
+        padding: 2px;
+        input{
+          color: #333;
+          font-family: $cc-font-family;
+          font-size:30px;
+          background: transparent;
+          border: none;
+        }
+        input + input{
+          margin-left: 16px;
+        }
+      }
+      .cc-exp{
+        left:50px;
+        top:230px;
+        input, .separator{
+          margin: 0; 
+          padding: 0;
+          font-family: $cc-font-family;
+          font-size: 20px;
+        }
+      }
+      .cc-name{
+        left:50px;
+        top:270px;
+        font-family: $cc-font-family;
+        font-size: 20px;
+      }
+    }
+
+    /* Customizations for specific issuers (.issuer-<issuerShortname>) */
+    &.issuer-blackcard{
+      .face.front{
+        background-image: url('/images/issuers/amex-blackcard-front.png');
+        input {
+          background-color: transparent;
+          color: #dbc397;
+          border: none;
+          @include input-placeholder{
+            color: #dbc397;
+            opacity: 0.5;
+          };
+        }
+        .cc-number{
+          background-color: transparent;
+        }
+        .cc-exp{
+          input, .separator{
+            margin: 0; 
+            padding: 0;
+            font-family: $cc-font-family;
+            font-size: 20px;
+            color: #dbc397;
+          }
+        }
+        .cc-name{
+          top: 254px;
+        }
+      }
+    }
+
+  }
+
+  /* MasterCard product *******************************************************/
+  &.product-mastercard{
+    .face.front{
+      background: #eee url('/images/products/mastercard-front.png') no-repeat right bottom;
+      .cc-number{
+        background-color: #ddd;
+        left:34px;
+        top:161px;
+        padding: 2px;
+        input{
+          color: #333;
+          font-family: $cc-font-family;
+          font-size:30px;
+          background: transparent;
+          border: none;
+        }
+        input + input{
+          margin-left: 16px;
+        }
+      }
+      .cc-exp{
+        left:230px;
+        top:216px;
+        input, .separator{ 
+          margin: 0; 
+          padding: 0; 
+          font-size: 20px; 
+          font-family: $cc-font-family; 
+        }
+      }
+      .cc-name{
+        left:50px;
+        top:244px;
+        font-family: $cc-font-family;
+        font-size: 20px;
+      }
+    }
+  }
+
+}

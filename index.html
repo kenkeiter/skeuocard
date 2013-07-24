@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Credit Card Input</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="styles/cc-input.css" />
+    <link rel="stylesheet" href="styles/master.css" />
+  </head>
+  <body>
+
+    <!--[if lt IE 7]>
+      <p class="chromeframe">You are using an <strong>outdated</strong> 
+      browser. Please <a href="http://browsehappy.com/">upgrade your 
+      browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">
+      activate Google Chrome Frame</a> to improve your experience.</p>
+    <![endif]-->
+    <form method="GET" action="">
+
+      <div class="credit-card-input" id="card">
+        <label for="cc_type">Card Type</label>
+        <select class="field cc-type" name="cc_type" id="cc-type-choice">
+          <option value="">...</option>
+          <option value="visa">Visa</option>
+          <option value="discover">Discover</option>
+          <option value="mastercard">MasterCard</option>
+          <option value="amex">American Express</option>
+        </select>
+        <div class="card">
+          <div class="face front">
+            <label for="cc_number">Card Number</label>
+            <input class="field cc-number value" type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
+            <label for="cc_exp">Expiration Date (mm/yy)</label>
+            <input class="field cc-exp value" type="text" name="cc_exp" placeholder="00/00">
+            <label for="cc_name">Cardholder's Name</label>
+            <input class="field cc-name" type="text" name="cc_name" placeholder="John Doe">
+          </div>
+          <div class="face back">
+            <label for="cc_cvc">Card Validation Code</label>
+            <input class="field cc-ccid" type="text" name="cc_cvc" placeholder="123" maxlength="3" size="3">
+          </div>
+        </div>
+      </div>
+
+      <input type="button" id="flip-btn" value="flip" />
+      <input type="submit" />
+    </form>
+
+    <script src="http://use.typekit.net/vga4jrn.js"></script>
+    <script src="/javascripts/jquery-2.0.3.min.js"></script>
+    <script src="/javascripts/jquery.autotab-1.1b.js"></script>
+    <script src="/javascripts/jquery.caret.js"></script>
+    <script src="/javascripts/cards.js"></script>
+    <script src="/javascripts/kredit-card.js"></script>
+    <script>
+      try{Typekit.load();}catch(e){
+        alert("Typekit failed to load, so fonts may look strange.");
+      }
+      var card;
+      $(document).ready(function(){
+        // Create a new controller and bind it to the interface elements.
+        card = new KreditCardInput('#card', {});
+        $('#flip-btn').click(function(){
+          card.flip();
+        });
+      });
+
+    </script>
+  </body>
+</html>
