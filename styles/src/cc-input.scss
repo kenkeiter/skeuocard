@@ -1,60 +1,116 @@
 @import "reset";
 @import "util";
 
-$cc-scale: 0.58;
-$cc-face-width: 856px * $cc-scale;
-$cc-face-height: 538px * $cc-scale;
+$cc-face-width: 24.8em;
+$cc-face-height: 15.6em;
 
+$cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-font-family: "ocr-a-std", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
-.credit-card-input {
-  -webkit-perspective: 1000;
-  -moz-perspective: 1000;
-  perspective: 1000;
+.skeuocard {
   width: $cc-face-width;
   height: $cc-face-height;
 
-  .card {
-    -webkit-transition: 0.6s;
-    -webkit-transform-style: preserve-3d;
-    -moz-transition: 0.6s;
+  -webkit-perspective: 1000;
+  -moz-perspective: 1000;
+  -o-perspective: 1000;
+  perspective: 1000;
+
+  .card-body {
+    -moz-transform: perspective(1000px);
     -moz-transform-style: preserve-3d;
-    transition: 0.6s;
-    transform-style: preserve-3d;
     position: relative;
 
-    &.flip{
-      -webkit-transform: rotateY(180deg);
-      -moz-transform: rotateY(180deg);
-      transform: rotateY(180deg);
+    .face {
+      -webkit-backface-visibility: hidden;
+      -moz-backface-visibility: hidden;
+      backface-visibility: hidden;
+      
+      -webkit-transform-style: preserve-3d;
+      -moz-transform-style: preserve-3d;
+      -o-transform-style: preserve-3d;
+      -ms-transform-style: preserve-3d;
+      transform-style: preserve-3d;
+
+      -webkit-transition: all 0.25s ease;
+      -moz-transition: all 0.25s ease;
+      -o-transition: all 0.25s ease;
+      -ms-transition: all 0.25s ease;
+      transition: all 0.25s ease;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: $cc-face-width;
+      height: $cc-face-height;
+      -webkit-border-radius: 1.15em;
+      border-radius: 1.15em;
+      background-color: #eee;
+      background-size: cover !important;
+      background-position: right bottom;
+      border: 1px solid #ddd;
     }
-  }
 
-  .face {
-    -webkit-backface-visibility: hidden;
-    -moz-backface-visibility: hidden;
-    backface-visibility: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: $cc-face-width;
-    height: $cc-face-height;
-
-    &.front{
+    .face.front{
       z-index: 2;
     }
 
-    &.back{
-      -webkit-transform: rotateY(180deg);
-      -moz-transform: rotateY(180deg);
-      transform: rotateY(180deg);
+    .face.back{
+      -webkit-transform: rotateY(-180deg);
+      -moz-transform: rotateY(-180deg);
+      -o-transform: rotateY(-180deg);
+      -ms-transform: rotateY(-180deg);
+      transform: rotateY(-180deg);
     }
   }
-}
 
-.credit-card-input.js-enabled{
-  label{ display: none; }
-  #cc-type-choice{ display: none; }
+  .card-body.flip {
+    .face.back{
+      -webkit-transform: rotateY(0deg);
+      -moz-transform: rotateY(0deg);
+      -o-transform: rotateY(0deg);
+      -ms-transform: rotateY(0deg);
+      transform: rotateY(0deg);
+    }
+
+    .face.front{
+      -webkit-transform: rotateY(180deg);
+      -moz-transform: rotateY(180deg);
+      -o-transform: rotateY(180deg);
+      transform: rotateY(180deg);
+    } 
+  }
+
+
+  .flip-tab{
+    position: absolute;
+    background-color: #62D1DA;
+    padding: 0.3em;
+    -webkit-border-radius: 0.3em;
+    border-radius: 0.3em;
+    cursor: pointer; cursor: hand;
+    h1{
+      font-family: $cc-label-family;
+      color: #fff;
+      font-size: 1.15em;
+    }
+    p{
+      margin-top: 0.3em;
+      font-family: $cc-label-family;
+      color: #333;
+      font-size: 0.65em;
+    }
+    &.front{
+      right: -10px;
+      top: 36px;
+    }
+    &.back{
+      left: -10px;
+      top: 36px;
+    }
+  }
+
 }
 
 @import "_cards";
+@import "_browser_hacks";

@@ -1,0 +1,27 @@
+// Firefox-specific hacks
+.gecko .skeuocard{
+  input { box-shadow:none; }
+  input:-moz-placeholder, input:focus { box-shadow:none !important; }
+  input:invalid { box-shadow:none; }
+  &.product-visa.issuer-simple .face.front input,.separator{
+    text-shadow: none;
+    color: #999;
+    @include input-placeholder{
+      color: #ccc;
+      text-shadow: none; 
+    }
+  }
+}
+
+.ie10 .skeuocard{
+  .cc-number input{
+    ::-ms-clear { display: none !important; }
+  }
+}
+
+.chrome.win .skeuocard, .ie10.win .skeuocard{
+  .card-body.flip .face.back{
+    z-index: 3;
+    backface-visibility: visible;
+  }
+}
