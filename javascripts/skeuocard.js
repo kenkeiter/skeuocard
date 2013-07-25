@@ -41,6 +41,7 @@
 
     Skeuocard.prototype._conformDOM = function() {
       var _this = this;
+      this.el.container.addClass("js");
       this.el.container.find("> :not(input,select,textarea)").remove();
       this.el.container.find("> input,select,textarea").hide();
       this._underlyingFormEls = {
@@ -92,18 +93,14 @@
         required: true
       });
       this._inputViews.number.el.addClass('cc-number');
-      this._inputViews.number.el.prependTo(this.el.surfaceFront);
+      this._inputViews.number.el.appendTo(this.el.surfaceFront);
       this._inputViews.exp.el.addClass('cc-exp');
-      this._inputViews.exp.el.prependTo(this.el.surfaceFront);
-      this._inputViews.number.bind("change", function(e, input) {
-        if (input != null) {
-          return _this._setUnderlyingValue('number', input.value);
-        }
+      this._inputViews.exp.el.appendTo(this.el.surfaceFront);
+      this._inputViews.number.bind("keyup", function(e, input) {
+        return _this._setUnderlyingValue('number', input.value);
       });
-      this._inputViews.exp.bind("change", function(e, input) {
-        if (input != null) {
-          return _this._setUnderlyingValue('exp', input.value);
-        }
+      this._inputViews.exp.bind("keyup", function(e, input) {
+        return _this._setUnderlyingValue('exp', input.value);
       });
       this._inputViews.name.bind("keyup", function(e) {
         return _this._setUnderlyingValue('name', $(e.target).val());
@@ -178,15 +175,17 @@
       }
       if (this.issuer !== (matchedIssuer = this.getIssuerForNumber(number))) {
         this._log("Changing issuer:", matchedIssuer);
-        this.issuer = matchedIssuer;
         this.el.container.removeClass(function(index, css) {
           return (css.match(/\bissuer-\S+/g) || []).join(' ');
         });
         if (matchedIssuer !== void 0) {
-          this.el.container.addClass("issuer-" + this.issuer.issuerShortname);
+          this.el.container.addClass("issuer-" + matchedIssuer.issuerShortname);
         }
+        this.issuer = matchedIssuer;
       }
+      this._log("Rendered...");
       if (this.frontIsValid()) {
+        this._log("Front face is now valid.");
         return this.el.flipTabFront.show();
       } else {
         return this.el.flipTabFront.hide();
@@ -196,8 +195,9 @@
     Skeuocard.prototype.frontIsValid = function() {
       var cardValid, expValid, nameValid;
       cardValid = this.isValidLuhn(this._inputViews.number.value) && (this._inputViews.number.maxLength() === this._inputViews.number.value.length);
-      expValid = this._inputViews.exp.date && this._inputViews.exp.date.getFullYear() >= this.options.currentDate.getFullYear() && this._inputViews.exp.date.getMonth() >= this.options.currentDate.getMonth();
+      expValid = this._inputViews.exp.date && ((this._inputViews.exp.date.getFullYear() === this.options.currentDate.getFullYear() && this._inputViews.exp.date.getMonth() >= this.options.currentDate.getMonth()) || this._inputViews.exp.date.getFullYear() > this.options.currentDate.getFullYear());
       nameValid = this._inputViews.name.el.val().length > 0;
+      console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid);
       return cardValid && expValid && nameValid;
     };
 
@@ -280,14 +280,19 @@
   Skeuocard.prototype.SegmentedCardNumberInputView = (function() {
 
     function SegmentedCardNumberInputView(opts) {
+      var _this = this;
       if (opts == null) {
         opts = {};
       }
       opts.value || (opts.value = "");
-      opts["class"] || (opts["class"] = "");
+      opts.groupings || (opts.groupings = [19]);
+      opts.placeholderChar || (opts.placeholderChar = "X");
       this.options = opts;
       this.value = this.options.value;
       this.el = $("<fieldset>");
+      this.el.delegate("input", "keyup", function(e) {
+        return _this._onGroupKeyUp(e);
+      });
       this.groupEls = $();
     }
 
@@ -303,68 +308,89 @@
       return (_ref = this.el).trigger.apply(_ref, args);
     };
 
+    SegmentedCardNumberInputView.prototype.setGroupings = function(groupings) {
+      var caretPos, groupEl, groupLength, _i, _len, _startLength;
+      caretPos = this._caretPosition();
+      this.el.empty();
+      _startLength = 0;
+      for (_i = 0, _len = groupings.length; _i < _len; _i++) {
+        groupLength = groupings[_i];
+        groupEl = $("<input>").attr({
+          type: 'text',
+          size: groupLength,
+          maxlength: groupLength,
+          required: true,
+          "class": "group" + groupLength
+        });
+        if (this.value.length > _startLength) {
+          groupEl.val(this.value.substr(_startLength, groupLength));
+          _startLength += groupLength;
+        }
+        this.el.append(groupEl);
+      }
+      this.options.groupings = groupings;
+      this.groupEls = this.el.find("input");
+      this._caretTo(caretPos);
+      if (this.options.placeholderChar !== void 0) {
+        this.setPlaceholderChar(this.options.placeholderChar);
+      }
+      if (this.options.placeholder !== void 0) {
+        this.setPlaceholder(this.options.placeholder);
+      }
+      return this.groupEls.autotab_magic().autotab_filter('numeric');
+    };
+
+    SegmentedCardNumberInputView.prototype.setPlaceholderChar = function(ch) {
+      this.groupEls.each(function() {
+        var el;
+        el = $(this);
+        return el.attr('placeholder', new Array(parseInt(el.attr('maxlength')) + 1).join(ch));
+      });
+      this.options.placeholder = void 0;
+      return this.options.placeholderChar = ch;
+    };
+
+    SegmentedCardNumberInputView.prototype.setPlaceholder = function(str) {
+      this.groupEls.each(function() {
+        return $(this).attr('placeholder', str);
+      });
+      this.options.placeholderChar = void 0;
+      return this.options.placeholder = str;
+    };
+
+    SegmentedCardNumberInputView.prototype.setValue = function(newValue) {
+      var lastPos;
+      lastPos = 0;
+      this.groupEls.each(function() {
+        var el, len;
+        el = $(this);
+        len = parseInt(el.attr('maxlength'));
+        el.val(newValue.substr(lastPos, len));
+        return lastPos += len;
+      });
+      return this.value = newValue;
+    };
+
+    SegmentedCardNumberInputView.prototype.getValue = function() {
+      return this.value;
+    };
+
     SegmentedCardNumberInputView.prototype.reconfigure = function(changes) {
-      var caretPos, groupEl, groupLength, lastPos, _i, _len, _ref,
-        _this = this;
       if (changes == null) {
         changes = {};
       }
-      caretPos = this._caretPosition();
-      if (changes.value != null) {
-        this.value = changes.value;
-      }
       if (changes.groupings != null) {
-        this.options.groupings = changes.groupings;
-        this.el.empty();
-        _ref = this.options.groupings;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          groupLength = _ref[_i];
-          groupEl = $("<input>").attr({
-            type: 'text',
-            size: groupLength,
-            maxlength: groupLength,
-            required: true,
-            "class": "group" + groupLength
-          });
-          groupEl.bind("keyup", function(e) {
-            return _this._onGroupKeyUp(e);
-          });
-          groupEl.bind("change", function(e) {
-            return _this._onGroupChange(e);
-          });
-          this.el.append(groupEl);
-        }
+        this.setGroupings(changes.groupings);
       }
-      this.groupEls = this.el.find("input");
       if (changes.placeholderChar != null) {
-        this.options.placeholderChar = changes.placeholderChar;
-        this.groupEls.each(function(i, e) {
-          var el, elLength;
-          el = $(e);
-          elLength = parseInt(el.attr('maxlength'));
-          return el.attr('placeholder', new Array(elLength + 1).join(_this.options.placeholderChar));
-        });
+        this.setPlaceholderChar(changes.placeholderChar);
       }
       if (changes.placeholder != null) {
-        this.options.placeholder = changes.placeholder;
-        this.groupEls.each(function(i, e) {
-          var el;
-          el = $(e);
-          return el.attr('placeholder', _this.options.placeholder);
-        });
+        this.setPlaceholder(changes.placeholder);
       }
-      if (this.value.length > 0) {
-        lastPos = 0;
-        this.groupEls.each(function(i, e) {
-          var el, elLength;
-          el = $(e);
-          elLength = parseInt(el.attr('maxlength'));
-          el.val(_this.value.substr(lastPos, elLength));
-          return lastPos += elLength;
-        });
+      if (changes.value != null) {
+        return this.setValue(changes.value);
       }
-      this._caretTo(caretPos);
-      return this.groupEls.autotab_magic().autotab_filter('numeric');
     };
 
     SegmentedCardNumberInputView.prototype._onGroupChange = function(e) {
@@ -372,15 +398,14 @@
     };
 
     SegmentedCardNumberInputView.prototype._onGroupKeyUp = function(e) {
-      var newValue,
-        _this = this;
+      var newValue;
       e.stopPropagation();
       newValue = "";
-      this.groupEls.each(function(i, el) {
-        return newValue += $(el).val();
+      this.groupEls.each(function() {
+        return newValue += $(this).val();
       });
       this.value = newValue;
-      this.trigger("change", [this]);
+      this.trigger("keyup", [this]);
       return false;
     };
 
@@ -439,82 +464,128 @@
   Skeuocard.prototype.ExpirationInputView = (function() {
 
     function ExpirationInputView(opts) {
+      var _this = this;
       if (opts == null) {
         opts = {};
       }
       opts.dateFormatter || (opts.dateFormatter = function(date) {
-        return date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear();
+        return date.getDate() + "-" + (date.getMonth() + 1) + "-" + date.getFullYear();
       });
       opts.dateParser || (opts.dateParser = function(value) {
         var dateParts;
         dateParts = value.split('-');
         return new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
       });
+      opts.pattern || (opts.pattern = "MM/YY");
       this.options = opts;
       this.date = void 0;
       this.value = void 0;
       this.el = $("<fieldset>");
+      this.el.delegate("input", "keyup", function(e) {
+        return _this._onKeyUp(e);
+      });
     }
 
-    ExpirationInputView.prototype.reconfigure = function(opts) {
-      var char, charWhitelist, currentLength, formatParticles, i, input, sep, _i, _len,
-        _this = this;
-      if (opts.value != null) {
-        this.value = opts.value;
-        this.date = this.options.dateParser(this.value);
-        console.log("set date", this.value, this.date);
-      }
-      if (opts.pattern != null) {
-        this.options.pattern = opts.pattern;
-        this.el.empty();
-        formatParticles = this.options.pattern.split('');
-        currentLength = 0;
-        charWhitelist = ['M', 'D', 'Y'];
-        for (i = _i = 0, _len = formatParticles.length; _i < _len; i = ++_i) {
-          char = formatParticles[i];
-          currentLength++;
-          if (formatParticles[i + 1] !== char) {
-            if (__indexOf.call(charWhitelist, char) >= 0) {
-              input = $('<input>').attr({
-                type: 'text',
-                placeholder: new Array(currentLength + 1).join(char),
-                maxlength: currentLength,
-                size: currentLength,
-                required: true,
-                "class": 'cc-exp-field-' + char.toLowerCase() + ' group' + currentLength
-              });
-              if (this.date && this.value) {
-                console.log(this.date);
-                if (char === 'M') {
-                  input.attr('value', this._zeroPadNumber(this.date.getMonth() + 1, currentLength));
-                } else if (char === 'D') {
-                  input.attr('value', this._zeroPadNumber(this.date.getDate(), currentLength));
-                } else if (char === 'Y') {
-                  if (currentLength === 4) {
-                    input.attr('value', this.date.getFullYear());
-                  } else {
-                    input.attr('value', this.date.getYear());
-                  }
-                }
-              }
-              this.el.append(input);
-              input.bind("keyup", function(e) {
-                return _this._onKeyUp(e);
-              });
-            } else {
-              sep = $('<span class="separator">' + char + '</span>');
-              this.el.append(sep);
-            }
-            currentLength = 0;
-          }
+    ExpirationInputView.prototype.setPattern = function(pattern) {
+      var char, groupings, i, patternParts, _currentLength, _i, _len;
+      groupings = [];
+      patternParts = pattern.split('');
+      _currentLength = 0;
+      for (i = _i = 0, _len = patternParts.length; _i < _len; i = ++_i) {
+        char = patternParts[i];
+        _currentLength++;
+        if (patternParts[i + 1] !== char) {
+          groupings.push([_currentLength, char]);
+          _currentLength = 0;
         }
-        return this._inputGroupEls().autotab_magic().autotab_filter('numeric');
+      }
+      this.options.groupings = groupings;
+      return this._setGroupings(this.options.groupings);
+    };
+
+    ExpirationInputView.prototype._setGroupings = function(groupings) {
+      var fieldChars, group, groupChar, groupLength, input, sep, _i, _len, _startLength;
+      fieldChars = ['D', 'M', 'Y'];
+      this.el.empty();
+      _startLength = 0;
+      for (_i = 0, _len = groupings.length; _i < _len; _i++) {
+        group = groupings[_i];
+        groupLength = group[0];
+        groupChar = group[1];
+        if (__indexOf.call(fieldChars, groupChar) >= 0) {
+          input = $('<input>').attr({
+            type: 'text',
+            placeholder: new Array(groupLength + 1).join(groupChar),
+            maxlength: groupLength,
+            required: true,
+            'data-fieldtype': groupChar,
+            "class": 'cc-exp-field-' + groupChar.toLowerCase() + ' group' + groupLength
+          });
+          this.el.append(input);
+        } else {
+          sep = $('<span>').attr({
+            "class": 'separator'
+          });
+          sep.html(new Array(groupLength + 1).join(groupChar));
+          this.el.append(sep);
+        }
+      }
+      this.groupEls = this.el.find('input');
+      this.groupEls.autotab_magic().autotab_filter('numeric');
+      if (this.date != null) {
+        return this._updateFieldValues();
+      }
+    };
+
+    ExpirationInputView.prototype._updateFieldValues = function() {
+      var currentDate,
+        _this = this;
+      currentDate = this.date;
+      return this.groupEls.each(function() {
+        var el, groupLength, year;
+        el = $(_this);
+        groupLength = parseInt(el.attr('maxlength'));
+        switch (el.attr('data-fieldtype')) {
+          case 'M':
+            return el.val(_this._zeroPadNumber(currentDate.getMonth() + 1, groupLength));
+          case 'D':
+            return el.val(_this._zeroPadNumber(currentDate.getDate(), groupLength));
+          case 'Y':
+            year = groupLength >= 4 ? currentDate.getFullYear() : currentDate.getFullYear().toString().substr(2, 4);
+            return el.val(year);
+        }
+      });
+    };
+
+    ExpirationInputView.prototype.setDate = function(newDate) {
+      this.date = newDate;
+      return this._updateFieldValues();
+    };
+
+    ExpirationInputView.prototype.setValue = function(newValue) {
+      return this.setDate(this.options.dateParser(newValue));
+    };
+
+    ExpirationInputView.prototype.getDate = function() {
+      return this.date;
+    };
+
+    ExpirationInputView.prototype.getValue = function() {
+      return this.value;
+    };
+
+    ExpirationInputView.prototype.reconfigure = function(opts) {
+      if (opts.pattern != null) {
+        this.setPattern(opts.pattern);
+      }
+      if (opts.value != null) {
+        return this.setValue(opts.value);
       }
     };
 
     ExpirationInputView.prototype._onKeyUp = function(e) {
       var dateObj, day, month, year;
-      e.preventDefault();
+      e.stopPropagation();
       day = parseInt(this.el.find('.cc-exp-field-d').val()) || 1;
       month = parseInt(this.el.find('.cc-exp-field-m').val());
       year = parseInt(this.el.find('.cc-exp-field-y').val());
@@ -523,7 +594,9 @@
       }
       dateObj = new Date(year, month - 1, day);
       this.value = this.options.dateFormatter(dateObj);
-      return this.trigger("change", [this]);
+      this.date = dateObj;
+      this.trigger("keyup", [this]);
+      return false;
     };
 
     ExpirationInputView.prototype.bind = function() {

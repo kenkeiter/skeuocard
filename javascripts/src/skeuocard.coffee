@@ -39,6 +39,10 @@ class Skeuocard
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
   _conformDOM: ->
+    # for CSS determination that this is an enhanced input, add 'js' class to 
+    # the container
+    @el.container.addClass("js")
+    # remove anything that's not an underlying form field
     @el.container.find("> :not(input,select,textarea)").remove()
     @el.container.find("> input,select,textarea").hide()
     # attach underlying form elements
@@ -79,18 +83,16 @@ class Skeuocard
 
     # style and attach the number view to the DOM
     @_inputViews.number.el.addClass('cc-number')
-    @_inputViews.number.el.prependTo(@el.surfaceFront)
+    @_inputViews.number.el.appendTo(@el.surfaceFront)
     # style and attach the exp view to the DOM
     @_inputViews.exp.el.addClass('cc-exp')
-    @_inputViews.exp.el.prependTo(@el.surfaceFront)
+    @_inputViews.exp.el.appendTo(@el.surfaceFront)
 
     # bind change events to their underlying form elements
-    @_inputViews.number.bind "change", (e, input)=>
-      if input? # hack to avoid getting extra events.. wherefrom?!
-        @_setUnderlyingValue 'number', input.value
-    @_inputViews.exp.bind "change", (e, input)=>
-      if input? # hack to avoid getting extra events.. wherefrom?!
-        @_setUnderlyingValue('exp', input.value)
+    @_inputViews.number.bind "keyup", (e, input)=>
+      @_setUnderlyingValue 'number', input.value
+    @_inputViews.exp.bind "keyup", (e, input)=>
+      @_setUnderlyingValue('exp', input.value)
     @_inputViews.name.bind "keyup", (e)=>
       @_setUnderlyingValue('name', $(e.target).val())
     @_inputViews.cvc.bind "keyup", (e)=>
@@ -155,14 +157,17 @@ class Skeuocard
     # rerender (if necessary) to match change in issuer
     if @issuer isnt matchedIssuer = @getIssuerForNumber(number)
       @_log("Changing issuer:", matchedIssuer)
-      @issuer = matchedIssuer
       @el.container.removeClass (index, css)=>
         (css.match(/\bissuer-\S+/g) || []).join(' ')
       if matchedIssuer isnt undefined
-        @el.container.addClass("issuer-#{@issuer.issuerShortname}")
+        @el.container.addClass("issuer-#{matchedIssuer.issuerShortname}")
+      # change the current issuer for the card
+      @issuer = matchedIssuer
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
+    @_log("Rendered...")
     if @frontIsValid()
+      @_log("Front face is now valid.")
       @el.flipTabFront.show()
     else
       @el.flipTabFront.hide()
@@ -173,11 +178,15 @@ class Skeuocard
       (@_inputViews.number.maxLength() == @_inputViews.number.value.length)
     # validate expiration
     expValid = @_inputViews.exp.date and
-      @_inputViews.exp.date.getFullYear() >= @options.currentDate.getFullYear() and
-      @_inputViews.exp.date.getMonth() >= @options.currentDate.getMonth()
+      ((@_inputViews.exp.date.getFullYear() == @options.currentDate.getFullYear() and
+       @_inputViews.exp.date.getMonth() >= @options.currentDate.getMonth()) or
+       @_inputViews.exp.date.getFullYear() > @options.currentDate.getFullYear())
+
+
     # validate name
     nameValid = @_inputViews.name.el.val().length > 0
     # combine
+    console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
     cardValid and expValid and nameValid
 
   isValid: ->
@@ -194,6 +203,7 @@ class Skeuocard
   # Set a value in the underlying form.
   _setUnderlyingValue: (field, newValue)->
     @_underlyingFormEls[field].val(newValue)
+    # we couple to the change event to influence renders in the interface
     @_underlyingFormEls[field].trigger('change')
 
   # Flip the card over.
@@ -233,11 +243,14 @@ class Skeuocard
 class Skeuocard::SegmentedCardNumberInputView
   constructor: (opts = {})->
     # Setup option defaults
-    opts.value ||= ""
-    opts.class ||= ""
+    opts.value           ||= ""
+    opts.groupings       ||= [19]
+    opts.placeholderChar ||= "X"
     @options = opts
+    # everythIng else
     @value = @options.value
     @el = $("<fieldset>")
+    @el.delegate "input", "keyup", (e)=> @_onGroupKeyUp(e)
     @groupEls = $()
 
   bind: (args...)->
@@ -246,53 +259,67 @@ class Skeuocard::SegmentedCardNumberInputView
   trigger: (args...)->
     @el.trigger(args...)
 
-  reconfigure: (changes = {})->
-    # save the position of the caret
+  setGroupings: (groupings)->
     caretPos = @_caretPosition()
-    # if there have been changes to the groupings
-    if changes.value?
-      @value = changes.value
-    if changes.groupings?
-      @options.groupings = changes.groupings
-      @el.empty() # remove all inputs
-      for groupLength in @options.groupings
-        groupEl = $("<input>").attr
-          type: 'text'
-          size: groupLength
-          maxlength: groupLength
-          required: true
-          class: "group#{groupLength}"
-        # bind events to the new input
-        groupEl.bind("keyup", (e)=> @_onGroupKeyUp(e))
-        groupEl.bind("change", (e)=> @_onGroupChange(e))
-        @el.append(groupEl)
-    # It's safe to make this avilable now:
+    @el.empty() # remove all inputs
+    _startLength = 0
+    for groupLength in groupings
+      groupEl = $("<input>").attr
+        type: 'text'
+        size: groupLength
+        maxlength: groupLength
+        required: true
+        class: "group#{groupLength}"
+      # restore value, if necessary
+      if @value.length > _startLength
+        groupEl.val(@value.substr(_startLength, groupLength))
+        _startLength += groupLength
+      @el.append(groupEl)
+    @options.groupings = groupings
     @groupEls = @el.find("input")
-    # if the placeholder char has been changed
-    if changes.placeholderChar?
-      @options.placeholderChar = changes.placeholderChar
-      @groupEls.each (i, e)=>
-        el = $(e)
-        elLength = parseInt(el.attr('maxlength'))
-        el.attr 'placeholder', new Array(elLength+1).join(@options.placeholderChar)
-    # if the placeholder text has been specified (each box will be filled)
-    if changes.placeholder?
-      @options.placeholder = changes.placeholder
-      @groupEls.each (i, e)=>
-        el = $(e)
-        el.attr 'placeholder', @options.placeholder
-    # restore existing value
-    if @value.length > 0
-      lastPos = 0
-      @groupEls.each (i, e)=>
-        el = $(e)
-        elLength = parseInt(el.attr('maxlength'))
-        el.val(@value.substr(lastPos, elLength))
-        lastPos += elLength
-    # restore caret position
+    # restore to previous settings
     @_caretTo(caretPos)
-    # restore auto-tabbing
+    if @options.placeholderChar isnt undefined
+      @setPlaceholderChar(@options.placeholderChar)
+    if @options.placeholder isnt undefined
+      @setPlaceholder(@options.placeholder)
+    # setup autotabbing between inputs
     @groupEls.autotab_magic().autotab_filter('numeric')
+
+  setPlaceholderChar: (ch)->
+    @groupEls.each ->
+      el = $(@)
+      el.attr 'placeholder', new Array(parseInt(el.attr('maxlength'))+1).join(ch)
+    @options.placeholder = undefined
+    @options.placeholderChar = ch
+
+  setPlaceholder: (str)->
+    @groupEls.each ->
+      $(@).attr 'placeholder', str
+    @options.placeholderChar = undefined
+    @options.placeholder = str
+
+  setValue: (newValue)->
+    lastPos = 0
+    @groupEls.each ->
+      el = $(@)
+      len = parseInt(el.attr('maxlength'))
+      el.val(newValue.substr(lastPos, len))
+      lastPos += len
+    @value = newValue
+
+  getValue: ->
+    @value
+
+  reconfigure: (changes = {})->
+    if changes.groupings?
+      @setGroupings(changes.groupings)
+    if changes.placeholderChar?
+      @setPlaceholderChar(changes.placeholderChar)
+    if changes.placeholder?
+      @setPlaceholder(changes.placeholder)
+    if changes.value?
+      @setValue(changes.value)
 
   _onGroupChange: (e)->
     e.preventDefault()
@@ -301,9 +328,9 @@ class Skeuocard::SegmentedCardNumberInputView
     e.stopPropagation()
     # update the value
     newValue = ""
-    @groupEls.each (i, el)=> newValue += $(el).val()
+    @groupEls.each -> newValue += $(@).val()
     @value = newValue
-    @trigger("change", [@])
+    @trigger("keyup", [@])
     return false
 
   _caretTo: (index)->
@@ -345,11 +372,11 @@ class Skeuocard::ExpirationInputView
   constructor: (opts = {})->
     # setup option defaults
     opts.dateFormatter ||= (date)->
-      date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear()
-    
+      date.getDate() + "-" + (date.getMonth()+1) + "-" + date.getFullYear()
     opts.dateParser ||= (value)->
       dateParts = value.split('-')
       new Date(dateParts[2], dateParts[1]-1, dateParts[0])
+    opts.pattern ||= "MM/YY"
     
     @options = opts
     # setup default values
@@ -357,61 +384,93 @@ class Skeuocard::ExpirationInputView
     @value = undefined
     # create dom container
     @el = $("<fieldset>")
+    @el.delegate "input", "keyup", (e)=> @_onKeyUp(e)
+
+  setPattern: (pattern)->
+    groupings = []
+    patternParts = pattern.split('')
+    _currentLength = 0
+    for char, i in patternParts
+      _currentLength++
+      if patternParts[i+1] != char
+        groupings.push([_currentLength, char])
+        _currentLength = 0
+    @options.groupings = groupings
+    @_setGroupings(@options.groupings)
+
+  _setGroupings: (groupings)->
+    fieldChars = ['D', 'M', 'Y']
+    @el.empty()
+    _startLength = 0
+    for group in groupings
+      groupLength = group[0]
+      groupChar = group[1]
+      if groupChar in fieldChars # this group is a field
+        input = $('<input>').attr
+          type: 'text'
+          placeholder: new Array(groupLength+1).join(groupChar)
+          maxlength: groupLength
+          required: true
+          'data-fieldtype': groupChar
+          class: 'cc-exp-field-' + groupChar.toLowerCase() + 
+                 ' group' + groupLength
+        @el.append(input)
+      else # this group is a separator
+        sep = $('<span>').attr
+          class: 'separator'
+        sep.html(new Array(groupLength + 1).join(groupChar))
+        @el.append(sep)
+
+    @groupEls = @el.find('input')
+    @groupEls.autotab_magic().autotab_filter('numeric')
+    @_updateFieldValues() if @date?
+
+  _updateFieldValues: ->
+    currentDate = @date
+    @groupEls.each =>
+      el = $(this)
+      groupLength = parseInt(el.attr('maxlength'))
+      switch el.attr('data-fieldtype')
+        when 'M'
+          el.val @_zeroPadNumber(currentDate.getMonth() + 1, groupLength)
+        when 'D'
+          el.val @_zeroPadNumber(currentDate.getDate(), groupLength)
+        when 'Y'
+          year = if groupLength >= 4 then currentDate.getFullYear() else 
+                 currentDate.getFullYear().toString().substr(2,4)
+          el.val(year)
+
+  setDate: (newDate)->
+    @date = newDate
+    @_updateFieldValues()
+
+  setValue: (newValue)->
+    @setDate @options.dateParser(newValue)
+
+  getDate: ->
+    @date
+
+  getValue: ->
+    @value
 
   reconfigure: (opts)->
-    if opts.value?
-      @value = opts.value
-      @date = @options.dateParser(@value)
-      console.log("set date", @value, @date)
     if opts.pattern?
-      @options.pattern = opts.pattern
-      @el.empty()
-      formatParticles = @options.pattern.split('')
-      currentLength = 0
-      charWhitelist = ['M', 'D', 'Y']
-      for char, i in formatParticles
-        currentLength++
-        if formatParticles[i+1] != char
-          if char in charWhitelist
-            # finish the input
-            input = $('<input>').attr
-              type: 'text'
-              placeholder: new Array(currentLength+1).join(char)
-              maxlength: currentLength
-              size: currentLength
-              required: true
-              class: 'cc-exp-field-' + char.toLowerCase() + ' group' + currentLength
-            if @date and @value
-              console.log(@date)
-              if char is 'M'
-                input.attr('value', @_zeroPadNumber(@date.getMonth() + 1, currentLength))
-              else if char is 'D'
-                input.attr('value', @_zeroPadNumber(@date.getDate(), currentLength))
-              else if char is 'Y'
-                if currentLength is 4
-                  input.attr('value', @date.getFullYear())
-                else
-                  input.attr('value', @date.getYear())
-            @el.append(input) 
-            input.bind("keyup", (e)=> @_onKeyUp(e))
-          else
-            # add a separator
-            sep = $('<span class="separator">' + char + '</span>')
-            @el.append(sep)
-          
-          currentLength = 0 # reset length count
-      @_inputGroupEls().autotab_magic().autotab_filter('numeric')
+      @setPattern(opts.pattern)
+    if opts.value?
+      @setValue(opts.value)
 
   _onKeyUp: (e)->
-    e.preventDefault()
-    # get a date object representing what's been entered    
+    e.stopPropagation()
+    # get a date object representing what's been entered
     day = parseInt(@el.find('.cc-exp-field-d').val()) || 1
     month = parseInt(@el.find('.cc-exp-field-m').val())
     year = parseInt(@el.find('.cc-exp-field-y').val())
     year += 2000 if year < 2000
     dateObj = new Date(year, month-1, day)
     @value = @options.dateFormatter(dateObj)
-    @trigger("change", [@])
+    @date = dateObj
+    @trigger("keyup", [@])
+    return false
 
   bind: (args...)->
     @el.bind(args...)
