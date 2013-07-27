@@ -1,3 +1,21 @@
+###
+"Skeuocard" -- A Skeuomorphic Credit-Card Input Enhancement
+@description Skeuocard is a skeuomorphic credit card input plugin, supporting 
+             progressive enhancement. It renders a credit-card input which 
+             behaves similarly to a physical credit card.
+@author Ken Keiter <ken@kenkeiter.com>
+@updated 2013-07-25
+@website http://kenkeiter.com/
+@exports [window.Skeuocard]
+
+# TODO:
+* Add full set of events.
+* Get basics working in IE8/9, older versions of FF/Chrome
+* Add classes to card indicating validation state
+* Pull list of accepted cards from <select>; update selected value upon
+  product change. Allow accepted cards to be overridden in options.
+###
+
 class Skeuocard
   
   constructor: (el, opts = {})->
@@ -53,10 +71,18 @@ class Skeuocard
       name: @el.container.find(@options.nameInputSelector)
       cvc: @el.container.find(@options.cvcInputSelector)
     # bind change handlers to render
-    @_underlyingFormEls.number.bind "change", (e)=> @render()
-    @_underlyingFormEls.exp.bind "change", (e)=> @render()
-    @_underlyingFormEls.name.bind "change", (e)=> @render()
-    @_underlyingFormEls.cvc.bind "change", (e)=> @render()
+    @_underlyingFormEls.number.bind "change", (e)=> 
+      @_inputViews.number.setValue @_getUnderlyingValue('number')
+      @render()
+    @_underlyingFormEls.exp.bind "change", (e)=> 
+      @_inputViews.exp.setValue @_getUnderlyingValue('exp')
+      @render()
+    @_underlyingFormEls.name.bind "change", (e)=> 
+      @_inputViews.exp.setValue @_getUnderlyingValue('name')
+      @render()
+    @_underlyingFormEls.cvc.bind "change", (e)=> 
+      @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
+      @render()
     # construct the necessary card elements
     @el.surfaceFront = $("<div>").attr(class: "face front")
     @el.surfaceBack = $("<div>").attr(class: "face back")
@@ -73,30 +99,35 @@ class Skeuocard
   _createInputs: ->
     @_inputViews.number = new @SegmentedCardNumberInputView()
     @_inputViews.exp = new @ExpirationInputView()
-    @_inputViews.name = new @TextInputView @el.surfaceFront, 
-                                           class: "cc-name"
-                                           required: true
-                                           placeholder: "YOUR NAME"
-    @_inputViews.cvc = new @TextInputView @el.surfaceBack, 
-                                          class: "cc-cvc"
-                                          required: true
+    @_inputViews.name = new @TextInputView(
+      class: "cc-name", required: true, placeholder: "YOUR NAME")
+    @_inputViews.cvc = new @TextInputView(
+      class: "cc-cvc", required: true, placeholder: "XXX")
 
     # style and attach the number view to the DOM
     @_inputViews.number.el.addClass('cc-number')
     @_inputViews.number.el.appendTo(@el.surfaceFront)
+    # attach name input
+    @_inputViews.name.el.appendTo(@el.surfaceFront)
     # style and attach the exp view to the DOM
     @_inputViews.exp.el.addClass('cc-exp')
     @_inputViews.exp.el.appendTo(@el.surfaceFront)
+    # attach cvc field to the DOM
+    @_inputViews.cvc.el.appendTo(@el.surfaceBack)
 
     # bind change events to their underlying form elements
     @_inputViews.number.bind "keyup", (e, input)=>
-      @_setUnderlyingValue 'number', input.value
+      @_setUnderlyingValue('number', input.value)
+      @render()
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
+      @render()
     @_inputViews.name.bind "keyup", (e)=>
       @_setUnderlyingValue('name', $(e.target).val())
+      @render()
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
+      @render()
 
     # create the validation indicator (flip tab)
     @el.flipTabFront = @options.flipTabFrontEl
@@ -118,7 +149,7 @@ class Skeuocard
   # Debugging helper; if debug is set to true at instantiation, messages will 
   # be printed to the console.
   _log: (msg...)->
-    if console?.log
+    if console?.log and !!@options.debug
       console.log("[skeuocard]", msg...) if @options.debug?
 
   # Render changes to the skeuocard; state-agnostic -- should transform content 
@@ -137,13 +168,10 @@ class Skeuocard
         @_inputViews.number.reconfigure 
           groupings: matchedProduct.cardNumberGrouping
           placeholderChar: @options.cardNumberPlaceholderChar
-          value: @_getUnderlyingValue('number')
         @_inputViews.exp.show()
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
           pattern: matchedProduct.expirationFormat
-          value: @_getUnderlyingValue('exp')
-        @_inputViews.name.el.val(@_getUnderlyingValue('name'))
       else
         # Reset to generic input
         @_inputViews.exp.hide()
@@ -165,7 +193,6 @@ class Skeuocard
       @issuer = matchedIssuer
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
-    @_log("Rendered...")
     if @frontIsValid()
       @_log("Front face is now valid.")
       @el.flipTabFront.show()
@@ -186,7 +213,7 @@ class Skeuocard
     # validate name
     nameValid = @_inputViews.name.el.val().length > 0
     # combine
-    console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
+    # console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
     cardValid and expValid and nameValid
 
   isValid: ->
@@ -203,8 +230,6 @@ class Skeuocard
   # Set a value in the underlying form.
   _setUnderlyingValue: (field, newValue)->
     @_underlyingFormEls[field].val(newValue)
-    # we couple to the change event to influence renders in the interface
-    @_underlyingFormEls[field].trigger('change')
 
   # Flip the card over.
   flip: ->
@@ -250,6 +275,7 @@ class Skeuocard::SegmentedCardNumberInputView
     # everythIng else
     @value = @options.value
     @el = $("<fieldset>")
+    @el.delegate "input", "keydown", (e)=> @_onGroupKeyDown(e)
     @el.delegate "input", "keyup", (e)=> @_onGroupKeyUp(e)
     @groupEls = $()
 
@@ -258,6 +284,87 @@ class Skeuocard::SegmentedCardNumberInputView
 
   trigger: (args...)->
     @el.trigger(args...)
+
+  _onGroupKeyDown: (e)->
+    e.stopPropagation()
+    groupEl = $(e.currentTarget)
+    if e.which is 8 and groupEl.val().length is 0 and not $.isEmptyObject(groupEl.prev())
+      groupEl.prev().focus()
+
+    arrowKeys = [37, 38, 39, 40]
+    groupEl = $(e.currentTarget)
+    groupMaxLength = parseInt(groupEl.attr('maxlength'))
+    groupCaretPos = @_getFieldCaretPosition(groupEl)
+
+    if e.which in arrowKeys
+      switch e.which
+        when 37 # left
+          if groupCaretPos is 0 and not $.isEmptyObject(groupEl.prev())
+            groupEl.prev().focus()
+        when 39 # right
+          if groupCaretPos is groupMaxLength and not $.isEmptyObject(groupEl.next())
+            groupEl.next().focus()
+        when 38 # up
+          if not $.isEmptyObject(groupEl.prev())
+            groupEl.prev().focus()
+        when 40 # down
+          if not $.isEmptyObject(groupEl.next())
+            groupEl.next().focus()
+    
+
+  _onGroupKeyUp: (e)->
+    e.stopPropagation() # prevent event from bubbling up
+
+    specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36,
+                   37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224]
+    arrowKeys = [37, 38, 39, 40]
+    groupEl = $(e.currentTarget)
+    groupMaxLength = parseInt(groupEl.attr('maxlength'))
+    groupCaretPos = @_getFieldCaretPosition(groupEl)
+    
+    if e.which not in specialKeys
+      # intercept bad chars, returning user to the right char pos if need be
+      groupValLength = groupEl.val().length
+      pattern = new RegExp('[^0-9]+', 'g')
+      groupEl.val(groupEl.val().replace(pattern, ''))
+      if groupEl.val().length < groupValLength # we caught bad char
+        @_setFieldCaretPosition(groupEl, groupCaretPos - 1)
+      else
+        @_setFieldCaretPosition(groupEl, groupCaretPos)
+
+    if e.which not in specialKeys and 
+      groupEl.val().length is groupMaxLength and 
+      not $.isEmptyObject(groupEl.next()) and
+      @_getFieldCaretPosition(groupEl) is groupMaxLength
+        groupEl.next().focus()    
+
+    # update the value
+    newValue = ""
+    @groupEls.each -> newValue += $(@).val()
+    @value = newValue
+    @trigger("keyup", [@])
+    return false
+
+  _getFieldCaretPosition: (el)->
+    input = el.get(0)
+    if input.selectionStart?
+      return input.selectionStart
+    else if document.selection
+      input.focus()
+      sel = document.selection.createRange()
+      selLength = document.selection.createRange().text.length
+      sel.moveStart('character', -input.value.length)
+      return sel.text.length - selLength
+
+  _setFieldCaretPosition: (el, pos)->
+    input = el.get(0)
+    if input.createTextRange?
+      range = input.createTextRange()
+      range.move "character", pos
+      range.select()
+    else if input.selectionStart?
+      input.focus()
+      input.setSelectionRange(pos, pos)
 
   setGroupings: (groupings)->
     caretPos = @_caretPosition()
@@ -284,7 +391,7 @@ class Skeuocard::SegmentedCardNumberInputView
     if @options.placeholder isnt undefined
       @setPlaceholder(@options.placeholder)
     # setup autotabbing between inputs
-    @groupEls.autotab_magic().autotab_filter('numeric')
+    #@groupEls.autotab_magic().autotab_filter('numeric')
 
   setPlaceholderChar: (ch)->
     @groupEls.each ->
@@ -300,6 +407,7 @@ class Skeuocard::SegmentedCardNumberInputView
     @options.placeholder = str
 
   setValue: (newValue)->
+    console.log('setting value', newValue)
     lastPos = 0
     @groupEls.each ->
       el = $(@)
@@ -321,18 +429,6 @@ class Skeuocard::SegmentedCardNumberInputView
     if changes.value?
       @setValue(changes.value)
 
-  _onGroupChange: (e)->
-    e.preventDefault()
-
-  _onGroupKeyUp: (e)->
-    e.stopPropagation()
-    # update the value
-    newValue = ""
-    @groupEls.each -> newValue += $(@).val()
-    @value = newValue
-    @trigger("keyup", [@])
-    return false
-
   _caretTo: (index)->
     pos = 0
     inputEl = undefined
@@ -342,25 +438,19 @@ class Skeuocard::SegmentedCardNumberInputView
       el = $(e)
       elLength = parseInt(el.attr('maxlength'))
       if index <= elLength + pos and index >= pos
-        inputEl = e
+        inputEl = el
         inputElIndex = index - pos
       pos += elLength
     # move the caret there
-    if inputEl.createTextRange?
-      range = inputEl.createTextRange()
-      range.move "character", inputElIndex
-      range.select()
-    else if inputEl.selectionStart?
-      inputEl.focus()
-      inputEl.setSelectionRange(inputElIndex, inputElIndex)
+    @_setFieldCaretPosition(inputEl, inputElIndex)
 
   _caretPosition: ->
     iPos = 0
     finalPos = 0
     @groupEls.each (i, e)=>
       el = $(e)
-      if el.is(':focus') and e.selectionStart
-        finalPos = iPos + e.selectionStart
+      if el.is(':focus')
+        finalPos = iPos + @_getFieldCaretPosition(el)
       iPos += parseInt(el.attr('maxlength'))
     return finalPos
 
@@ -384,6 +474,7 @@ class Skeuocard::ExpirationInputView
     @value = undefined
     # create dom container
     @el = $("<fieldset>")
+    @el.delegate "input", "keydown", (e)=> @_onKeyDown(e)
     @el.delegate "input", "keyup", (e)=> @_onKeyUp(e)
 
   setPattern: (pattern)->
@@ -427,6 +518,8 @@ class Skeuocard::ExpirationInputView
 
   _updateFieldValues: ->
     currentDate = @date
+    unless @groupEls
+      return
     @groupEls.each =>
       el = $(this)
       groupLength = parseInt(el.attr('maxlength'))
@@ -459,16 +552,24 @@ class Skeuocard::ExpirationInputView
     if opts.value?
       @setValue(opts.value)
 
+  _onKeyDown: (e)->
+    e.stopPropagation()
+
+
   _onKeyUp: (e)->
     e.stopPropagation()
     # get a date object representing what's been entered
     day = parseInt(@el.find('.cc-exp-field-d').val()) || 1
     month = parseInt(@el.find('.cc-exp-field-m').val())
     year = parseInt(@el.find('.cc-exp-field-y').val())
-    year += 2000 if year < 2000
-    dateObj = new Date(year, month-1, day)
-    @value = @options.dateFormatter(dateObj)
-    @date = dateObj
+    if month is 0 or year is 0
+      @value = ""
+      @date = null
+    else
+      year += 2000 if year < 2000
+      dateObj = new Date(year, month-1, day)
+      @value = @options.dateFormatter(dateObj)
+      @date = dateObj
     @trigger("keyup", [@])
     return false
 
@@ -496,9 +597,8 @@ class Skeuocard::ExpirationInputView
 
 
 class Skeuocard::TextInputView
-  constructor: (parentEl, opts)->
+  constructor: (opts)->
     @el = $("<input>").attr $.extend({type: 'text'}, opts)
-    parentEl.append(@el)
 
   bind: (args...)->
     @el.bind(args...)

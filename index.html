@@ -26,6 +26,13 @@
 
     <form method="GET" action="">
 
+      <!--
+      The primary card input. If JS is enabled, everything except the form 
+      fields will be stripped and replaced with elements that Skeuocard has 
+      generated. The underlying form fields will be updated by Skeuocard (and 
+      can be updated by your code) to reflect the user's input. When the form's 
+      submit button is clicked, only the underlying fields will be submitted.
+      -->
       <div class="credit-card-input" id="skeuocard">
         <label for="cc_type">Card Type</label>
         <select class="field cc-type" name="cc_type">
@@ -48,17 +55,16 @@
       <input type="submit" />
     </form>
 
-    <script src="http://use.typekit.net/vga4jrn.js"></script>
     <script src="/javascripts/vendor/jquery-2.0.3.min.js"></script>
     <script src="/javascripts/vendor/jquery.autotab-1.1b.js"></script>
     <script src="/javascripts/cards.js"></script>
     <script src="/javascripts/skeuocard.js"></script>
     <script>
 
-      try{Typekit.load();}catch(e){ alert("Typekit failed to load, so fonts may look strange."); }
-
       $(document).ready(function(){
-        window.card = new Skeuocard($("#skeuocard"));
+        window.card = new Skeuocard($("#skeuocard"), {
+          debug: true
+        });
       });
 
     </script>

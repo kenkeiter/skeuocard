@@ -1,11 +1,23 @@
 @import "reset";
 @import "util";
 
+@font-face {
+  font-family: 'ocraregular';
+  src: url('fonts/ocra-webfont.eot');
+  src: url('fonts/ocra-webfont.eot?#iefix') format('embedded-opentype'),
+       url('fonts/ocra-webfont.woff') format('woff'),
+       url('fonts/ocra-webfont.ttf') format('truetype'),
+       url('fonts/ocra-webfont.svg#ocraregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Sizing is based 1em = 20px */
 $cc-face-width: 24.8em;
 $cc-face-height: 15.6em;
 
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$cc-font-family: "ocr-a-std", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+$cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
 .skeuocard {
   width: $cc-face-width;

@@ -8,6 +8,9 @@ Generic
   .face.front {
     background: #eee url('/images/products/generic-front.png') no-repeat right bottom;
   }
+  .face.back {
+    background: #eee url('/images/products/generic-back.png') no-repeat center center;
+  }
 
   .cc-exp { 
     position: absolute; 
@@ -15,7 +18,7 @@ Generic
     input, .separator {
       margin: 0; padding: 0;
       font-size: 1em;
-      font-family: $cc-font-family;
+      font-family: $cc-field-family;
       &.group2{ width: 2em; }
       &.group4{ width: 4em; }
     }
@@ -26,7 +29,7 @@ Generic
     position: absolute; 
     display: block; 
     font-size: 1em;
-    font-family: $cc-font-family;
+    font-family: $cc-field-family;
   }
 
   .cc-number{
@@ -38,13 +41,22 @@ Generic
     input{
       color: #333;
       background-color: #ddd;
-      font-family: $cc-font-family;
+      font-family: $cc-field-family;
       font-size: 1.5em;
       &.group4{ width: 3.2em; }
       &.group5{ width: 3.8em; }
       &.group6{ width: 4.6em; }
       &.group19{ width: 14em; }
     }
+    input + input {
+      margin-left: 0.4em;
+    }
+  }
+
+  .cc-cvc{
+    position: absolute;
+    display: block; 
+    font-size: 1em;
   }
 
 }
@@ -88,19 +100,20 @@ Generic
   .face.front{
     background: #eee url('/images/products/visa-front.png') no-repeat right bottom;
   }
+  .face.back {
+    background: #eee url('/images/products/visa-back.png') no-repeat center center;
+  }
+
 
   .cc-number{
-    background-color: #ddd;
+    background-color: transparent;
     left: 1.8em;
     top: 8.05em;
     padding: 0.1em;
     input{
       color: #333;
-      background: transparent;
+      background-color: transparent;
       border: none;
-    }
-    input + input{
-      margin-left: 0.6em;
     }
   }
 
@@ -108,13 +121,28 @@ Generic
     left: 10.9em;
     top: 11.2em;
     width: 5em;
+    input{
+      color: #333;
+      background-color: transparent;
+      border: none;
+      text-align: center;
+    }
   }
 
   .cc-name{
     left: 1.8em;
     top: 13em;
-    font-family: $cc-font-family;
+    font-family: $cc-field-family;
     font-size: 1em;
+    color: #333;
+    background-color: transparent;
+    border: none;
+  }
+
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
   }
 
   &.issuer-simple{

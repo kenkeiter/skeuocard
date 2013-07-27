@@ -241,8 +241,10 @@ $.fn.autotab = function(options) {
 		 * 46:	Delete
 		 * 144:	Num Lock
 		 * 145:	Scroll Lock
+		 -- Added by kenkeiter:
+		 * 224, 91, 93 (Apple command key)
 		 */
-		var keys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 144, 145];
+		var keys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224];
 
 		if(e.which != 8)
 		{
