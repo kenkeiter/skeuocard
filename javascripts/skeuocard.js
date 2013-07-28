@@ -22,6 +22,8 @@
 (function() {
   var Skeuocard,
     __slice = [].slice,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Skeuocard = (function() {
@@ -192,6 +194,8 @@
             pattern: matchedProduct.expirationFormat
           });
         } else {
+          this._inputViews.exp.clear();
+          this._inputViews.cvc.clear();
           this._inputViews.exp.hide();
           this._inputViews.name.hide();
           this._inputViews.number.reconfigure({
@@ -302,7 +306,70 @@
 
   })();
 
-  Skeuocard.prototype.SegmentedCardNumberInputView = (function() {
+  Skeuocard.prototype.TextInputView = (function() {
+
+    function TextInputView() {}
+
+    TextInputView.prototype.bind = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).bind.apply(_ref, args);
+    };
+
+    TextInputView.prototype.trigger = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).trigger.apply(_ref, args);
+    };
+
+    TextInputView.prototype._getFieldCaretPosition = function(el) {
+      var input, sel, selLength;
+      input = el.get(0);
+      if (input.selectionEnd != null) {
+        return input.selectionEnd;
+      } else if (document.selection) {
+        input.focus();
+        sel = document.selection.createRange();
+        selLength = document.selection.createRange().text.length;
+        sel.moveStart('character', -input.value.length);
+        return selLength;
+      }
+    };
+
+    TextInputView.prototype._setFieldCaretPosition = function(el, pos) {
+      var input, range;
+      input = el.get(0);
+      if (input.createTextRange != null) {
+        range = input.createTextRange();
+        range.move("character", pos);
+        return range.select();
+      } else if (input.selectionStart != null) {
+        input.focus();
+        return input.setSelectionRange(pos, pos);
+      }
+    };
+
+    TextInputView.prototype.show = function() {
+      return this.el.show();
+    };
+
+    TextInputView.prototype.hide = function() {
+      return this.el.hide();
+    };
+
+    TextInputView.prototype._zeroPadNumber = function(num, places) {
+      var zero;
+      zero = places - num.toString().length + 1;
+      return Array(zero).join("0") + num;
+    };
+
+    return TextInputView;
+
+  })();
+
+  Skeuocard.prototype.SegmentedCardNumberInputView = (function(_super) {
+
+    __extends(SegmentedCardNumberInputView, _super);
 
     function SegmentedCardNumberInputView(opts) {
       var _this = this;
@@ -324,29 +391,17 @@
       this.groupEls = $();
     }
 
-    SegmentedCardNumberInputView.prototype.bind = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).bind.apply(_ref, args);
-    };
-
-    SegmentedCardNumberInputView.prototype.trigger = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).trigger.apply(_ref, args);
-    };
-
     SegmentedCardNumberInputView.prototype._onGroupKeyDown = function(e) {
       var arrowKeys, groupCaretPos, groupEl, groupMaxLength, _ref;
       e.stopPropagation();
       groupEl = $(e.currentTarget);
-      if (e.which === 8 && groupEl.val().length === 0 && !$.isEmptyObject(groupEl.prev())) {
-        groupEl.prev().focus();
-      }
       arrowKeys = [37, 38, 39, 40];
       groupEl = $(e.currentTarget);
       groupMaxLength = parseInt(groupEl.attr('maxlength'));
       groupCaretPos = this._getFieldCaretPosition(groupEl);
+      if (e.which === 8 && groupCaretPos === 0 && !$.isEmptyObject(groupEl.prev())) {
+        groupEl.prev().focus();
+      }
       if (_ref = e.which, __indexOf.call(arrowKeys, _ref) >= 0) {
         switch (e.which) {
           case 37:
@@ -373,10 +428,9 @@
     };
 
     SegmentedCardNumberInputView.prototype._onGroupKeyUp = function(e) {
-      var arrowKeys, groupCaretPos, groupEl, groupMaxLength, groupValLength, newValue, pattern, specialKeys, _ref, _ref1;
+      var groupCaretPos, groupEl, groupMaxLength, groupValLength, newValue, pattern, specialKeys, _ref, _ref1;
       e.stopPropagation();
       specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224];
-      arrowKeys = [37, 38, 39, 40];
       groupEl = $(e.currentTarget);
       groupMaxLength = parseInt(groupEl.attr('maxlength'));
       groupCaretPos = this._getFieldCaretPosition(groupEl);
@@ -400,33 +454,6 @@
       this.value = newValue;
       this.trigger("keyup", [this]);
       return false;
-    };
-
-    SegmentedCardNumberInputView.prototype._getFieldCaretPosition = function(el) {
-      var input, sel, selLength;
-      input = el.get(0);
-      if (input.selectionStart != null) {
-        return input.selectionStart;
-      } else if (document.selection) {
-        input.focus();
-        sel = document.selection.createRange();
-        selLength = document.selection.createRange().text.length;
-        sel.moveStart('character', -input.value.length);
-        return sel.text.length - selLength;
-      }
-    };
-
-    SegmentedCardNumberInputView.prototype._setFieldCaretPosition = function(el, pos) {
-      var input, range;
-      input = el.get(0);
-      if (input.createTextRange != null) {
-        range = input.createTextRange();
-        range.move("character", pos);
-        return range.select();
-      } else if (input.selectionStart != null) {
-        input.focus();
-        return input.setSelectionRange(pos, pos);
-      }
     };
 
     SegmentedCardNumberInputView.prototype.setGroupings = function(groupings) {
@@ -557,9 +584,11 @@
 
     return SegmentedCardNumberInputView;
 
-  })();
+  })(Skeuocard.prototype.TextInputView);
 
-  Skeuocard.prototype.ExpirationInputView = (function() {
+  Skeuocard.prototype.ExpirationInputView = (function(_super) {
+
+    __extends(ExpirationInputView, _super);
 
     function ExpirationInputView(opts) {
       var _this = this;
@@ -586,6 +615,33 @@
         return _this._onKeyUp(e);
       });
     }
+
+    ExpirationInputView.prototype._getFieldCaretPosition = function(el) {
+      var input, sel, selLength;
+      input = el.get(0);
+      if (input.selectionEnd != null) {
+        return input.selectionEnd;
+      } else if (document.selection) {
+        input.focus();
+        sel = document.selection.createRange();
+        selLength = document.selection.createRange().text.length;
+        sel.moveStart('character', -input.value.length);
+        return selLength;
+      }
+    };
+
+    ExpirationInputView.prototype._setFieldCaretPosition = function(el, pos) {
+      var input, range;
+      input = el.get(0);
+      if (input.createTextRange != null) {
+        range = input.createTextRange();
+        range.move("character", pos);
+        return range.select();
+      } else if (input.selectionStart != null) {
+        input.focus();
+        return input.setSelectionRange(pos, pos);
+      }
+    };
 
     ExpirationInputView.prototype.setPattern = function(pattern) {
       var char, groupings, i, patternParts, _currentLength, _i, _len;
@@ -632,7 +688,6 @@
         }
       }
       this.groupEls = this.el.find('input');
-      this.groupEls.autotab_magic().autotab_filter('numeric');
       if (this.date != null) {
         return this._updateFieldValues();
       }
@@ -659,6 +714,12 @@
             return el.val(year);
         }
       });
+    };
+
+    ExpirationInputView.prototype.clear = function() {
+      this.value = "";
+      this.date = null;
+      return this._updateFieldValues();
     };
 
     ExpirationInputView.prototype.setDate = function(newDate) {
@@ -688,12 +749,64 @@
     };
 
     ExpirationInputView.prototype._onKeyDown = function(e) {
-      return e.stopPropagation();
+      var groupCaretPos, groupEl, groupMaxLength, nextInputEl, prevInputEl, _ref;
+      e.stopPropagation();
+      groupEl = $(e.currentTarget);
+      groupEl = $(e.currentTarget);
+      groupMaxLength = parseInt(groupEl.attr('maxlength'));
+      groupCaretPos = this._getFieldCaretPosition(groupEl);
+      prevInputEl = groupEl.prevAll('input').first();
+      nextInputEl = groupEl.nextAll('input').first();
+      if (e.which === 8 && groupCaretPos === 0 && !$.isEmptyObject(prevInputEl)) {
+        prevInputEl.focus();
+      }
+      if ((_ref = e.which) === 37 || _ref === 38 || _ref === 39 || _ref === 40) {
+        switch (e.which) {
+          case 37:
+            if (groupCaretPos === 0 && !$.isEmptyObject(prevInputEl)) {
+              return prevInputEl.focus();
+            }
+            break;
+          case 39:
+            if (groupCaretPos === groupMaxLength && !$.isEmptyObject(nextInputEl)) {
+              return nextInputEl.focus();
+            }
+            break;
+          case 38:
+            if (!$.isEmptyObject(groupEl.prev('input'))) {
+              return prevInputEl.focus();
+            }
+            break;
+          case 40:
+            if (!$.isEmptyObject(groupEl.next('input'))) {
+              return nextInputEl.focus();
+            }
+        }
+      }
     };
 
     ExpirationInputView.prototype._onKeyUp = function(e) {
-      var dateObj, day, month, year;
+      var arrowKeys, dateObj, day, groupCaretPos, groupEl, groupMaxLength, groupValLength, month, nextInputEl, pattern, specialKeys, year, _ref, _ref1;
       e.stopPropagation();
+      specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224];
+      arrowKeys = [37, 38, 39, 40];
+      groupEl = $(e.currentTarget);
+      groupMaxLength = parseInt(groupEl.attr('maxlength'));
+      groupCaretPos = this._getFieldCaretPosition(groupEl);
+      if (_ref = e.which, __indexOf.call(specialKeys, _ref) < 0) {
+        groupValLength = groupEl.val().length;
+        pattern = new RegExp('[^0-9]+', 'g');
+        groupEl.val(groupEl.val().replace(pattern, ''));
+        if (groupEl.val().length < groupValLength) {
+          this._setFieldCaretPosition(groupEl, groupCaretPos - 1);
+        } else {
+          this._setFieldCaretPosition(groupEl, groupCaretPos);
+        }
+      }
+      nextInputEl = groupEl.nextAll('input').first();
+      if ((_ref1 = e.which, __indexOf.call(specialKeys, _ref1) < 0) && groupEl.val().length === groupMaxLength && !$.isEmptyObject(nextInputEl) && this._getFieldCaretPosition(groupEl) === groupMaxLength) {
+        nextInputEl.focus();
+      }
       day = parseInt(this.el.find('.cc-exp-field-d').val()) || 1;
       month = parseInt(this.el.find('.cc-exp-field-m').val());
       year = parseInt(this.el.find('.cc-exp-field-y').val());
@@ -712,45 +825,17 @@
       return false;
     };
 
-    ExpirationInputView.prototype.bind = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).bind.apply(_ref, args);
-    };
-
-    ExpirationInputView.prototype.trigger = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).trigger.apply(_ref, args);
-    };
-
     ExpirationInputView.prototype._inputGroupEls = function() {
       return this.el.find("input");
     };
 
-    ExpirationInputView.prototype.show = function() {
-      return this.el.show();
-    };
-
-    ExpirationInputView.prototype.hide = function() {
-      return this.el.hide();
-    };
-
-    ExpirationInputView.prototype.isValid = function() {
-      return this.el.find(':invalid').length === 0;
-    };
-
-    ExpirationInputView.prototype._zeroPadNumber = function(num, places) {
-      var zero;
-      zero = places - num.toString().length + 1;
-      return Array(zero).join("0") + num;
-    };
-
     return ExpirationInputView;
 
-  })();
+  })(Skeuocard.prototype.TextInputView);
 
-  Skeuocard.prototype.TextInputView = (function() {
+  Skeuocard.prototype.TextInputView = (function(_super) {
+
+    __extends(TextInputView, _super);
 
     function TextInputView(opts) {
       this.el = $("<input>").attr($.extend({
@@ -758,33 +843,13 @@
       }, opts));
     }
 
-    TextInputView.prototype.bind = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).bind.apply(_ref, args);
-    };
-
-    TextInputView.prototype.trigger = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).trigger.apply(_ref, args);
-    };
-
-    TextInputView.prototype.show = function() {
-      return this.el.show();
-    };
-
-    TextInputView.prototype.hide = function() {
-      return this.el.hide();
-    };
-
-    TextInputView.prototype.isValid = function() {
-      return this.el.is(':valid');
+    TextInputView.prototype.clear = function() {
+      return this.el.val("");
     };
 
     return TextInputView;
 
-  })();
+  })(Skeuocard.prototype.TextInputView);
 
   window.Skeuocard = Skeuocard;
 

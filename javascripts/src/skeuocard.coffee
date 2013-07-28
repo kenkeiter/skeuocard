@@ -174,6 +174,8 @@ class Skeuocard
           pattern: matchedProduct.expirationFormat
       else
         # Reset to generic input
+        @_inputViews.exp.clear()
+        @_inputViews.cvc.clear()
         @_inputViews.exp.hide()
         @_inputViews.name.hide()
         @_inputViews.number.reconfigure
@@ -264,8 +266,47 @@ class Skeuocard
       sum += num
     sum % 10 is 0
 
+class Skeuocard::TextInputView
 
-class Skeuocard::SegmentedCardNumberInputView
+  bind: (args...)->
+    @el.bind(args...)
+
+  trigger: (args...)->
+    @el.trigger(args...)
+
+  _getFieldCaretPosition: (el)->
+    input = el.get(0)
+    if input.selectionEnd?
+      return input.selectionEnd
+    else if document.selection
+      input.focus()
+      sel = document.selection.createRange()
+      selLength = document.selection.createRange().text.length
+      sel.moveStart('character', -input.value.length)
+      return selLength
+
+  _setFieldCaretPosition: (el, pos)->
+    input = el.get(0)
+    if input.createTextRange?
+      range = input.createTextRange()
+      range.move "character", pos
+      range.select()
+    else if input.selectionStart?
+      input.focus()
+      input.setSelectionRange(pos, pos)
+
+  show: ->
+    @el.show()
+
+  hide: ->
+    @el.hide()
+
+  _zeroPadNumber: (num, places)->
+    zero = places - num.toString().length + 1
+    return Array(zero).join("0") + num
+
+
+class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
   constructor: (opts = {})->
     # Setup option defaults
     opts.value           ||= ""
@@ -279,22 +320,17 @@ class Skeuocard::SegmentedCardNumberInputView
     @el.delegate "input", "keyup", (e)=> @_onGroupKeyUp(e)
     @groupEls = $()
 
-  bind: (args...)->
-    @el.bind(args...)
-
-  trigger: (args...)->
-    @el.trigger(args...)
-
   _onGroupKeyDown: (e)->
     e.stopPropagation()
     groupEl = $(e.currentTarget)
-    if e.which is 8 and groupEl.val().length is 0 and not $.isEmptyObject(groupEl.prev())
-      groupEl.prev().focus()
 
     arrowKeys = [37, 38, 39, 40]
     groupEl = $(e.currentTarget)
     groupMaxLength = parseInt(groupEl.attr('maxlength'))
     groupCaretPos = @_getFieldCaretPosition(groupEl)
+
+    if e.which is 8 and groupCaretPos is 0 and not $.isEmptyObject(groupEl.prev())
+      groupEl.prev().focus()
 
     if e.which in arrowKeys
       switch e.which
@@ -311,13 +347,11 @@ class Skeuocard::SegmentedCardNumberInputView
           if not $.isEmptyObject(groupEl.next())
             groupEl.next().focus()
     
-
   _onGroupKeyUp: (e)->
     e.stopPropagation() # prevent event from bubbling up
 
     specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36,
                    37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224]
-    arrowKeys = [37, 38, 39, 40]
     groupEl = $(e.currentTarget)
     groupMaxLength = parseInt(groupEl.attr('maxlength'))
     groupCaretPos = @_getFieldCaretPosition(groupEl)
@@ -345,27 +379,6 @@ class Skeuocard::SegmentedCardNumberInputView
     @trigger("keyup", [@])
     return false
 
-  _getFieldCaretPosition: (el)->
-    input = el.get(0)
-    if input.selectionStart?
-      return input.selectionStart
-    else if document.selection
-      input.focus()
-      sel = document.selection.createRange()
-      selLength = document.selection.createRange().text.length
-      sel.moveStart('character', -input.value.length)
-      return sel.text.length - selLength
-
-  _setFieldCaretPosition: (el, pos)->
-    input = el.get(0)
-    if input.createTextRange?
-      range = input.createTextRange()
-      range.move "character", pos
-      range.select()
-    else if input.selectionStart?
-      input.focus()
-      input.setSelectionRange(pos, pos)
-
   setGroupings: (groupings)->
     caretPos = @_caretPosition()
     @el.empty() # remove all inputs
@@ -390,8 +403,6 @@ class Skeuocard::SegmentedCardNumberInputView
       @setPlaceholderChar(@options.placeholderChar)
     if @options.placeholder isnt undefined
       @setPlaceholder(@options.placeholder)
-    # setup autotabbing between inputs
-    #@groupEls.autotab_magic().autotab_filter('numeric')
 
   setPlaceholderChar: (ch)->
     @groupEls.each ->
@@ -458,7 +469,7 @@ class Skeuocard::SegmentedCardNumberInputView
     @options.groupings.reduce((a,b)->(a+b))
 
 
-class Skeuocard::ExpirationInputView
+class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
   constructor: (opts = {})->
     # setup option defaults
     opts.dateFormatter ||= (date)->
@@ -476,6 +487,27 @@ class Skeuocard::ExpirationInputView
     @el = $("<fieldset>")
     @el.delegate "input", "keydown", (e)=> @_onKeyDown(e)
     @el.delegate "input", "keyup", (e)=> @_onKeyUp(e)
+
+  _getFieldCaretPosition: (el)->
+    input = el.get(0)
+    if input.selectionEnd?
+      return input.selectionEnd
+    else if document.selection
+      input.focus()
+      sel = document.selection.createRange()
+      selLength = document.selection.createRange().text.length
+      sel.moveStart('character', -input.value.length)
+      return selLength
+
+  _setFieldCaretPosition: (el, pos)->
+    input = el.get(0)
+    if input.createTextRange?
+      range = input.createTextRange()
+      range.move "character", pos
+      range.select()
+    else if input.selectionStart?
+      input.focus()
+      input.setSelectionRange(pos, pos)
 
   setPattern: (pattern)->
     groupings = []
@@ -513,7 +545,7 @@ class Skeuocard::ExpirationInputView
         @el.append(sep)
 
     @groupEls = @el.find('input')
-    @groupEls.autotab_magic().autotab_filter('numeric')
+    #@groupEls.autotab_magic().autotab_filter('numeric')
     @_updateFieldValues() if @date?
 
   _updateFieldValues: ->
@@ -532,6 +564,11 @@ class Skeuocard::ExpirationInputView
           year = if groupLength >= 4 then currentDate.getFullYear() else 
                  currentDate.getFullYear().toString().substr(2,4)
           el.val(year)
+
+  clear: ->
+    @value = ""
+    @date = null
+    @_updateFieldValues()
 
   setDate: (newDate)->
     @date = newDate
@@ -554,10 +591,63 @@ class Skeuocard::ExpirationInputView
 
   _onKeyDown: (e)->
     e.stopPropagation()
+    groupEl = $(e.currentTarget)
 
+    groupEl = $(e.currentTarget)
+    groupMaxLength = parseInt(groupEl.attr('maxlength'))
+    groupCaretPos = @_getFieldCaretPosition(groupEl)
+
+    prevInputEl = groupEl.prevAll('input').first()
+    nextInputEl = groupEl.nextAll('input').first()
+
+    # Handle delete key
+    if e.which is 8 and groupCaretPos is 0 and 
+      not $.isEmptyObject(prevInputEl)
+        prevInputEl.focus()
+
+    if e.which in [37, 38, 39, 40] # arrow keys
+      switch e.which
+        when 37 # left
+          if groupCaretPos is 0 and not $.isEmptyObject(prevInputEl)
+            prevInputEl.focus()
+        when 39 # right
+          if groupCaretPos is groupMaxLength and not $.isEmptyObject(nextInputEl)
+            nextInputEl.focus()
+        when 38 # up
+          if not $.isEmptyObject(groupEl.prev('input'))
+            prevInputEl.focus()
+        when 40 # down
+          if not $.isEmptyObject(groupEl.next('input'))
+            nextInputEl.focus()
 
   _onKeyUp: (e)->
     e.stopPropagation()
+    
+    specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36,
+                   37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224]
+    arrowKeys = [37, 38, 39, 40]
+    groupEl = $(e.currentTarget)
+    groupMaxLength = parseInt(groupEl.attr('maxlength'))
+    groupCaretPos = @_getFieldCaretPosition(groupEl)
+    
+    if e.which not in specialKeys
+      # intercept bad chars, returning user to the right char pos if need be
+      groupValLength = groupEl.val().length
+      pattern = new RegExp('[^0-9]+', 'g')
+      groupEl.val(groupEl.val().replace(pattern, ''))
+      if groupEl.val().length < groupValLength # we caught bad char
+        @_setFieldCaretPosition(groupEl, groupCaretPos - 1)
+      else
+        @_setFieldCaretPosition(groupEl, groupCaretPos)
+
+    nextInputEl = groupEl.nextAll('input').first()
+
+    if e.which not in specialKeys and 
+      groupEl.val().length is groupMaxLength and 
+      not $.isEmptyObject(nextInputEl) and
+      @_getFieldCaretPosition(groupEl) is groupMaxLength
+        nextInputEl.focus()
+
     # get a date object representing what's been entered
     day = parseInt(@el.find('.cc-exp-field-d').val()) || 1
     month = parseInt(@el.find('.cc-exp-field-m').val())
@@ -573,48 +663,16 @@ class Skeuocard::ExpirationInputView
     @trigger("keyup", [@])
     return false
 
-  bind: (args...)->
-    @el.bind(args...)
-
-  trigger: (args...)->
-    @el.trigger(args...)
-
   _inputGroupEls: ->
     @el.find("input")
 
-  show: ->
-    @el.show()
 
-  hide: ->
-    @el.hide()
-
-  isValid: ->
-    @el.find(':invalid').length == 0
-
-  _zeroPadNumber: (num, places)->
-    zero = places - num.toString().length + 1
-    return Array(zero).join("0") + num
-
-
-class Skeuocard::TextInputView
+class Skeuocard::TextInputView extends Skeuocard::TextInputView
   constructor: (opts)->
     @el = $("<input>").attr $.extend({type: 'text'}, opts)
 
-  bind: (args...)->
-    @el.bind(args...)
-
-  trigger: (args...)->
-    @el.trigger(args...)
-
-  show: ->
-    @el.show()
-
-  hide: ->
-    @el.hide()
-
-  isValid: ->
-    @el.is(':valid')
-
+  clear: ->
+    @el.val("")
 
 # Export the object.
 window.Skeuocard = Skeuocard
