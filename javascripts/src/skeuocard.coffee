@@ -9,11 +9,19 @@
 @exports [window.Skeuocard]
 
 # TODO:
-* Add full set of events.
-* Get basics working in IE8/9, older versions of FF/Chrome
-* Add classes to card indicating validation state
-* Pull list of accepted cards from <select>; update selected value upon
-  product change. Allow accepted cards to be overridden in options.
+[ ] Add full set of emitted/handled events for card body.
+[ ] Get basics working in IE8/9, older versions of FF/Chrome.
+[ ] Remove dependency on HTML5 validation; add CSS classes to card indicating 
+    validation state.
+[ ] Pull list of accepted cards from <select>; update selected value upon
+    product change. Allow accepted cards to be overridden in options.
+[ ] Move option defaults into an object which is extended.
+[ ] Style the flip buttons better. Add CSS-embedded arrows.
+[ ] Add transitions between products/issuers.
+[ ] Reorganize CSS; make sure we have rely on js class being defined for card.
+[ ] When a fields are marked as invalid upon init (perhaps through options?) 
+    we should automatically flip to the correct side or, if there are invalid 
+    items on both sides, we should note that for the user using the flags.
 ###
 
 class Skeuocard
@@ -32,25 +40,21 @@ class Skeuocard
     opts.expInputSelector    ||= '[name="cc_exp"]'
     opts.nameInputSelector   ||= '[name="cc_name"]'
     opts.cvcInputSelector    ||= '[name="cc_cvc"]'
-    opts.frontFlipTabHeader  ||= 'Looks good.'
-    opts.frontFlipTabBody    ||= 'Click here to fill in the back...'
-    opts.backFlipTabHeader   ||= "Back"
-    opts.backFlipTabBody     ||= "Forget to fill something in on the front? " +
-                                 "Click here to turn the card over."
-    opts.flipTabFrontEl      ||= $("<div class=\"flip-tab front\"><h1>" +
-                                   "#{opts.frontFlipTabHeader}</h1>" +
+    opts.frontFlipTabBody    ||= 'Click here to<br /> fill in the other side.'
+    opts.backFlipTabBody     ||= "Forgot something?"
+    opts.flipTabFrontEl      ||= $("<div class=\"flip-tab front\">" +
                                    "<p>#{opts.frontFlipTabBody}</p></div>")
-    opts.flipTabBackEl       ||= $("<div class=\"flip-tab back\"><h1>" +
-                                   "#{opts.backFlipTabHeader}</h1>" +
+    opts.flipTabBackEl       ||= $("<div class=\"flip-tab back\">" +
                                    "<p>#{opts.backFlipTabBody}</p></div>")
     opts.currentDate         ||= new Date()
     opts.genericPlaceholder  ||= "XXXX XXXX XXXX XXXX"
     @options = opts
+
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
     @_createInputs() # create reconfigurable input views
-    @_bindEvents()   # bind custom events to the container
-    
+    @_bindEvents()   # bind custom events to the containers
+
     # call initial render to pick up existing values from non-enhanced inputs
     @render()
 
@@ -214,7 +218,6 @@ class Skeuocard
 
     # validate name
     nameValid = @_inputViews.name.el.val().length > 0
-    # combine
     # console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
     cardValid and expValid and nameValid
 
@@ -265,6 +268,7 @@ class Skeuocard
       alt = !alt
       sum += num
     sum % 10 is 0
+
 
 class Skeuocard::TextInputView
 
@@ -346,7 +350,7 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
         when 40 # down
           if not $.isEmptyObject(groupEl.next())
             groupEl.next().focus()
-    
+  
   _onGroupKeyUp: (e)->
     e.stopPropagation() # prevent event from bubbling up
 

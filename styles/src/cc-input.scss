@@ -1,6 +1,8 @@
 @import "reset";
 @import "util";
 
+/* Sizing is 1em = 20px */
+
 @font-face {
   font-family: 'ocraregular';
   src: url('fonts/ocra-webfont.eot');
@@ -12,14 +14,13 @@
   font-style: normal;
 }
 
-/* Sizing is based 1em = 20px */
 $cc-face-width: 24.8em;
 $cc-face-height: 15.6em;
 
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
-.skeuocard {
+.skeuocard.js {
   width: $cc-face-width;
   height: $cc-face-height;
 
@@ -96,29 +97,50 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
 
   .flip-tab{
     position: absolute;
-    background-color: #62D1DA;
     padding: 0.3em;
-    -webkit-border-radius: 0.3em;
-    border-radius: 0.3em;
+    -webkit-border-radius: 3.55em;
+    border-radius: 3.55em;
     cursor: pointer; cursor: hand;
-    h1{
-      font-family: $cc-label-family;
-      color: #fff;
-      font-size: 1.15em;
-    }
+    height: 3.55em;
+    width: 13em;
+    display: block;
+    background: #00CFA7 url('/images/card-flip-arrow.png') no-repeat;
+    background-size: 1.375em 1.725em;
+    -webkit-transition: all 0.25s ease;
+    -moz-transition: all 0.25s ease;
+    -o-transition: all 0.25s ease;
+    -ms-transition: all 0.25s ease;
+    transition: all 0.25s ease;
+
     p{
       margin-top: 0.3em;
       font-family: $cc-label-family;
-      color: #333;
-      font-size: 0.65em;
+      color: #fff;
+      font-size: 1.0em;
+      line-height: 1.2em;
     }
     &.front{
-      right: -10px;
-      top: 36px;
+      right: -1.25em;
+      top: 1em;
+      background-position: 10.65em 0.90em;
+      padding-right: 2.9em;
+      padding-left: 1.25em;
+    }
+    &.front:hover{
+      right: -1.8em;
+      background-color: darken(#00CFA7, 10%);
     }
     &.back{
-      left: -10px;
-      top: 36px;
+      left: -1.25em;
+      top: 1em;
+      background-position: 1.0em 0.90em;
+      padding-right: 1.25em;
+      padding-left: 2.9em;
+      padding-top: 0.85em;
+    }
+    &.back:hover{
+      left: -1.8em;
+      background-color: darken(#00CFA7, 10%);
     }
   }
 

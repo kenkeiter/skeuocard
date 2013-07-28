@@ -11,11 +11,19 @@
 @exports [window.Skeuocard]
 
 # TODO:
-* Add full set of events.
-* Get basics working in IE8/9, older versions of FF/Chrome
-* Add classes to card indicating validation state
-* Pull list of accepted cards from <select>; update selected value upon
-  product change. Allow accepted cards to be overridden in options.
+[ ] Add full set of emitted/handled events for card body.
+[ ] Get basics working in IE8/9, older versions of FF/Chrome.
+[ ] Remove dependency on HTML5 validation; add CSS classes to card indicating 
+    validation state.
+[ ] Pull list of accepted cards from <select>; update selected value upon
+    product change. Allow accepted cards to be overridden in options.
+[ ] Move option defaults into an object which is extended.
+[ ] Style the flip buttons better. Add CSS-embedded arrows.
+[ ] Add transitions between products/issuers.
+[ ] Reorganize CSS; make sure we have rely on js class being defined for card.
+[ ] When a fields are marked as invalid upon init (perhaps through options?) 
+    we should automatically flip to the correct side or, if there are invalid 
+    items on both sides, we should note that for the user using the flags.
 */
 
 
@@ -46,12 +54,10 @@
       opts.expInputSelector || (opts.expInputSelector = '[name="cc_exp"]');
       opts.nameInputSelector || (opts.nameInputSelector = '[name="cc_name"]');
       opts.cvcInputSelector || (opts.cvcInputSelector = '[name="cc_cvc"]');
-      opts.frontFlipTabHeader || (opts.frontFlipTabHeader = 'Looks good.');
-      opts.frontFlipTabBody || (opts.frontFlipTabBody = 'Click here to fill in the back...');
-      opts.backFlipTabHeader || (opts.backFlipTabHeader = "Back");
-      opts.backFlipTabBody || (opts.backFlipTabBody = "Forget to fill something in on the front? " + "Click here to turn the card over.");
-      opts.flipTabFrontEl || (opts.flipTabFrontEl = $("<div class=\"flip-tab front\"><h1>" + ("" + opts.frontFlipTabHeader + "</h1>") + ("<p>" + opts.frontFlipTabBody + "</p></div>")));
-      opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\"><h1>" + ("" + opts.backFlipTabHeader + "</h1>") + ("<p>" + opts.backFlipTabBody + "</p></div>")));
+      opts.frontFlipTabBody || (opts.frontFlipTabBody = 'Click here to<br /> fill in the other side.');
+      opts.backFlipTabBody || (opts.backFlipTabBody = "Forgot something?");
+      opts.flipTabFrontEl || (opts.flipTabFrontEl = $("<div class=\"flip-tab front\">" + ("<p>" + opts.frontFlipTabBody + "</p></div>")));
+      opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
       opts.currentDate || (opts.currentDate = new Date());
       opts.genericPlaceholder || (opts.genericPlaceholder = "XXXX XXXX XXXX XXXX");
       this.options = opts;

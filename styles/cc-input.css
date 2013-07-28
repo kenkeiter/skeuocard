@@ -52,6 +52,7 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
+/* Sizing is 1em = 20px */
 @font-face {
   font-family: 'ocraregular';
   src: url("fonts/ocra-webfont.eot");
@@ -59,19 +60,18 @@ table {
   font-weight: normal;
   font-style: normal; }
 
-/* Sizing is based 1em = 20px */
-.skeuocard {
+.skeuocard.js {
   width: 24.8em;
   height: 15.6em;
   -webkit-perspective: 1000;
   -moz-perspective: 1000;
   -o-perspective: 1000;
   perspective: 1000; }
-  .skeuocard .card-body {
+  .skeuocard.js .card-body {
     -moz-transform: perspective(1000px);
     -moz-transform-style: preserve-3d;
     position: relative; }
-    .skeuocard .card-body .face {
+    .skeuocard.js .card-body .face {
       -webkit-backface-visibility: hidden;
       -moz-backface-visibility: hidden;
       backface-visibility: hidden;
@@ -96,96 +96,115 @@ table {
       background-size: cover !important;
       background-position: right bottom;
       border: 1px solid #ddd; }
-    .skeuocard .card-body .face.front {
+    .skeuocard.js .card-body .face.front {
       z-index: 2; }
-    .skeuocard .card-body .face.back {
+    .skeuocard.js .card-body .face.back {
       -webkit-transform: rotateY(-180deg);
       -moz-transform: rotateY(-180deg);
       -o-transform: rotateY(-180deg);
       -ms-transform: rotateY(-180deg);
       transform: rotateY(-180deg); }
-  .skeuocard .card-body.flip .face.back {
+  .skeuocard.js .card-body.flip .face.back {
     -webkit-transform: rotateY(0deg);
     -moz-transform: rotateY(0deg);
     -o-transform: rotateY(0deg);
     -ms-transform: rotateY(0deg);
     transform: rotateY(0deg); }
-  .skeuocard .card-body.flip .face.front {
+  .skeuocard.js .card-body.flip .face.front {
     -webkit-transform: rotateY(180deg);
     -moz-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);
     transform: rotateY(180deg); }
-  .skeuocard .flip-tab {
+  .skeuocard.js .flip-tab {
     position: absolute;
-    background-color: #62D1DA;
     padding: 0.3em;
-    -webkit-border-radius: 0.3em;
-    border-radius: 0.3em;
+    -webkit-border-radius: 3.55em;
+    border-radius: 3.55em;
     cursor: pointer;
-    cursor: hand; }
-    .skeuocard .flip-tab h1 {
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      color: #fff;
-      font-size: 1.15em; }
-    .skeuocard .flip-tab p {
+    cursor: hand;
+    height: 3.55em;
+    width: 13em;
+    display: block;
+    background: #00cfa7 url("/images/card-flip-arrow.png") no-repeat;
+    background-size: 1.375em 1.725em;
+    -webkit-transition: all 0.25s ease;
+    -moz-transition: all 0.25s ease;
+    -o-transition: all 0.25s ease;
+    -ms-transition: all 0.25s ease;
+    transition: all 0.25s ease; }
+    .skeuocard.js .flip-tab p {
       margin-top: 0.3em;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      color: #333;
-      font-size: 0.65em; }
-    .skeuocard .flip-tab.front {
-      right: -10px;
-      top: 36px; }
-    .skeuocard .flip-tab.back {
-      left: -10px;
-      top: 36px; }
+      color: #fff;
+      font-size: 1.0em;
+      line-height: 1.2em; }
+    .skeuocard.js .flip-tab.front {
+      right: -1.25em;
+      top: 1em;
+      background-position: 10.65em 0.90em;
+      padding-right: 2.9em;
+      padding-left: 1.25em; }
+    .skeuocard.js .flip-tab.front:hover {
+      right: -1.8em;
+      background-color: #009c7e; }
+    .skeuocard.js .flip-tab.back {
+      left: -1.25em;
+      top: 1em;
+      background-position: 1.0em 0.90em;
+      padding-right: 1.25em;
+      padding-left: 2.9em;
+      padding-top: 0.85em; }
+    .skeuocard.js .flip-tab.back:hover {
+      left: -1.8em;
+      background-color: #009c7e; }
 
 /*
 Generic
  */
-.skeuocard .face.front {
+.skeuocard.js .face.front {
   background: #eeeeee url("/images/products/generic-front.png") no-repeat right bottom; }
-.skeuocard .face.back {
+.skeuocard.js .face.back {
   background: #eeeeee url("/images/products/generic-back.png") no-repeat center center; }
-.skeuocard .cc-exp {
+.skeuocard.js .cc-exp {
   position: absolute;
   display: block; }
-  .skeuocard .cc-exp input, .skeuocard .cc-exp .separator {
+  .skeuocard.js .cc-exp input, .skeuocard.js .cc-exp .separator {
     margin: 0;
     padding: 0;
     font-size: 1em;
     font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace; }
-    .skeuocard .cc-exp input.group2, .skeuocard .cc-exp .separator.group2 {
+    .skeuocard.js .cc-exp input.group2, .skeuocard.js .cc-exp .separator.group2 {
       width: 2em; }
-    .skeuocard .cc-exp input.group4, .skeuocard .cc-exp .separator.group4 {
+    .skeuocard.js .cc-exp input.group4, .skeuocard.js .cc-exp .separator.group4 {
       width: 4em; }
-.skeuocard .cc-name {
+.skeuocard.js .cc-name {
   margin: 0;
   padding: 0;
   position: absolute;
   display: block;
   font-size: 1em;
   font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace; }
-.skeuocard .cc-number {
+.skeuocard.js .cc-number {
   position: absolute;
   display: block;
   left: 1.8em;
   top: 8.05em; }
-  .skeuocard .cc-number input {
+  .skeuocard.js .cc-number input {
     color: #333;
-    background-color: #ddd;
+    background-color: #fff;
     font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
     font-size: 1.5em; }
-    .skeuocard .cc-number input.group4 {
+    .skeuocard.js .cc-number input.group4 {
       width: 3.2em; }
-    .skeuocard .cc-number input.group5 {
+    .skeuocard.js .cc-number input.group5 {
       width: 3.8em; }
-    .skeuocard .cc-number input.group6 {
+    .skeuocard.js .cc-number input.group6 {
       width: 4.6em; }
-    .skeuocard .cc-number input.group19 {
+    .skeuocard.js .cc-number input.group19 {
       width: 14em; }
-  .skeuocard .cc-number input + input {
+  .skeuocard.js .cc-number input + input {
     margin-left: 0.4em; }
-.skeuocard .cc-cvc {
+.skeuocard.js .cc-cvc {
   position: absolute;
   display: block;
   font-size: 1em; }

@@ -9,8 +9,7 @@
     companyShortname: "dinersclub",
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -19,8 +18,7 @@
     companyShortname: "dinersclubintl",
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -29,8 +27,7 @@
     companyShortname: "jcb",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -39,8 +36,7 @@
     companyShortname: "dinersclubintl",
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -49,8 +45,7 @@
     companyShortname: "amex",
     cardNumberGrouping: [4, 6, 5],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 4,
+    cvcLength: 4,
     verificationSide: 'front'
   };
 
@@ -59,8 +54,7 @@
     companyShortname: "hipercard",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -69,8 +63,7 @@
     companyShortname: "visa",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -79,8 +72,7 @@
     companyShortname: "mastercard",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 
@@ -89,8 +81,7 @@
     companyShortname: "discovercard",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
-    includeValidFrom: false,
-    verificationLength: 3,
+    cvcLength: 3,
     verificationSide: 'back'
   };
 

@@ -6,8 +6,7 @@ CCProducts[/^30[0-5][0-9]/] =
   companyShortname: "dinersclub"
   cardNumberGrouping: [4,6,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^3095/] =
@@ -15,8 +14,7 @@ CCProducts[/^3095/] =
   companyShortname: "dinersclubintl"
   cardNumberGrouping: [4,6,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^35\d{2}/] =
@@ -24,8 +22,7 @@ CCProducts[/^35\d{2}/] =
   companyShortname: "jcb"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^36\d{2}/] =
@@ -33,8 +30,7 @@ CCProducts[/^36\d{2}/] =
   companyShortname: "dinersclubintl"
   cardNumberGrouping: [4,6,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^37/] =
@@ -42,8 +38,7 @@ CCProducts[/^37/] =
   companyShortname: "amex"
   cardNumberGrouping: [4,6,5]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 4
+  cvcLength: 4
   verificationSide: 'front'
 
 CCProducts[/^38/] =
@@ -51,8 +46,7 @@ CCProducts[/^38/] =
   companyShortname: "hipercard"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^4[0-9]\d{2}/] =
@@ -60,8 +54,7 @@ CCProducts[/^4[0-9]\d{2}/] =
   companyShortname: "visa"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^5[0-8]\d{2}/] =
@@ -69,8 +62,7 @@ CCProducts[/^5[0-8]\d{2}/] =
   companyShortname: "mastercard"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 CCProducts[/^6011/] =
@@ -78,8 +70,7 @@ CCProducts[/^6011/] =
   companyShortname: "discovercard"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
-  includeValidFrom: false
-  verificationLength: 3
+  cvcLength: 3
   verificationSide: 'back'
 
 # Example issuer customizations

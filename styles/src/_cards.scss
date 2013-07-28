@@ -3,7 +3,7 @@
 /*
 Generic
  */
-.skeuocard {
+.skeuocard.js {
 
   .face.front {
     background: #eee url('/images/products/generic-front.png') no-repeat right bottom;
@@ -40,7 +40,7 @@ Generic
     top: 8.05em;
     input{
       color: #333;
-      background-color: #ddd;
+      background-color: #fff;
       font-family: $cc-field-family;
       font-size: 1.5em;
       &.group4{ width: 3.2em; }
