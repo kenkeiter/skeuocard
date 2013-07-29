@@ -179,7 +179,8 @@ class Skeuocard
     matchedProductIdentifier = matchedProduct?.companyShortname || ''
     matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
 
-    if @product isnt "#{matchedProductIdentifier}-#{matchedIssuerIdentifier}"
+    if @product isnt matchedProductIdentifier or @issuer isnt matchedIssuerIdentifier
+      @trigger('productWillChange.skeuocard', [@, @product, matchedProductIdentifier])
       # Update product-specific details
       if matchedProduct isnt undefined
         # change the design and layout of the card to match the matched prod.
@@ -220,7 +221,9 @@ class Skeuocard
           (css.match(/\bproduct-\S+/g) || []).join(' ')
         @el.container.removeClass (index, css)=>
           (css.match(/\bissuer-\S+/g) || []).join(' ')
-      @product = "#{matchedProductIdentifier}-#{matchedIssuerIdentifier}"
+      @trigger('productDidChange.skeuocard', [@, @product, matchedProductIdentifier])
+      @product = matchedProductIdentifier
+      @issuer = matchedIssuerIdentifier
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
     if @frontIsValid()
@@ -259,16 +262,21 @@ class Skeuocard
 
   # Set a value in the underlying form.
   _setUnderlyingValue: (field, newValue)->
+    @trigger('change.skeuocard', [@]) # changing the underlying value triggers a change.
     @_underlyingFormEls[field].val(newValue)
 
   # Flip the card over.
   flip: ->
     if @visibleFace == 'front'
+      @trigger('faceWillBecomeVisible.skeuocard', [@, 'back'])
       @el.cardBody.addClass('flip')
       @visibleFace = 'back'
+      @trigger('faceDidBecomeVisible.skeuocard', [@, 'back'])
     else
+      @trigger('faceWillBecomeVisible.skeuocard', [@, 'front'])
       @el.cardBody.removeClass('flip')
       @visibleFace = 'front'
+      @trigger('faceDidBecomeVisible.skeuocard', [@, 'front'])
 
   getProductForNumber: (num)->
     for m, d of @acceptedCardProducts
@@ -305,6 +313,12 @@ class Skeuocard
       el = $(_el)
       if shortname is (el.attr('data-card-product-shortname') || el.attr('value'))
         el.val(el.attr('value')) # change which option is selected
+
+  trigger: (args...)->
+    @el.container.trigger(args...)
+
+  bind: (args...)->
+    @el.container.trigger(args...)
 
 
 class Skeuocard::TextInputView
@@ -459,7 +473,6 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     @options.placeholder = str
 
   setValue: (newValue)->
-    console.log('setting value', newValue)
     lastPos = 0
     @groupEls.each ->
       el = $(@)

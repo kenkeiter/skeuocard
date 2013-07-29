@@ -206,7 +206,8 @@
       matchedProduct = this.getProductForNumber(number);
       matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
       matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
-      if (this.product !== ("" + matchedProductIdentifier + "-" + matchedIssuerIdentifier)) {
+      if (this.product !== matchedProductIdentifier || this.issuer !== matchedIssuerIdentifier) {
+        this.trigger('productWillChange.skeuocard', [this, this.product, matchedProductIdentifier]);
         if (matchedProduct !== void 0) {
           this._log("Changing product:", matchedProduct);
           this.el.container.removeClass(function(index, css) {
@@ -254,7 +255,9 @@
             return (css.match(/\bissuer-\S+/g) || []).join(' ');
           });
         }
-        this.product = "" + matchedProductIdentifier + "-" + matchedIssuerIdentifier;
+        this.trigger('productDidChange.skeuocard', [this, this.product, matchedProductIdentifier]);
+        this.product = matchedProductIdentifier;
+        this.issuer = matchedIssuerIdentifier;
       }
       if (this.frontIsValid()) {
         this._log("Front face is now valid.");
@@ -291,16 +294,21 @@
     };
 
     Skeuocard.prototype._setUnderlyingValue = function(field, newValue) {
+      this.trigger('change.skeuocard', [this]);
       return this._underlyingFormEls[field].val(newValue);
     };
 
     Skeuocard.prototype.flip = function() {
       if (this.visibleFace === 'front') {
+        this.trigger('faceWillBecomeVisible.skeuocard', [this, 'back']);
         this.el.cardBody.addClass('flip');
-        return this.visibleFace = 'back';
+        this.visibleFace = 'back';
+        return this.trigger('faceDidBecomeVisible.skeuocard', [this, 'back']);
       } else {
+        this.trigger('faceWillBecomeVisible.skeuocard', [this, 'front']);
         this.el.cardBody.removeClass('flip');
-        return this.visibleFace = 'front';
+        this.visibleFace = 'front';
+        return this.trigger('faceDidBecomeVisible.skeuocard', [this, 'front']);
       }
     };
 
@@ -362,6 +370,18 @@
           return el.val(el.attr('value'));
         }
       });
+    };
+
+    Skeuocard.prototype.trigger = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el.container).trigger.apply(_ref, args);
+    };
+
+    Skeuocard.prototype.bind = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el.container).trigger.apply(_ref, args);
     };
 
     return Skeuocard;
@@ -569,7 +589,6 @@
 
     SegmentedCardNumberInputView.prototype.setValue = function(newValue) {
       var lastPos;
-      console.log('setting value', newValue);
       lastPos = 0;
       this.groupEls.each(function() {
         var el, len;
