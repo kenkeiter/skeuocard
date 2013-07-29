@@ -34,17 +34,35 @@ class Skeuocard
                                    "<p>#{opts.backFlipTabBody}</p></div>")
     opts.currentDate         ||= new Date()
     opts.genericPlaceholder  ||= "XXXX XXXX XXXX XXXX"
-    opts.initialValues       ||= {}
     @options = opts
     # configure initial values
 
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
+    
+    @options.initialValues = @_conformInitialValues(@options.initialValues || {})
+
     @_createInputs() # create reconfigurable input views
     @_bindEvents()   # bind custom events to the containers
 
     # call initial render to pick up existing values from non-enhanced inputs
     @render()
+
+  _conformInitialValues: (supplied)->
+    if supplied.number?
+      @_setUnderlyingValue('number', supplied.number)
+    if supplied.exp?
+      @_setUnderlyingValue('exp', supplied.exp)
+    if supplied.name?
+      @_setUnderlyingValue('name', supplied.name)
+    if supplied.cvc?
+      @_setUnderlyingValue('cvc', supplied.cvc)
+    return {
+      number: @_getUnderlyingValue('number')
+      exp: @_getUnderlyingValue('exp')
+      cvc: @_getUnderlyingValue('cvc')
+      name: @_getUnderlyingValue('name')
+    }
 
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
@@ -120,6 +138,12 @@ class Skeuocard
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
       @render()
+
+    # setup default values; when render is called, these will be picked up
+    @_inputViews.number.setValue @options.initialValues.number
+    @_inputViews.exp.setValue @options.initialValues.exp
+    @_inputViews.name.el.val @options.initialValues.name
+    @_inputViews.cvc.el.val @options.initialValues.cvc
 
     # create the validation indicator (flip tab)
     @el.flipTabFront = @options.flipTabFrontEl
@@ -531,28 +555,26 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength
           required: true
-          'data-fieldtype': groupChar
           class: 'cc-exp-field-' + groupChar.toLowerCase() + 
                  ' group' + groupLength
+        input.data('fieldtype', groupChar)
         @el.append(input)
       else # this group is a separator
         sep = $('<span>').attr
           class: 'separator'
         sep.html(new Array(groupLength + 1).join(groupChar))
         @el.append(sep)
-
     @groupEls = @el.find('input')
-    #@groupEls.autotab_magic().autotab_filter('numeric')
     @_updateFieldValues() if @date?
 
   _updateFieldValues: ->
     currentDate = @date
-    unless @groupEls
-      return
-    @groupEls.each =>
-      el = $(this)
+    unless @groupEls # they need to be created
+      return @setPattern(@options.pattern)
+    @groupEls.each (i,_el)=>
+      el = $(_el)
       groupLength = parseInt(el.attr('maxlength'))
-      switch el.attr('data-fieldtype')
+      switch el.data('fieldtype')
         when 'M'
           el.val @_zeroPadNumber(currentDate.getMonth() + 1, groupLength)
         when 'D'
@@ -565,14 +587,18 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
   clear: ->
     @value = ""
     @date = null
-    @_updateFieldValues()
+    @groupEls.each ->
+      $(@).val('')
 
   setDate: (newDate)->
     @date = newDate
+    @value = @options.dateFormatter(newDate)
     @_updateFieldValues()
 
   setValue: (newValue)->
-    @setDate @options.dateParser(newValue)
+    @value = newValue
+    @date = @options.dateParser(newValue)
+    @_updateFieldValues()
 
   getDate: ->
     @date

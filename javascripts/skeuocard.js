@@ -46,13 +46,34 @@
       opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
       opts.currentDate || (opts.currentDate = new Date());
       opts.genericPlaceholder || (opts.genericPlaceholder = "XXXX XXXX XXXX XXXX");
-      opts.initialValues || (opts.initialValues = {});
       this.options = opts;
       this._conformDOM();
+      this.options.initialValues = this._conformInitialValues(this.options.initialValues || {});
       this._createInputs();
       this._bindEvents();
       this.render();
     }
+
+    Skeuocard.prototype._conformInitialValues = function(supplied) {
+      if (supplied.number != null) {
+        this._setUnderlyingValue('number', supplied.number);
+      }
+      if (supplied.exp != null) {
+        this._setUnderlyingValue('exp', supplied.exp);
+      }
+      if (supplied.name != null) {
+        this._setUnderlyingValue('name', supplied.name);
+      }
+      if (supplied.cvc != null) {
+        this._setUnderlyingValue('cvc', supplied.cvc);
+      }
+      return {
+        number: this._getUnderlyingValue('number'),
+        exp: this._getUnderlyingValue('exp'),
+        cvc: this._getUnderlyingValue('cvc'),
+        name: this._getUnderlyingValue('name')
+      };
+    };
 
     Skeuocard.prototype._conformDOM = function() {
       var _this = this;
@@ -134,6 +155,10 @@
         _this._setUnderlyingValue('cvc', $(e.target).val());
         return _this.render();
       });
+      this._inputViews.number.setValue(this.options.initialValues.number);
+      this._inputViews.exp.setValue(this.options.initialValues.exp);
+      this._inputViews.name.el.val(this.options.initialValues.name);
+      this._inputViews.cvc.el.val(this.options.initialValues.cvc);
       this.el.flipTabFront = this.options.flipTabFrontEl;
       this.el.flipTabBack = this.options.flipTabBackEl;
       this.el.surfaceFront.prepend(this.el.flipTabFront);
@@ -676,9 +701,9 @@
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
             required: true,
-            'data-fieldtype': groupChar,
             "class": 'cc-exp-field-' + groupChar.toLowerCase() + ' group' + groupLength
           });
+          input.data('fieldtype', groupChar);
           this.el.append(input);
         } else {
           sep = $('<span>').attr({
@@ -699,13 +724,13 @@
         _this = this;
       currentDate = this.date;
       if (!this.groupEls) {
-        return;
+        return this.setPattern(this.options.pattern);
       }
-      return this.groupEls.each(function() {
+      return this.groupEls.each(function(i, _el) {
         var el, groupLength, year;
-        el = $(_this);
+        el = $(_el);
         groupLength = parseInt(el.attr('maxlength'));
-        switch (el.attr('data-fieldtype')) {
+        switch (el.data('fieldtype')) {
           case 'M':
             return el.val(_this._zeroPadNumber(currentDate.getMonth() + 1, groupLength));
           case 'D':
@@ -720,16 +745,21 @@
     ExpirationInputView.prototype.clear = function() {
       this.value = "";
       this.date = null;
-      return this._updateFieldValues();
+      return this.groupEls.each(function() {
+        return $(this).val('');
+      });
     };
 
     ExpirationInputView.prototype.setDate = function(newDate) {
       this.date = newDate;
+      this.value = this.options.dateFormatter(newDate);
       return this._updateFieldValues();
     };
 
     ExpirationInputView.prototype.setValue = function(newValue) {
-      return this.setDate(this.options.dateParser(newValue));
+      this.value = newValue;
+      this.date = this.options.dateParser(newValue);
+      return this._updateFieldValues();
     };
 
     ExpirationInputView.prototype.getDate = function() {

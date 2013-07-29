@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="styles/skeuocard.css" />
     <!-- styling necessary for demo -->
     <link rel="stylesheet" href="styles/demo.css" />
+    <!-- needed by Skeuocard to determine browser and make fixes -->
     <script src="/javascripts/vendor/css_browser_selector.js"></script>
   </head>
   <body>
@@ -46,6 +47,7 @@
         <label for="cc_cvc">Card Validation Code</label>
         <input class="cc-ccid" type="text" name="cc_cvc" placeholder="123" maxlength="3" size="3">
       </div>
+
       <!--<input type="submit" />-->
     </form>
 
@@ -56,7 +58,7 @@
 
       $(document).ready(function(){
         window.card = new Skeuocard($("#skeuocard"), {
-          debug: true
+          debug: true,
         });
       });
 
