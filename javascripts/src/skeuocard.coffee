@@ -17,28 +17,32 @@ class Skeuocard
     @_inputViews = {}
     @product = null
     @issuer = null
+    @acceptedCardProducts = {}
     @visibleFace = 'front'
     # configure default opts
     opts.debug ||= false
+    opts.acceptedCardProducts ||= []
     opts.cardNumberPlaceholderChar ||= "X"
-    opts.typeInputSelector   ||= '[name="cc_type"]'
-    opts.numberInputSelector ||= '[name="cc_number"]'
-    opts.expInputSelector    ||= '[name="cc_exp"]'
-    opts.nameInputSelector   ||= '[name="cc_name"]'
-    opts.cvcInputSelector    ||= '[name="cc_cvc"]'
-    opts.frontFlipTabBody    ||= 'Click here to<br /> fill in the other side.'
-    opts.backFlipTabBody     ||= "Forgot something?"
-    opts.flipTabFrontEl      ||= $("<div class=\"flip-tab front\">" +
-                                   "<p>#{opts.frontFlipTabBody}</p></div>")
-    opts.flipTabBackEl       ||= $("<div class=\"flip-tab back\">" +
-                                   "<p>#{opts.backFlipTabBody}</p></div>")
-    opts.currentDate         ||= new Date()
-    opts.genericPlaceholder  ||= "XXXX XXXX XXXX XXXX"
-    opts.initialValues       ||= {}
+    opts.typeInputSelector    ||= '[name="cc_type"]'
+    opts.numberInputSelector  ||= '[name="cc_number"]'
+    opts.expInputSelector     ||= '[name="cc_exp"]'
+    opts.nameInputSelector    ||= '[name="cc_name"]'
+    opts.cvcInputSelector     ||= '[name="cc_cvc"]'
+    opts.frontFlipTabBody     ||= 'Click here to<br /> fill in the other side.'
+    opts.backFlipTabBody      ||= "Forgot something?"
+    opts.flipTabFrontEl       ||= $("<div class=\"flip-tab front\">" +
+                                    "<p>#{opts.frontFlipTabBody}</p></div>")
+    opts.flipTabBackEl        ||= $("<div class=\"flip-tab back\">" +
+                                    "<p>#{opts.backFlipTabBody}</p></div>")
+    opts.currentDate          ||= new Date()
+    opts.genericPlaceholder   ||= "XXXX XXXX XXXX XXXX"
+    opts.initialValues        ||= {}
+
     @options = opts
 
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
+    @_setAcceptedCardProducts() # determine which card products to accept
     @_createInputs() # create reconfigurable input views
     @_bindEvents()   # bind custom events to the containers
 
@@ -89,6 +93,20 @@ class Skeuocard
     @el.cardBody.appendTo(@el.container)
 
     return @el.container
+
+  _setAcceptedCardProducts: ->
+    # build the set of accepted card products
+    if @options.acceptedCardProducts.length is 0
+      @_underlyingFormEls.type.find('option').each (i, _el)=>
+        el = $(_el)
+        cardProductShortname = el.attr('data-card-product-shortname') || el.attr('value')
+        @options.acceptedCardProducts.push cardProductShortname
+    # find all matching card products by shortname, and add them to the 
+    # list of @acceptedCardProducts
+    for matcher, product of CCProducts
+      if product.companyShortname in @options.acceptedCardProducts
+        @acceptedCardProducts[matcher] = product
+    return @acceptedCardProducts
 
   # Create the new inputs, and attach them to their appropriate card face els.
   _createInputs: ->
@@ -165,6 +183,7 @@ class Skeuocard
         (css.match(/\bproduct-\S+/g) || []).join(' ')
       if matchedProduct isnt undefined
         @el.container.addClass("product-#{matchedProduct.companyShortname}")
+        @_setUnderlyingCardType(matchedProduct.companyShortname)
         # Reconfigure input to match product
         @_inputViews.number.reconfigure 
           groupings: matchedProduct.cardNumberGrouping
@@ -243,7 +262,7 @@ class Skeuocard
       @visibleFace = 'front'
 
   getProductForNumber: (num)->
-    for m, d of CCProducts
+    for m, d of @acceptedCardProducts
       parts = m.split('/')
       matcher = new RegExp(parts[1], parts[2])
       if matcher.test(num)
@@ -270,6 +289,12 @@ class Skeuocard
       alt = !alt
       sum += num
     sum % 10 is 0
+
+  _setUnderlyingCardType: (shortname)->
+    @_underlyingFormEls.type.find('option').each (i, _el)=>
+      el = $(_el)
+      if shortname is (el.attr('data-card-product-shortname') || el.attr('value'))
+        el.val(el.attr('value')) # change which option is selected
 
 
 class Skeuocard::TextInputView

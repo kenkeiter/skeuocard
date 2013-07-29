@@ -14,10 +14,10 @@
 
 (function() {
   var Skeuocard,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __slice = [].slice,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Skeuocard = (function() {
 
@@ -32,8 +32,10 @@
       this._inputViews = {};
       this.product = null;
       this.issuer = null;
+      this.acceptedCardProducts = {};
       this.visibleFace = 'front';
       opts.debug || (opts.debug = false);
+      opts.acceptedCardProducts || (opts.acceptedCardProducts = []);
       opts.cardNumberPlaceholderChar || (opts.cardNumberPlaceholderChar = "X");
       opts.typeInputSelector || (opts.typeInputSelector = '[name="cc_type"]');
       opts.numberInputSelector || (opts.numberInputSelector = '[name="cc_number"]');
@@ -49,6 +51,7 @@
       opts.initialValues || (opts.initialValues = {});
       this.options = opts;
       this._conformDOM();
+      this._setAcceptedCardProducts();
       this._createInputs();
       this._bindEvents();
       this.render();
@@ -102,6 +105,26 @@
       this.el.surfaceBack.appendTo(this.el.cardBody);
       this.el.cardBody.appendTo(this.el.container);
       return this.el.container;
+    };
+
+    Skeuocard.prototype._setAcceptedCardProducts = function() {
+      var matcher, product, _ref,
+        _this = this;
+      if (this.options.acceptedCardProducts.length === 0) {
+        this._underlyingFormEls.type.find('option').each(function(i, _el) {
+          var cardProductShortname, el;
+          el = $(_el);
+          cardProductShortname = el.attr('data-card-product-shortname') || el.attr('value');
+          return _this.options.acceptedCardProducts.push(cardProductShortname);
+        });
+      }
+      for (matcher in CCProducts) {
+        product = CCProducts[matcher];
+        if (_ref = product.companyShortname, __indexOf.call(this.options.acceptedCardProducts, _ref) >= 0) {
+          this.acceptedCardProducts[matcher] = product;
+        }
+      }
+      return this.acceptedCardProducts;
     };
 
     Skeuocard.prototype._createInputs = function() {
@@ -187,6 +210,7 @@
         });
         if (matchedProduct !== void 0) {
           this.el.container.addClass("product-" + matchedProduct.companyShortname);
+          this._setUnderlyingCardType(matchedProduct.companyShortname);
           this._inputViews.number.reconfigure({
             groupings: matchedProduct.cardNumberGrouping,
             placeholderChar: this.options.cardNumberPlaceholderChar
@@ -267,9 +291,10 @@
     };
 
     Skeuocard.prototype.getProductForNumber = function(num) {
-      var d, m, matcher, parts;
-      for (m in CCProducts) {
-        d = CCProducts[m];
+      var d, m, matcher, parts, _ref;
+      _ref = this.acceptedCardProducts;
+      for (m in _ref) {
+        d = _ref[m];
         parts = m.split('/');
         matcher = new RegExp(parts[1], parts[2]);
         if (matcher.test(num)) {
@@ -311,6 +336,17 @@
         sum += num;
       }
       return sum % 10 === 0;
+    };
+
+    Skeuocard.prototype._setUnderlyingCardType = function(shortname) {
+      var _this = this;
+      return this._underlyingFormEls.type.find('option').each(function(i, _el) {
+        var el;
+        el = $(_el);
+        if (shortname === (el.attr('data-card-product-shortname') || el.attr('value'))) {
+          return el.val(el.attr('value'));
+        }
+      });
     };
 
     return Skeuocard;
