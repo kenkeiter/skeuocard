@@ -175,13 +175,17 @@ class Skeuocard
   # without clearing input.
   render: ->
     number = @_getUnderlyingValue('number')
-    
-    # rerender (if necessary) to deal with a change in product
-    if @product isnt matchedProduct = @getProductForNumber(number)
-      @_log("Changing product:", matchedProduct)
-      @el.container.removeClass (index, css)=>
-        (css.match(/\bproduct-\S+/g) || []).join(' ')
+    matchedProduct = @getProductForNumber(number)
+    matchedProductIdentifier = matchedProduct?.companyShortname || ''
+    matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
+
+    if @product isnt "#{matchedProductIdentifier}-#{matchedIssuerIdentifier}"
+      # Update product-specific details
       if matchedProduct isnt undefined
+        # change the design and layout of the card to match the matched prod.
+        @_log("Changing product:", matchedProduct)
+        @el.container.removeClass (index, css)=>
+          (css.match(/\bproduct-\S+/g) || []).join(' ')
         @el.container.addClass("product-#{matchedProduct.companyShortname}")
         @_setUnderlyingCardType(matchedProduct.companyShortname)
         # Reconfigure input to match product
@@ -192,6 +196,11 @@ class Skeuocard
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
           pattern: matchedProduct.expirationFormat
+        # adjust for issuer specifics
+        @el.container.removeClass (index, css)=>
+          (css.match(/\bissuer-\S+/g) || []).join(' ')
+        if matchedProduct.issuerShortname?
+          @el.container.addClass("issuer-#{matchedProduct.issuerShortname}")
       else
         # Reset to generic input
         @_inputViews.exp.clear()
@@ -201,18 +210,11 @@ class Skeuocard
         @_inputViews.number.reconfigure
           groupings: [@options.genericPlaceholder.length],
           placeholder: @options.genericPlaceholder
-      # change the current product for the card
-      @product = matchedProduct
-    
-    # rerender (if necessary) to match change in issuer
-    if @issuer isnt matchedIssuer = @getIssuerForNumber(number)
-      @_log("Changing issuer:", matchedIssuer)
-      @el.container.removeClass (index, css)=>
-        (css.match(/\bissuer-\S+/g) || []).join(' ')
-      if matchedIssuer isnt undefined
-        @el.container.addClass("issuer-#{matchedIssuer.issuerShortname}")
-      # change the current issuer for the card
-      @issuer = matchedIssuer
+        @el.container.removeClass (index, css)=>
+          (css.match(/\bproduct-\S+/g) || []).join(' ')
+        @el.container.removeClass (index, css)=>
+          (css.match(/\bissuer-\S+/g) || []).join(' ')
+      @product = "#{matchedProductIdentifier}-#{matchedIssuerIdentifier}"
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
     if @frontIsValid()
@@ -222,6 +224,7 @@ class Skeuocard
     else
       @el.flipTabFront.hide()
       @el.flipTabFront.removeClass('valid-anim')
+
 
   frontIsValid: ->
     # validate card number
@@ -266,7 +269,8 @@ class Skeuocard
       parts = m.split('/')
       matcher = new RegExp(parts[1], parts[2])
       if matcher.test(num)
-        return d
+        issuer = @getIssuerForNumber(num) || {}
+        return $.extend({}, d, issuer)
     return undefined
 
   getIssuerForNumber: (num)->

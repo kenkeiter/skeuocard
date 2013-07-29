@@ -200,15 +200,18 @@
     };
 
     Skeuocard.prototype.render = function() {
-      var matchedIssuer, matchedProduct, number,
+      var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number,
         _this = this;
       number = this._getUnderlyingValue('number');
-      if (this.product !== (matchedProduct = this.getProductForNumber(number))) {
-        this._log("Changing product:", matchedProduct);
-        this.el.container.removeClass(function(index, css) {
-          return (css.match(/\bproduct-\S+/g) || []).join(' ');
-        });
+      matchedProduct = this.getProductForNumber(number);
+      matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
+      matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
+      if (this.product !== ("" + matchedProductIdentifier + "-" + matchedIssuerIdentifier)) {
         if (matchedProduct !== void 0) {
+          this._log("Changing product:", matchedProduct);
+          this.el.container.removeClass(function(index, css) {
+            return (css.match(/\bproduct-\S+/g) || []).join(' ');
+          });
           this.el.container.addClass("product-" + matchedProduct.companyShortname);
           this._setUnderlyingCardType(matchedProduct.companyShortname);
           this._inputViews.number.reconfigure({
@@ -220,6 +223,12 @@
           this._inputViews.exp.reconfigure({
             pattern: matchedProduct.expirationFormat
           });
+          this.el.container.removeClass(function(index, css) {
+            return (css.match(/\bissuer-\S+/g) || []).join(' ');
+          });
+          if (matchedProduct.issuerShortname != null) {
+            this.el.container.addClass("issuer-" + matchedProduct.issuerShortname);
+          }
         } else {
           this._inputViews.exp.clear();
           this._inputViews.cvc.clear();
@@ -229,18 +238,14 @@
             groupings: [this.options.genericPlaceholder.length],
             placeholder: this.options.genericPlaceholder
           });
+          this.el.container.removeClass(function(index, css) {
+            return (css.match(/\bproduct-\S+/g) || []).join(' ');
+          });
+          this.el.container.removeClass(function(index, css) {
+            return (css.match(/\bissuer-\S+/g) || []).join(' ');
+          });
         }
-        this.product = matchedProduct;
-      }
-      if (this.issuer !== (matchedIssuer = this.getIssuerForNumber(number))) {
-        this._log("Changing issuer:", matchedIssuer);
-        this.el.container.removeClass(function(index, css) {
-          return (css.match(/\bissuer-\S+/g) || []).join(' ');
-        });
-        if (matchedIssuer !== void 0) {
-          this.el.container.addClass("issuer-" + matchedIssuer.issuerShortname);
-        }
-        this.issuer = matchedIssuer;
+        this.product = "" + matchedProductIdentifier + "-" + matchedIssuerIdentifier;
       }
       if (this.frontIsValid()) {
         this._log("Front face is now valid.");
@@ -291,14 +296,15 @@
     };
 
     Skeuocard.prototype.getProductForNumber = function(num) {
-      var d, m, matcher, parts, _ref;
+      var d, issuer, m, matcher, parts, _ref;
       _ref = this.acceptedCardProducts;
       for (m in _ref) {
         d = _ref[m];
         parts = m.split('/');
         matcher = new RegExp(parts[1], parts[2]);
         if (matcher.test(num)) {
-          return d;
+          issuer = this.getIssuerForNumber(num) || {};
+          return $.extend({}, d, issuer);
         }
       }
       return void 0;
