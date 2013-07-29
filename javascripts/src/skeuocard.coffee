@@ -34,35 +34,16 @@ class Skeuocard
                                    "<p>#{opts.backFlipTabBody}</p></div>")
     opts.currentDate         ||= new Date()
     opts.genericPlaceholder  ||= "XXXX XXXX XXXX XXXX"
+    opts.initialValues       ||= {}
     @options = opts
-    # configure initial values
 
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
-    
-    @options.initialValues = @_conformInitialValues(@options.initialValues || {})
-
     @_createInputs() # create reconfigurable input views
     @_bindEvents()   # bind custom events to the containers
 
     # call initial render to pick up existing values from non-enhanced inputs
     @render()
-
-  _conformInitialValues: (supplied)->
-    if supplied.number?
-      @_setUnderlyingValue('number', supplied.number)
-    if supplied.exp?
-      @_setUnderlyingValue('exp', supplied.exp)
-    if supplied.name?
-      @_setUnderlyingValue('name', supplied.name)
-    if supplied.cvc?
-      @_setUnderlyingValue('cvc', supplied.cvc)
-    return {
-      number: @_getUnderlyingValue('number')
-      exp: @_getUnderlyingValue('exp')
-      cvc: @_getUnderlyingValue('cvc')
-      name: @_getUnderlyingValue('name')
-    }
 
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
@@ -93,6 +74,10 @@ class Skeuocard
     @_underlyingFormEls.cvc.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
       @render()
+    # Conform the underlying values to match supplied initial values, if there 
+    # are any provided.
+    for fieldName, fieldValue of @options.initialValues
+      @_underlyingFormEls[fieldName].val(fieldValue)
     # construct the necessary card elements
     @el.surfaceFront = $("<div>").attr(class: "face front")
     @el.surfaceBack = $("<div>").attr(class: "face back")
@@ -140,10 +125,10 @@ class Skeuocard
       @render()
 
     # setup default values; when render is called, these will be picked up
-    @_inputViews.number.setValue @options.initialValues.number
-    @_inputViews.exp.setValue @options.initialValues.exp
-    @_inputViews.name.el.val @options.initialValues.name
-    @_inputViews.cvc.el.val @options.initialValues.cvc
+    @_inputViews.number.setValue @_getUnderlyingValue('number')
+    @_inputViews.exp.setValue @_getUnderlyingValue('exp')
+    @_inputViews.name.el.val @_getUnderlyingValue('name')
+    @_inputViews.cvc.el.val @_getUnderlyingValue('cvc')
 
     # create the validation indicator (flip tab)
     @el.flipTabFront = @options.flipTabFrontEl

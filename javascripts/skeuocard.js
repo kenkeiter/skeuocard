@@ -46,37 +46,17 @@
       opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
       opts.currentDate || (opts.currentDate = new Date());
       opts.genericPlaceholder || (opts.genericPlaceholder = "XXXX XXXX XXXX XXXX");
+      opts.initialValues || (opts.initialValues = {});
       this.options = opts;
       this._conformDOM();
-      this.options.initialValues = this._conformInitialValues(this.options.initialValues || {});
       this._createInputs();
       this._bindEvents();
       this.render();
     }
 
-    Skeuocard.prototype._conformInitialValues = function(supplied) {
-      if (supplied.number != null) {
-        this._setUnderlyingValue('number', supplied.number);
-      }
-      if (supplied.exp != null) {
-        this._setUnderlyingValue('exp', supplied.exp);
-      }
-      if (supplied.name != null) {
-        this._setUnderlyingValue('name', supplied.name);
-      }
-      if (supplied.cvc != null) {
-        this._setUnderlyingValue('cvc', supplied.cvc);
-      }
-      return {
-        number: this._getUnderlyingValue('number'),
-        exp: this._getUnderlyingValue('exp'),
-        cvc: this._getUnderlyingValue('cvc'),
-        name: this._getUnderlyingValue('name')
-      };
-    };
-
     Skeuocard.prototype._conformDOM = function() {
-      var _this = this;
+      var fieldName, fieldValue, _ref,
+        _this = this;
       this.el.container.addClass("js");
       this.el.container.find("> :not(input,select,textarea)").remove();
       this.el.container.find("> input,select,textarea").hide();
@@ -103,6 +83,11 @@
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('cvc'));
         return _this.render();
       });
+      _ref = this.options.initialValues;
+      for (fieldName in _ref) {
+        fieldValue = _ref[fieldName];
+        this._underlyingFormEls[fieldName].val(fieldValue);
+      }
       this.el.surfaceFront = $("<div>").attr({
         "class": "face front"
       });
@@ -155,10 +140,10 @@
         _this._setUnderlyingValue('cvc', $(e.target).val());
         return _this.render();
       });
-      this._inputViews.number.setValue(this.options.initialValues.number);
-      this._inputViews.exp.setValue(this.options.initialValues.exp);
-      this._inputViews.name.el.val(this.options.initialValues.name);
-      this._inputViews.cvc.el.val(this.options.initialValues.cvc);
+      this._inputViews.number.setValue(this._getUnderlyingValue('number'));
+      this._inputViews.exp.setValue(this._getUnderlyingValue('exp'));
+      this._inputViews.name.el.val(this._getUnderlyingValue('name'));
+      this._inputViews.cvc.el.val(this._getUnderlyingValue('cvc'));
       this.el.flipTabFront = this.options.flipTabFrontEl;
       this.el.flipTabBack = this.options.flipTabBackEl;
       this.el.surfaceFront.prepend(this.el.flipTabFront);
