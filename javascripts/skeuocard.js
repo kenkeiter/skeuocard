@@ -200,7 +200,7 @@
     };
 
     Skeuocard.prototype.render = function() {
-      var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number,
+      var container, el, fieldName, inputEl, matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number, sel, surfaceName, _ref,
         _this = this;
       number = this._getUnderlyingValue('number');
       matchedProduct = this.getProductForNumber(number);
@@ -210,9 +210,12 @@
         if (matchedProduct !== void 0) {
           this._log("Changing product:", matchedProduct);
           this.el.container.removeClass(function(index, css) {
-            return (css.match(/\bproduct-\S+/g) || []).join(' ');
+            return (css.match(/\b(product|issuer)-\S+/g) || []).join(' ');
           });
           this.el.container.addClass("product-" + matchedProduct.companyShortname);
+          if (matchedProduct.issuerShortname != null) {
+            this.el.container.addClass("issuer-" + matchedProduct.issuerShortname);
+          }
           this._setUnderlyingCardType(matchedProduct.companyShortname);
           this._inputViews.number.reconfigure({
             groupings: matchedProduct.cardNumberGrouping,
@@ -223,11 +226,17 @@
           this._inputViews.exp.reconfigure({
             pattern: matchedProduct.expirationFormat
           });
-          this.el.container.removeClass(function(index, css) {
-            return (css.match(/\bissuer-\S+/g) || []).join(' ');
-          });
-          if (matchedProduct.issuerShortname != null) {
-            this.el.container.addClass("issuer-" + matchedProduct.issuerShortname);
+          _ref = matchedProduct.layout;
+          for (fieldName in _ref) {
+            surfaceName = _ref[fieldName];
+            sel = surfaceName === 'front' ? 'surfaceFront' : 'surfaceBack';
+            container = this.el[sel];
+            inputEl = this._inputViews[fieldName].el;
+            if (!(container.has(inputEl).length > 0)) {
+              console.log("Moving", inputEl, "=>", container);
+              el = this._inputViews[fieldName].el.detach();
+              $(el).appendTo(this.el[sel]);
+            }
           }
         } else {
           this._inputViews.exp.clear();

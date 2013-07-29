@@ -185,8 +185,11 @@ class Skeuocard
         # change the design and layout of the card to match the matched prod.
         @_log("Changing product:", matchedProduct)
         @el.container.removeClass (index, css)=>
-          (css.match(/\bproduct-\S+/g) || []).join(' ')
+          (css.match(/\b(product|issuer)-\S+/g) || []).join(' ')
         @el.container.addClass("product-#{matchedProduct.companyShortname}")
+        if matchedProduct.issuerShortname?
+          @el.container.addClass("issuer-#{matchedProduct.issuerShortname}")
+        # Adjust underlying card type to match detected type
         @_setUnderlyingCardType(matchedProduct.companyShortname)
         # Reconfigure input to match product
         @_inputViews.number.reconfigure 
@@ -196,11 +199,14 @@ class Skeuocard
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
           pattern: matchedProduct.expirationFormat
-        # adjust for issuer specifics
-        @el.container.removeClass (index, css)=>
-          (css.match(/\bissuer-\S+/g) || []).join(' ')
-        if matchedProduct.issuerShortname?
-          @el.container.addClass("issuer-#{matchedProduct.issuerShortname}")
+        for fieldName, surfaceName of matchedProduct.layout
+          sel = if surfaceName is 'front' then 'surfaceFront' else 'surfaceBack'
+          container = @el[sel]
+          inputEl = @_inputViews[fieldName].el
+          unless container.has(inputEl).length > 0
+            console.log("Moving", inputEl, "=>", container)
+            el = @_inputViews[fieldName].el.detach()
+            $(el).appendTo(@el[sel])
       else
         # Reset to generic input
         @_inputViews.exp.clear()
