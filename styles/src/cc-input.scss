@@ -97,7 +97,6 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
 
   .flip-tab{
     position: absolute;
-    padding: 0.3em;
     -webkit-border-radius: 3.55em;
     border-radius: 3.55em;
     cursor: pointer; cursor: hand;
@@ -111,9 +110,8 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
     -o-transition: all 0.25s ease;
     -ms-transition: all 0.25s ease;
     transition: all 0.25s ease;
-
     p{
-      margin-top: 0.3em;
+      margin: 0.3em;
       font-family: $cc-label-family;
       color: #fff;
       font-size: 1.0em;
@@ -123,25 +121,33 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
       right: -1.25em;
       top: 1em;
       background-position: 10.65em 0.90em;
-      padding-right: 2.9em;
-      padding-left: 1.25em;
+      p{
+        margin-top: 0.6em;
+        margin-right: 2.9em;
+        margin-left: 1.25em;
+      }
     }
     &.front:hover{
       right: -1.8em;
-      background-color: darken(#00CFA7, 10%);
     }
     &.back{
       left: -1.25em;
       top: 1em;
       background-position: 1.0em 0.90em;
-      padding-right: 1.25em;
-      padding-left: 2.9em;
-      padding-top: 0.85em;
+      p{
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.85em;
+      }
     }
     &.back:hover{
       left: -1.8em;
-      background-color: darken(#00CFA7, 10%);
     }
+  }
+  .flip-tab.valid-anim{
+    background-position: 10.05em 0.6em;
+    background-image: url('/images/card-valid-anim.gif');
+    background-size: 2.3em 2.3em;
   }
 
 }

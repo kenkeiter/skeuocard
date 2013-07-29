@@ -10,7 +10,12 @@
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^3095/] = {
@@ -19,7 +24,12 @@
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^35\d{2}/] = {
@@ -28,7 +38,12 @@
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^36\d{2}/] = {
@@ -37,7 +52,12 @@
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^37/] = {
@@ -46,7 +66,12 @@
     cardNumberGrouping: [4, 6, 5],
     expirationFormat: "MM/YY",
     cvcLength: 4,
-    verificationSide: 'front'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^38/] = {
@@ -55,7 +80,12 @@
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^4[0-9]\d{2}/] = {
@@ -64,7 +94,12 @@
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^5[0-8]\d{2}/] = {
@@ -73,7 +108,12 @@
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCProducts[/^6011/] = {
@@ -82,21 +122,48 @@
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
-    verificationSide: 'back'
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
   };
 
   CCIssuers = {};
 
-  CCIssuers[/^377411/] = {
-    issuingAuthority: "American Express",
-    issuerName: "Black Card",
+  /*
+  # Example issuer customizations
+  # AmEx Issuers
+  CCIssuers[/^377411/] =
+    issuingAuthority: "American Express"
+    issuerName: "Black Card"
     issuerShortname: "blackcard"
-  };
-
-  CCIssuers[/^481171/] = {
-    issuingAuthority: "Simple Finance Technology Corporation",
-    issuerName: "Simple Debit Card",
+  # Visa Issuers
+  CCIssuers[/^481171/] =
+    issuingAuthority: "Simple Finance Technology Corporation"
+    issuerName: "Simple Debit Card"
     issuerShortname: "simple"
+  */
+
+
+  CCIssuers = {};
+
+  /*
+  Hack fixes the Chase Sapphire card's stupid (nice?) layout non-conformity.
+  */
+
+
+  CCIssuers[/^414720/] = {
+    issuingAuthority: "Chase",
+    issuerName: "Chase Sapphire Card",
+    issuerShortname: "chase-sapphire",
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'front'
+    }
   };
 
   window.CCIssuers = CCIssuers;

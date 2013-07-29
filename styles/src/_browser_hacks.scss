@@ -19,9 +19,10 @@
   }
 }
 
-.chrome.win .skeuocard, .ie10.win .skeuocard{
+/*
+.chrome.win .skeuocard, {
   .card-body.flip .face.back{
-    z-index: 3;
-    backface-visibility: visible;
+    display: none;
   }
 }
+*/

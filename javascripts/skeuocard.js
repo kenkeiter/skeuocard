@@ -9,21 +9,6 @@
 @updated 2013-07-25
 @website http://kenkeiter.com/
 @exports [window.Skeuocard]
-
-# TODO:
-[ ] Add full set of emitted/handled events for card body.
-[ ] Get basics working in IE8/9, older versions of FF/Chrome.
-[ ] Remove dependency on HTML5 validation; add CSS classes to card indicating 
-    validation state.
-[ ] Pull list of accepted cards from <select>; update selected value upon
-    product change. Allow accepted cards to be overridden in options.
-[ ] Move option defaults into an object which is extended.
-[ ] Style the flip buttons better. Add CSS-embedded arrows.
-[ ] Add transitions between products/issuers.
-[ ] Reorganize CSS; make sure we have rely on js class being defined for card.
-[ ] When a fields are marked as invalid upon init (perhaps through options?) 
-    we should automatically flip to the correct side or, if there are invalid 
-    items on both sides, we should note that for the user using the flags.
 */
 
 
@@ -47,6 +32,7 @@
       this._inputViews = {};
       this.product = null;
       this.issuer = null;
+      this.visibleFace = 'front';
       opts.debug || (opts.debug = false);
       opts.cardNumberPlaceholderChar || (opts.cardNumberPlaceholderChar = "X");
       opts.typeInputSelector || (opts.typeInputSelector = '[name="cc_type"]');
@@ -60,6 +46,7 @@
       opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
       opts.currentDate || (opts.currentDate = new Date());
       opts.genericPlaceholder || (opts.genericPlaceholder = "XXXX XXXX XXXX XXXX");
+      opts.initialValues || (opts.initialValues = {});
       this.options = opts;
       this._conformDOM();
       this._createInputs();
@@ -223,9 +210,11 @@
       }
       if (this.frontIsValid()) {
         this._log("Front face is now valid.");
-        return this.el.flipTabFront.show();
+        this.el.flipTabFront.show();
+        return this.el.flipTabFront.addClass('valid-anim');
       } else {
-        return this.el.flipTabFront.hide();
+        this.el.flipTabFront.hide();
+        return this.el.flipTabFront.removeClass('valid-anim');
       }
     };
 
@@ -258,7 +247,13 @@
     };
 
     Skeuocard.prototype.flip = function() {
-      return this.el.cardBody.toggleClass('flip');
+      if (this.visibleFace === 'front') {
+        this.el.cardBody.addClass('flip');
+        return this.visibleFace = 'back';
+      } else {
+        this.el.cardBody.removeClass('flip');
+        return this.visibleFace = 'front';
+      }
     };
 
     Skeuocard.prototype.getProductForNumber = function(num) {

@@ -7,21 +7,6 @@
 @updated 2013-07-25
 @website http://kenkeiter.com/
 @exports [window.Skeuocard]
-
-# TODO:
-[ ] Add full set of emitted/handled events for card body.
-[ ] Get basics working in IE8/9, older versions of FF/Chrome.
-[ ] Remove dependency on HTML5 validation; add CSS classes to card indicating 
-    validation state.
-[ ] Pull list of accepted cards from <select>; update selected value upon
-    product change. Allow accepted cards to be overridden in options.
-[ ] Move option defaults into an object which is extended.
-[ ] Style the flip buttons better. Add CSS-embedded arrows.
-[ ] Add transitions between products/issuers.
-[ ] Reorganize CSS; make sure we have rely on js class being defined for card.
-[ ] When a fields are marked as invalid upon init (perhaps through options?) 
-    we should automatically flip to the correct side or, if there are invalid 
-    items on both sides, we should note that for the user using the flags.
 ###
 
 class Skeuocard
@@ -32,6 +17,7 @@ class Skeuocard
     @_inputViews = {}
     @product = null
     @issuer = null
+    @visibleFace = 'front'
     # configure default opts
     opts.debug ||= false
     opts.cardNumberPlaceholderChar ||= "X"
@@ -48,7 +34,9 @@ class Skeuocard
                                    "<p>#{opts.backFlipTabBody}</p></div>")
     opts.currentDate         ||= new Date()
     opts.genericPlaceholder  ||= "XXXX XXXX XXXX XXXX"
+    opts.initialValues       ||= {}
     @options = opts
+    # configure initial values
 
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
@@ -202,8 +190,10 @@ class Skeuocard
     if @frontIsValid()
       @_log("Front face is now valid.")
       @el.flipTabFront.show()
+      @el.flipTabFront.addClass('valid-anim')
     else
       @el.flipTabFront.hide()
+      @el.flipTabFront.removeClass('valid-anim')
 
   frontIsValid: ->
     # validate card number
@@ -214,8 +204,6 @@ class Skeuocard
       ((@_inputViews.exp.date.getFullYear() == @options.currentDate.getFullYear() and
        @_inputViews.exp.date.getMonth() >= @options.currentDate.getMonth()) or
        @_inputViews.exp.date.getFullYear() > @options.currentDate.getFullYear())
-
-
     # validate name
     nameValid = @_inputViews.name.el.val().length > 0
     # console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
@@ -238,7 +226,12 @@ class Skeuocard
 
   # Flip the card over.
   flip: ->
-    @el.cardBody.toggleClass('flip')
+    if @visibleFace == 'front'
+      @el.cardBody.addClass('flip')
+      @visibleFace = 'back'
+    else
+      @el.cardBody.removeClass('flip')
+      @visibleFace = 'front'
 
   getProductForNumber: (num)->
     for m, d of CCProducts

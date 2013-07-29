@@ -117,7 +117,6 @@ table {
     transform: rotateY(180deg); }
   .skeuocard.js .flip-tab {
     position: absolute;
-    padding: 0.3em;
     -webkit-border-radius: 3.55em;
     border-radius: 3.55em;
     cursor: pointer;
@@ -133,7 +132,7 @@ table {
     -ms-transition: all 0.25s ease;
     transition: all 0.25s ease; }
     .skeuocard.js .flip-tab p {
-      margin-top: 0.3em;
+      margin: 0.3em;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       color: #fff;
       font-size: 1.0em;
@@ -141,22 +140,27 @@ table {
     .skeuocard.js .flip-tab.front {
       right: -1.25em;
       top: 1em;
-      background-position: 10.65em 0.90em;
-      padding-right: 2.9em;
-      padding-left: 1.25em; }
+      background-position: 10.65em 0.90em; }
+      .skeuocard.js .flip-tab.front p {
+        margin-top: 0.6em;
+        margin-right: 2.9em;
+        margin-left: 1.25em; }
     .skeuocard.js .flip-tab.front:hover {
-      right: -1.8em;
-      background-color: #009c7e; }
+      right: -1.8em; }
     .skeuocard.js .flip-tab.back {
       left: -1.25em;
       top: 1em;
-      background-position: 1.0em 0.90em;
-      padding-right: 1.25em;
-      padding-left: 2.9em;
-      padding-top: 0.85em; }
+      background-position: 1.0em 0.90em; }
+      .skeuocard.js .flip-tab.back p {
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.85em; }
     .skeuocard.js .flip-tab.back:hover {
-      left: -1.8em;
-      background-color: #009c7e; }
+      left: -1.8em; }
+  .skeuocard.js .flip-tab.valid-anim {
+    background-position: 10.05em 0.6em;
+    background-image: url("/images/card-valid-anim.gif");
+    background-size: 2.3em 2.3em; }
 
 /*
 Generic
@@ -397,6 +401,10 @@ Generic
 .ie10 .skeuocard .cc-number input ::-ms-clear {
   display: none !important; }
 
-.chrome.win .skeuocard .card-body.flip .face.back, .ie10.win .skeuocard .card-body.flip .face.back {
-  z-index: 3;
-  backface-visibility: visible; }
+/*
+.chrome.win .skeuocard, {
+  .card-body.flip .face.back{
+    display: none;
+  }
+}
+*/
