@@ -1,8 +1,11 @@
 @import "util";
 
-/*
-Generic
- */
+$cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+
+// *****************************************************************************
+// Generic card layout
+// *****************************************************************************
 .skeuocard.js {
 
   .face.front {
@@ -10,26 +13,6 @@ Generic
   }
   .face.back {
     background: #eee url('/images/products/generic-back.png') no-repeat center center;
-  }
-
-  .cc-exp { 
-    position: absolute; 
-    display: block; 
-    input, .separator {
-      margin: 0; padding: 0;
-      font-size: 1em;
-      font-family: $cc-field-family;
-      &.group2{ width: 2em; }
-      &.group4{ width: 4em; }
-    }
-  }
-
-  .cc-name{ 
-    margin: 0; padding: 0;
-    position: absolute; 
-    display: block; 
-    font-size: 1em;
-    font-family: $cc-field-family;
   }
 
   .cc-number{
@@ -52,50 +35,61 @@ Generic
       margin-left: 0.4em;
     }
   }
+}
 
-  .cc-cvc{
+// *****************************************************************************
+// Base layout for cards
+// This is inherited by card products.
+// *****************************************************************************
+.skeuocard.card-product {
+  .cc-number {
+    background-color: transparent;
+    padding: 0.1em;
+    input{
+      color: #333;
+      background-color: transparent;
+      border: none;
+    }
+    input:focus{
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+  }
+  .cc-exp {
+    position: absolute; 
+    display: block; 
+    input, .separator {
+      margin: 0; padding: 0;
+      font-size: 1em;
+      font-family: $cc-field-family;
+      color: #333;
+      background-color: transparent;
+      border: none;
+      text-align: center;
+      &.group2{ width: 2em; }
+      &.group4{ width: 4em; }
+    }
+  }
+  .cc-name {
+    margin: 0; padding: 0;
+    position: absolute; 
+    display: block; 
+    font-size: 1em;
+    font-family: $cc-field-family;
+    background-color: transparent;
+    border: none;
+  }
+  .cc-cvc {
     position: absolute;
     display: block; 
     font-size: 1em;
   }
-
 }
 
-.skeuocard.product-dinersclubintl {
-  .face.front{
-    background: #eee url('/images/products/dinersclubintl-front.png') no-repeat right bottom;
-  }
-  .cc-number{
-    left: 1.8em;
-    top: 8.05em;
-    input {
-      background: transparent;
-      border: 0;
-    }
-    input + input {
-      margin-left: 0.6em;
-    }
-  }
-  .cc-name{
-    left: 1.8em;
-    top: 11.5em;
-    background: transparent;
-    border: 0;
-  }
-  .cc-exp{
-    left: 17.5em;
-    top: 13.5em;
-    input, .separator {
-      background: transparent;
-      border: 0;
-    }
-  }
-}
-
-/*
- Visa product
- */
+// *****************************************************************************
+// Visa product layout
+// *****************************************************************************
 .skeuocard.product-visa {
+  @extend .skeuocard.card-product;
 
   .face.front{
     background: #eee url('/images/products/visa-front.png') no-repeat right bottom;
@@ -104,45 +98,65 @@ Generic
     background: #eee url('/images/products/visa-back.png') no-repeat center center;
   }
 
-
   .cc-number{
-    background-color: transparent;
-    left: 1.8em;
+    left: 1.8em; 
     top: 8.05em;
-    padding: 0.1em;
-    input{
-      color: #333;
-      background-color: transparent;
-      border: none;
-    }
   }
 
   .cc-exp{
     left: 10.9em;
     top: 11.2em;
     width: 5em;
-    input{
-      color: #333;
-      background-color: transparent;
-      border: none;
-      text-align: center;
-    }
   }
 
   .cc-name{
     left: 1.8em;
     top: 13em;
-    font-family: $cc-field-family;
-    font-size: 1em;
-    color: #333;
-    background-color: transparent;
-    border: none;
   }
 
   .cc-cvc{
     top: 7.15em;
     left: 18.1em;
     width: 3em;
+  }
+
+  // This card puts all required information on the back, rather than the front.
+  &.issuer-chase-sapphire{
+    .face.front{
+      background-image: url('/images/issuers/visa-chase-sapphire.png');
+    }
+    .cc-name{
+      left: 1.25em;
+      top: 8.90em;
+      font-family: $cc-label-family;
+      letter-spacing: 2px;
+    }
+    .cc-number{
+      left: 1.25em;
+      top: 9.6em;
+      input{
+        font-family: $cc-label-family;
+        letter-spacing: 2px;
+        font-size: 1.425em;
+        &.group4{ width: 2.8em; }
+      }
+      input + input{
+        margin-left: 0.1em;
+      }
+    }
+    .cc-exp{
+      left: 3.75em;
+      top: 11.5em; 
+      input, .separator{
+        font-family: $cc-label-family;
+        &.group2{ width: 1.6em; }
+      }
+    }
+    .cc-cvc{
+      top: 6.3em;
+      left: 15.25em;
+    }
+
   }
 
   &.issuer-simple{
@@ -168,90 +182,103 @@ Generic
 
 }
 
+// *****************************************************************************
+// American Express card layout
+// *****************************************************************************
 .skeuocard.product-amex {
+  @extend .skeuocard.card-product;
+
   .face.front {
     background: #eee url('/images/products/amex-front.png') no-repeat right bottom;
   }
+
   .cc-number{
-    // background-color: #ddd;
-    background-color: transparent;
     left: 3em;
     top: 8em;
-    padding: 0.1em;
-    input{
-      color: #333;
-      background: transparent;
-      border: none;
-    }
-    input + input{
-      margin-left: 0.6em;
-    }
   }
-  .cc-exp{
-    left: 2.5em;
-    top: 11.5em;
-  }
+
   .cc-name{
     left: 2.5em;
     top: 13.5em;
   }
 
-  /* Customizations for specific issuers (.issuer-<issuerShortname>) */
-  &.issuer-blackcard{
-    .face.front{
-      background-image: url('/images/issuers/amex-blackcard-front.png');
-      input {
-        background-color: transparent;
-        color: #dbc397;
-        border: none;
-        @include input-placeholder{
-          color: #dbc397;
-          opacity: 0.5;
-        };
-      }
-      .cc-number{
-        background-color: transparent;
-      }
-      .cc-exp{
-        input, .separator{ color: #dbc397; }
-      }
-      .cc-name{
-        top: 12.7em;
-      }
-    }
+  .cc-exp{
+    left: 2.5em;
+    top: 11.5em;
   }
-
 }
 
+// *****************************************************************************
+// Diners Club International card layout
+// *****************************************************************************
+.skeuocard.product-dinersclubintl {
+  @extend .skeuocard.card-product;
+
+  .face.front{
+    background: #eee url('/images/products/dinersclubintl-front.png') no-repeat right bottom;
+  }
+  .cc-number{
+    left: 1.8em;
+    top: 8.05em;
+  }
+  .cc-name{
+    left: 1.8em;
+    top: 11.5em;
+  }
+  .cc-exp{
+    left: 17.5em;
+    top: 13.5em;
+  }
+}
+
+// *****************************************************************************
+// Mastercard card layout
+// *****************************************************************************
 .skeuocard.product-mastercard {
+  @extend .skeuocard.card-product;
 
   .face.front{
     background: #eee url('/images/products/mastercard-front.png') no-repeat right bottom;
   }
 
   .cc-number{
-    background-color: #ddd;
     left: 1.8em;
     top: 8.05em;
-    padding: 0.1em;
-    background-color: transparent;
-    input{
-      color: #333;
-      background: transparent;
-      border: none;
-    }
-    input + input{
-      margin-left: 0.6em;
-    }
+  }
+
+  .cc-name{
+    left: 2.5em;
+    top: 12.2em;
   }
 
   .cc-exp{
     left: 11.5em;
     top: 10.8em;
   }
+}
+
+// *****************************************************************************
+// Discover card layout
+// *****************************************************************************
+.skeuocard.product-discover {
+  @extend .skeuocard.card-product;
+
+  .face.front{
+    background: #eee url('/images/products/discover-front.png') no-repeat right bottom;
+  }
+
+  .cc-number{
+    left: 1.8em;
+    top: 8.05em;
+  }
 
   .cc-name{
-    left: 2.5em;
-    top: 12.2em;
+    left: 1.55em;
+    top: 13.575em;
+  }
+
+  .cc-exp{
+    left: 13.15em;
+    top: 11.61em;
   }
 }

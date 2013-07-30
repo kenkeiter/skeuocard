@@ -108,32 +108,10 @@
     background-image: url("/images/card-valid-anim.gif");
     background-size: 2.3em 2.3em; }
 
-/*
-Generic
- */
 .skeuocard.js .face.front {
   background: #eeeeee url("/images/products/generic-front.png") no-repeat right bottom; }
 .skeuocard.js .face.back {
   background: #eeeeee url("/images/products/generic-back.png") no-repeat center center; }
-.skeuocard.js .cc-exp {
-  position: absolute;
-  display: block; }
-  .skeuocard.js .cc-exp input, .skeuocard.js .cc-exp .separator {
-    margin: 0;
-    padding: 0;
-    font-size: 1em;
-    font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace; }
-    .skeuocard.js .cc-exp input.group2, .skeuocard.js .cc-exp .separator.group2 {
-      width: 2em; }
-    .skeuocard.js .cc-exp input.group4, .skeuocard.js .cc-exp .separator.group4 {
-      width: 4em; }
-.skeuocard.js .cc-name {
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  display: block;
-  font-size: 1em;
-  font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace; }
 .skeuocard.js .cc-number {
   position: absolute;
   display: block;
@@ -154,70 +132,92 @@ Generic
       width: 14em; }
   .skeuocard.js .cc-number input + input {
     margin-left: 0.4em; }
-.skeuocard.js .cc-cvc {
+
+.skeuocard.card-product .cc-number, .skeuocard.product-visa .cc-number, .skeuocard.product-amex .cc-number, .skeuocard.product-dinersclubintl .cc-number, .skeuocard.product-mastercard .cc-number, .skeuocard.product-discover .cc-number {
+  background-color: transparent;
+  padding: 0.1em; }
+  .skeuocard.card-product .cc-number input, .skeuocard.product-visa .cc-number input, .skeuocard.product-amex .cc-number input, .skeuocard.product-dinersclubintl .cc-number input, .skeuocard.product-mastercard .cc-number input, .skeuocard.product-discover .cc-number input {
+    color: #333;
+    background-color: transparent;
+    border: none; }
+  .skeuocard.card-product .cc-number input:focus, .skeuocard.product-visa .cc-number input:focus, .skeuocard.product-amex .cc-number input:focus, .skeuocard.product-dinersclubintl .cc-number input:focus, .skeuocard.product-mastercard .cc-number input:focus, .skeuocard.product-discover .cc-number input:focus {
+    background-color: rgba(255, 255, 255, 0.6); }
+.skeuocard.card-product .cc-exp, .skeuocard.product-visa .cc-exp, .skeuocard.product-amex .cc-exp, .skeuocard.product-dinersclubintl .cc-exp, .skeuocard.product-mastercard .cc-exp, .skeuocard.product-discover .cc-exp {
+  position: absolute;
+  display: block; }
+  .skeuocard.card-product .cc-exp input, .skeuocard.product-visa .cc-exp input, .skeuocard.product-amex .cc-exp input, .skeuocard.product-dinersclubintl .cc-exp input, .skeuocard.product-mastercard .cc-exp input, .skeuocard.product-discover .cc-exp input, .skeuocard.card-product .cc-exp .separator, .skeuocard.product-visa .cc-exp .separator, .skeuocard.product-amex .cc-exp .separator, .skeuocard.product-dinersclubintl .cc-exp .separator, .skeuocard.product-mastercard .cc-exp .separator, .skeuocard.product-discover .cc-exp .separator {
+    margin: 0;
+    padding: 0;
+    font-size: 1em;
+    font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+    color: #333;
+    background-color: transparent;
+    border: none;
+    text-align: center; }
+    .skeuocard.card-product .cc-exp input.group2, .skeuocard.product-visa .cc-exp input.group2, .skeuocard.product-amex .cc-exp input.group2, .skeuocard.product-dinersclubintl .cc-exp input.group2, .skeuocard.product-mastercard .cc-exp input.group2, .skeuocard.product-discover .cc-exp input.group2, .skeuocard.card-product .cc-exp .separator.group2, .skeuocard.product-visa .cc-exp .separator.group2, .skeuocard.product-amex .cc-exp .separator.group2, .skeuocard.product-dinersclubintl .cc-exp .separator.group2, .skeuocard.product-mastercard .cc-exp .separator.group2, .skeuocard.product-discover .cc-exp .separator.group2 {
+      width: 2em; }
+    .skeuocard.card-product .cc-exp input.group4, .skeuocard.product-visa .cc-exp input.group4, .skeuocard.product-amex .cc-exp input.group4, .skeuocard.product-dinersclubintl .cc-exp input.group4, .skeuocard.product-mastercard .cc-exp input.group4, .skeuocard.product-discover .cc-exp input.group4, .skeuocard.card-product .cc-exp .separator.group4, .skeuocard.product-visa .cc-exp .separator.group4, .skeuocard.product-amex .cc-exp .separator.group4, .skeuocard.product-dinersclubintl .cc-exp .separator.group4, .skeuocard.product-mastercard .cc-exp .separator.group4, .skeuocard.product-discover .cc-exp .separator.group4 {
+      width: 4em; }
+.skeuocard.card-product .cc-name, .skeuocard.product-visa .cc-name, .skeuocard.product-amex .cc-name, .skeuocard.product-dinersclubintl .cc-name, .skeuocard.product-mastercard .cc-name, .skeuocard.product-discover .cc-name {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  display: block;
+  font-size: 1em;
+  font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+  background-color: transparent;
+  border: none; }
+.skeuocard.card-product .cc-cvc, .skeuocard.product-visa .cc-cvc, .skeuocard.product-amex .cc-cvc, .skeuocard.product-dinersclubintl .cc-cvc, .skeuocard.product-mastercard .cc-cvc, .skeuocard.product-discover .cc-cvc {
   position: absolute;
   display: block;
   font-size: 1em; }
 
-.skeuocard.product-dinersclubintl .face.front {
-  background: #eeeeee url("/images/products/dinersclubintl-front.png") no-repeat right bottom; }
-.skeuocard.product-dinersclubintl .cc-number {
-  left: 1.8em;
-  top: 8.05em; }
-  .skeuocard.product-dinersclubintl .cc-number input {
-    background: transparent;
-    border: 0; }
-  .skeuocard.product-dinersclubintl .cc-number input + input {
-    margin-left: 0.6em; }
-.skeuocard.product-dinersclubintl .cc-name {
-  left: 1.8em;
-  top: 11.5em;
-  background: transparent;
-  border: 0; }
-.skeuocard.product-dinersclubintl .cc-exp {
-  left: 17.5em;
-  top: 13.5em; }
-  .skeuocard.product-dinersclubintl .cc-exp input, .skeuocard.product-dinersclubintl .cc-exp .separator {
-    background: transparent;
-    border: 0; }
-
-/*
- Visa product
- */
 .skeuocard.product-visa .face.front {
   background: #eeeeee url("/images/products/visa-front.png") no-repeat right bottom; }
 .skeuocard.product-visa .face.back {
   background: #eeeeee url("/images/products/visa-back.png") no-repeat center center; }
 .skeuocard.product-visa .cc-number {
-  background-color: transparent;
   left: 1.8em;
-  top: 8.05em;
-  padding: 0.1em; }
-  .skeuocard.product-visa .cc-number input {
-    color: #333;
-    background-color: transparent;
-    border: none; }
+  top: 8.05em; }
 .skeuocard.product-visa .cc-exp {
   left: 10.9em;
   top: 11.2em;
   width: 5em; }
-  .skeuocard.product-visa .cc-exp input {
-    color: #333;
-    background-color: transparent;
-    border: none;
-    text-align: center; }
 .skeuocard.product-visa .cc-name {
   left: 1.8em;
-  top: 13em;
-  font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
-  font-size: 1em;
-  color: #333;
-  background-color: transparent;
-  border: none; }
+  top: 13em; }
 .skeuocard.product-visa .cc-cvc {
   top: 7.15em;
   left: 18.1em;
   width: 3em; }
+.skeuocard.product-visa.issuer-chase-sapphire .face.front {
+  background-image: url("/images/issuers/visa-chase-sapphire.png"); }
+.skeuocard.product-visa.issuer-chase-sapphire .cc-name {
+  left: 1.25em;
+  top: 8.90em;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 2px; }
+.skeuocard.product-visa.issuer-chase-sapphire .cc-number {
+  left: 1.25em;
+  top: 9.6em; }
+  .skeuocard.product-visa.issuer-chase-sapphire .cc-number input {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: 2px;
+    font-size: 1.425em; }
+    .skeuocard.product-visa.issuer-chase-sapphire .cc-number input.group4 {
+      width: 2.8em; }
+  .skeuocard.product-visa.issuer-chase-sapphire .cc-number input + input {
+    margin-left: 0.1em; }
+.skeuocard.product-visa.issuer-chase-sapphire .cc-exp {
+  left: 3.75em;
+  top: 11.5em; }
+  .skeuocard.product-visa.issuer-chase-sapphire .cc-exp input, .skeuocard.product-visa.issuer-chase-sapphire .cc-exp .separator {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .skeuocard.product-visa.issuer-chase-sapphire .cc-exp input.group2, .skeuocard.product-visa.issuer-chase-sapphire .cc-exp .separator.group2 {
+      width: 1.6em; }
+.skeuocard.product-visa.issuer-chase-sapphire .cc-cvc {
+  top: 6.3em;
+  left: 15.25em; }
 .skeuocard.product-visa.issuer-simple .face.front {
   background-image: url("/images/issuers/visa-simple-front.png"); }
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {
@@ -249,75 +249,53 @@ Generic
 .skeuocard.product-visa.issuer-simple .cc-number {
   background-color: transparent; }
 
-.skeuocard.product-amex {
-  /* Customizations for specific issuers (.issuer-<issuerShortname>) */ }
-  .skeuocard.product-amex .face.front {
-    background: #eeeeee url("/images/products/amex-front.png") no-repeat right bottom; }
-  .skeuocard.product-amex .cc-number {
-    background-color: transparent;
-    left: 3em;
-    top: 8em;
-    padding: 0.1em; }
-    .skeuocard.product-amex .cc-number input {
-      color: #333;
-      background: transparent;
-      border: none; }
-    .skeuocard.product-amex .cc-number input + input {
-      margin-left: 0.6em; }
-  .skeuocard.product-amex .cc-exp {
-    left: 2.5em;
-    top: 11.5em; }
-  .skeuocard.product-amex .cc-name {
-    left: 2.5em;
-    top: 13.5em; }
-  .skeuocard.product-amex.issuer-blackcard .face.front {
-    background-image: url("/images/issuers/amex-blackcard-front.png"); }
-    .skeuocard.product-amex.issuer-blackcard .face.front input {
-      background-color: transparent;
-      color: #dbc397;
-      border: none; }
-      .skeuocard.product-amex.issuer-blackcard .face.front input.placeholder {
-        color: #dbc397;
-        opacity: 0.5; }
-      .skeuocard.product-amex.issuer-blackcard .face.front input:-moz-placeholder {
-        color: #dbc397;
-        opacity: 0.5; }
-      .skeuocard.product-amex.issuer-blackcard .face.front input::-moz-placeholder {
-        color: #dbc397;
-        opacity: 0.5; }
-      .skeuocard.product-amex.issuer-blackcard .face.front input:-ms-input-placeholder {
-        color: #dbc397;
-        opacity: 0.5; }
-      .skeuocard.product-amex.issuer-blackcard .face.front input::-webkit-input-placeholder {
-        color: #dbc397;
-        opacity: 0.5; }
-    .skeuocard.product-amex.issuer-blackcard .face.front .cc-number {
-      background-color: transparent; }
-    .skeuocard.product-amex.issuer-blackcard .face.front .cc-exp input, .skeuocard.product-amex.issuer-blackcard .face.front .cc-exp .separator {
-      color: #dbc397; }
-    .skeuocard.product-amex.issuer-blackcard .face.front .cc-name {
-      top: 12.7em; }
+.skeuocard.product-amex .face.front {
+  background: #eeeeee url("/images/products/amex-front.png") no-repeat right bottom; }
+.skeuocard.product-amex .cc-number {
+  left: 3em;
+  top: 8em; }
+.skeuocard.product-amex .cc-name {
+  left: 2.5em;
+  top: 13.5em; }
+.skeuocard.product-amex .cc-exp {
+  left: 2.5em;
+  top: 11.5em; }
+
+.skeuocard.product-dinersclubintl .face.front {
+  background: #eeeeee url("/images/products/dinersclubintl-front.png") no-repeat right bottom; }
+.skeuocard.product-dinersclubintl .cc-number {
+  left: 1.8em;
+  top: 8.05em; }
+.skeuocard.product-dinersclubintl .cc-name {
+  left: 1.8em;
+  top: 11.5em; }
+.skeuocard.product-dinersclubintl .cc-exp {
+  left: 17.5em;
+  top: 13.5em; }
 
 .skeuocard.product-mastercard .face.front {
   background: #eeeeee url("/images/products/mastercard-front.png") no-repeat right bottom; }
 .skeuocard.product-mastercard .cc-number {
-  background-color: #ddd;
   left: 1.8em;
-  top: 8.05em;
-  padding: 0.1em;
-  background-color: transparent; }
-  .skeuocard.product-mastercard .cc-number input {
-    color: #333;
-    background: transparent;
-    border: none; }
-  .skeuocard.product-mastercard .cc-number input + input {
-    margin-left: 0.6em; }
-.skeuocard.product-mastercard .cc-exp {
-  left: 11.5em;
-  top: 10.8em; }
+  top: 8.05em; }
 .skeuocard.product-mastercard .cc-name {
   left: 2.5em;
   top: 12.2em; }
+.skeuocard.product-mastercard .cc-exp {
+  left: 11.5em;
+  top: 10.8em; }
+
+.skeuocard.product-discover .face.front {
+  background: #eeeeee url("/images/products/discover-front.png") no-repeat right bottom; }
+.skeuocard.product-discover .cc-number {
+  left: 1.8em;
+  top: 8.05em; }
+.skeuocard.product-discover .cc-name {
+  left: 1.55em;
+  top: 13.575em; }
+.skeuocard.product-discover .cc-exp {
+  left: 13.15em;
+  top: 11.61em; }
 
 .gecko .skeuocard input {
   box-shadow: none; }

@@ -99,7 +99,7 @@ CCProducts[/^5[0-8]\d{2}/] =
 
 CCProducts[/^6011/] =
   companyName: "Discover"
-  companyShortname: "discovercard"
+  companyShortname: "discover"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
   cvcLength: 3

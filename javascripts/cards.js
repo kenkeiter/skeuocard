@@ -118,7 +118,7 @@
 
   CCProducts[/^6011/] = {
     companyName: "Discover",
-    companyShortname: "discovercard",
+    companyShortname: "discover",
     cardNumberGrouping: [4, 4, 4, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
