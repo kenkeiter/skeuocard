@@ -37,6 +37,7 @@ class Skeuocard
     opts.currentDate          ||= new Date()
     opts.genericPlaceholder   ||= "XXXX XXXX XXXX XXXX"
     opts.initialValues        ||= {}
+    opts.validationState      ||= {}
 
     @options = opts
 
@@ -82,6 +83,12 @@ class Skeuocard
     # are any provided.
     for fieldName, fieldValue of @options.initialValues
       @_underlyingFormEls[fieldName].val(fieldValue)
+    # determine the initial validations state
+    @_validationState =
+      number: @_underlyingFormEls.number.hasClass('invalid')
+      exp:    @_underlyingFormEls.exp.hasClass('invalid')
+      name:   @_underlyingFormEls.name.hasClass('invalid')
+      cvc:    @_underlyingFormEls.cvc.hasClass('invalid')
     # construct the necessary card elements
     @el.surfaceFront = $("<div>").attr(class: "face front")
     @el.surfaceBack = $("<div>").attr(class: "face back")
@@ -113,9 +120,9 @@ class Skeuocard
     @_inputViews.number = new @SegmentedCardNumberInputView()
     @_inputViews.exp = new @ExpirationInputView()
     @_inputViews.name = new @TextInputView(
-      class: "cc-name", required: true, placeholder: "YOUR NAME")
+      class: "cc-name", placeholder: "YOUR NAME")
     @_inputViews.cvc = new @TextInputView(
-      class: "cc-cvc", required: true, placeholder: "XXX")
+      class: "cc-cvc", placeholder: "XXX")
 
     # style and attach the number view to the DOM
     @_inputViews.number.el.addClass('cc-number')
@@ -224,37 +231,73 @@ class Skeuocard
       @trigger('productDidChange.skeuocard', [@, @product, matchedProductIdentifier])
       @product = matchedProductIdentifier
       @issuer = matchedIssuerIdentifier
+
+    @_updateValidationState()
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
-    if @frontIsValid()
-      @_log("Front face is now valid.")
+    if @visibleFaceIsValid()
       @el.flipTabFront.show()
       @el.flipTabFront.addClass('valid-anim')
     else
       @el.flipTabFront.hide()
       @el.flipTabFront.removeClass('valid-anim')
 
-
-  frontIsValid: ->
-    # validate card number
+  _updateValidationState: ->
+    _triggerStateChangeEvent = false
     cardValid = @isValidLuhn(@_inputViews.number.value) and 
       (@_inputViews.number.maxLength() == @_inputViews.number.value.length)
-    # validate expiration
     expValid = @_inputViews.exp.date and
       ((@_inputViews.exp.date.getFullYear() == @options.currentDate.getFullYear() and
        @_inputViews.exp.date.getMonth() >= @options.currentDate.getMonth()) or
        @_inputViews.exp.date.getFullYear() > @options.currentDate.getFullYear())
-    # validate name
     nameValid = @_inputViews.name.el.val().length > 0
-    # console.log("Card valid:", cardValid, "exp valid:", expValid, "name valid:", nameValid)
-    cardValid and expValid and nameValid
+    cvcValid = @_inputViews.cvc.el.val().length > 0
+    # figure out if we need to trigger a validationStateChanged event
+    # TODO: Make this less hideous.
+    if cardValid isnt @_validationState.number
+      _triggerStateChangeEvent = true
+      if cardValid
+        @_inputViews.number.el.removeClass('invalid')
+      else
+        @_inputViews.number.el.addClass('invalid')
+    if expValid isnt @_validationState.exp
+      _triggerStateChangeEvent = true
+      if expValid
+        @_inputViews.exp.el.removeClass('invalid')
+      else
+        @_inputViews.exp.el.addClass('invalid')
+    if nameValid isnt @_validationState.name
+      _triggerStateChangeEvent = true
+      if nameValid
+        @_inputViews.name.el.removeClass('invalid')
+      else
+        @_inputViews.name.el.addClass('invalid')
+    if cvcValid isnt @_validationState.cvc
+      _triggerStateChangeEvent = true
+      if cvcValid
+        @_inputViews.cvc.el.removeClass('invalid')
+      else
+        @_inputViews.cvc.el.addClass('invalid')
+    # update the state
+    @_validationState.number = cardValid
+    @_validationState.exp = expValid
+    @_validationState.name = nameValid
+    @_validationState.cvc = cvcValid
+    # trigger event if need be
+    if _triggerStateChangeEvent
+      if not @isValid()
+        @el.container.addClass('invalid')
+      else
+        @el.container.removeClass('invalid')
+      @trigger('validationStateDidChange', [@, @_validationState])
+
+  visibleFaceIsValid: ->
+    sel = if @visibleFace is 'front' then 'surfaceFront' else 'surfaceBack'
+    @el[sel].find('.invalid').length is 0
 
   isValid: ->
-    valid = true
-    for fieldName, view of @_inputViews
-      valid &= view.isValid()
-      console.log("#{fieldName} is valid?", view.isValid())
-    return valid
+    @_validationState.number and @_validationState.exp and 
+    @_validationState.name and @_validationState.cvc
 
   # Get a value from the underlying form.
   _getUnderlyingValue: (field)->
@@ -443,7 +486,6 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
         type: 'text'
         size: groupLength
         maxlength: groupLength
-        required: true
         class: "group#{groupLength}"
       # restore value, if necessary
       if @value.length > _startLength
@@ -587,7 +629,6 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
           type: 'text'
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength
-          required: true
           class: 'cc-exp-field-' + groupChar.toLowerCase() + 
                  ' group' + groupLength
         input.data('fieldtype', groupChar)
