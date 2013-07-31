@@ -49,9 +49,9 @@ class Skeuocard
     @_conformDOM()   # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
     @_createInputs() # create reconfigurable input views
+    @_updateProductIfNeeded()
+    @_flipToInvalidSide()
 
-    # call initial render to pick up existing values from non-enhanced inputs
-    @render()
 
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
@@ -84,15 +84,19 @@ class Skeuocard
     # bind change handlers to render
     @el.underlyingFields.number.bind "change", (e)=> 
       @_inputViews.number.setValue @_getUnderlyingValue('number')
+      @_log("Triggering render because underlying value for number changed.")
       @render()
     @el.underlyingFields.exp.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('exp')
+      @_log("Triggering render because underlying value for exp changed.")
       @render()
     @el.underlyingFields.name.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('name')
+      @_log("Triggering render because underlying value for name changed.")
       @render()
     @el.underlyingFields.cvc.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
+      @_log("Triggering render because underlying value for cvc changed.")
       @render()
     # construct the necessary card elements
     @el.surfaceFront = $("<div>").attr(class: "face front")
@@ -131,6 +135,27 @@ class Skeuocard
         @acceptedCardProducts[matcher] = product
     return @acceptedCardProducts
 
+  _updateProductIfNeeded: ->
+    @_updateValidationState()
+    # determine if product changed; if so, change it globally, and 
+    # call render() to render the changes.
+    number = @_getUnderlyingValue('number')
+    matchedProduct = @getProductForNumber(number)
+    matchedProductIdentifier = matchedProduct?.companyShortname || ''
+    matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
+
+    if (@productShortname isnt matchedProductIdentifier) or 
+       (@issuerShortname isnt matchedIssuerIdentifier)
+        @productShortname = matchedProductIdentifier
+        @issuerShortname = matchedIssuerIdentifier
+        @product = matchedProduct
+        @_cardProductNeedsLayout = true
+        @trigger 'productWillChange.skeuocard', 
+          [@, @productShortname, matchedProductIdentifier]
+        @_log("Triggering render because product changed.")
+        @render()
+        @trigger('productDidChange.skeuocard', [@, @productShortname, matchedProductIdentifier])
+
   # Create the new inputs, and attach them to their appropriate card face els.
   _createInputs: ->
     @_inputViews.number = new @SegmentedCardNumberInputView()
@@ -154,25 +179,7 @@ class Skeuocard
     # bind change events to their underlying form elements
     @_inputViews.number.bind "keyup", (e, input)=>
       @_setUnderlyingValue('number', input.value)
-      @_updateValidationState()
-      # determine if product changed; if so, change it globally, and 
-      # call render() to render the changes.
-      number = @_getUnderlyingValue('number')
-      matchedProduct = @getProductForNumber(number)
-      matchedProductIdentifier = matchedProduct?.companyShortname || ''
-      matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
-
-      if (@productShortname isnt matchedProductIdentifier) or 
-         (@issuerShortname isnt matchedIssuerIdentifier)
-          @productShortname = matchedProductIdentifier
-          @issuerShortname = matchedIssuerIdentifier
-          @product = matchedProduct
-          @_cardProductNeedsLayout = true
-          @trigger 'productWillChange.skeuocard', 
-            [@, @productShortname, matchedProductIdentifier]
-          @render()
-          @trigger('productDidChange.skeuocard', [@, @productShortname, matchedProductIdentifier])
-
+      @_updateProductIfNeeded()
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
       @_updateValidationState()
@@ -194,6 +201,16 @@ class Skeuocard
   _log: (msg...)->
     if console?.log and !!@options.debug
       console.log("[skeuocard]", msg...) if @options.debug?
+
+  _flipToInvalidSide: ->
+    if Object.keys(@_initialValidationState).length > 0
+      _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
+      # if the back face has errors, and the front does not, flip there.
+      _errorCounts = {front: 0, back: 0}
+      for fieldName, state of @_initialValidationState
+        _errorCounts[@product?.layout[fieldName]]++
+      if _errorCounts[@visibleFace] == 0 and _errorCounts[_oppositeFace] > 0
+        @flip()
 
   # Update the card's visual representation to reflect internal state.
   render: ->

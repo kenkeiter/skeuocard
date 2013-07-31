@@ -67,7 +67,8 @@
       this._conformDOM();
       this._setAcceptedCardProducts();
       this._createInputs();
-      this.render();
+      this._updateProductIfNeeded();
+      this._flipToInvalidSide();
     }
 
     Skeuocard.prototype._conformDOM = function() {
@@ -105,18 +106,22 @@
       }
       this.el.underlyingFields.number.bind("change", function(e) {
         _this._inputViews.number.setValue(_this._getUnderlyingValue('number'));
+        _this._log("Triggering render because underlying value for number changed.");
         return _this.render();
       });
       this.el.underlyingFields.exp.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('exp'));
+        _this._log("Triggering render because underlying value for exp changed.");
         return _this.render();
       });
       this.el.underlyingFields.name.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('name'));
+        _this._log("Triggering render because underlying value for name changed.");
         return _this.render();
       });
       this.el.underlyingFields.cvc.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('cvc'));
+        _this._log("Triggering render because underlying value for cvc changed.");
         return _this.render();
       });
       this.el.surfaceFront = $("<div>").attr({
@@ -166,6 +171,25 @@
       return this.acceptedCardProducts;
     };
 
+    Skeuocard.prototype._updateProductIfNeeded = function() {
+      var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number;
+      this._updateValidationState();
+      number = this._getUnderlyingValue('number');
+      matchedProduct = this.getProductForNumber(number);
+      matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
+      matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
+      if ((this.productShortname !== matchedProductIdentifier) || (this.issuerShortname !== matchedIssuerIdentifier)) {
+        this.productShortname = matchedProductIdentifier;
+        this.issuerShortname = matchedIssuerIdentifier;
+        this.product = matchedProduct;
+        this._cardProductNeedsLayout = true;
+        this.trigger('productWillChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
+        this._log("Triggering render because product changed.");
+        this.render();
+        return this.trigger('productDidChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
+      }
+    };
+
     Skeuocard.prototype._createInputs = function() {
       var _this = this;
       this._inputViews.number = new this.SegmentedCardNumberInputView();
@@ -188,22 +212,8 @@
       this._inputViews.exp.el.appendTo(this.el.surfaceFront);
       this._inputViews.cvc.el.appendTo(this.el.surfaceBack);
       this._inputViews.number.bind("keyup", function(e, input) {
-        var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number;
         _this._setUnderlyingValue('number', input.value);
-        _this._updateValidationState();
-        number = _this._getUnderlyingValue('number');
-        matchedProduct = _this.getProductForNumber(number);
-        matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
-        matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
-        if ((_this.productShortname !== matchedProductIdentifier) || (_this.issuerShortname !== matchedIssuerIdentifier)) {
-          _this.productShortname = matchedProductIdentifier;
-          _this.issuerShortname = matchedIssuerIdentifier;
-          _this.product = matchedProduct;
-          _this._cardProductNeedsLayout = true;
-          _this.trigger('productWillChange.skeuocard', [_this, _this.productShortname, matchedProductIdentifier]);
-          _this.render();
-          return _this.trigger('productDidChange.skeuocard', [_this, _this.productShortname, matchedProductIdentifier]);
-        }
+        return _this._updateProductIfNeeded();
       });
       this._inputViews.exp.bind("keyup", function(e, input) {
         _this._setUnderlyingValue('exp', input.value);
@@ -229,6 +239,25 @@
       if ((typeof console !== "undefined" && console !== null ? console.log : void 0) && !!this.options.debug) {
         if (this.options.debug != null) {
           return console.log.apply(console, ["[skeuocard]"].concat(__slice.call(msg)));
+        }
+      }
+    };
+
+    Skeuocard.prototype._flipToInvalidSide = function() {
+      var fieldName, state, _errorCounts, _oppositeFace, _ref, _ref1;
+      if (Object.keys(this._initialValidationState).length > 0) {
+        _oppositeFace = this.visibleFace === 'front' ? 'back' : 'front';
+        _errorCounts = {
+          front: 0,
+          back: 0
+        };
+        _ref = this._initialValidationState;
+        for (fieldName in _ref) {
+          state = _ref[fieldName];
+          _errorCounts[(_ref1 = this.product) != null ? _ref1.layout[fieldName] : void 0]++;
+        }
+        if (_errorCounts[this.visibleFace] === 0 && _errorCounts[_oppositeFace] > 0) {
+          return this.flip();
         }
       }
     };
