@@ -20,26 +20,30 @@ class Skeuocard
     @acceptedCardProducts = {}
     @visibleFace = 'front'
     # configure default opts
-    opts.debug ||= false
-    opts.acceptedCardProducts ||= []
-    opts.cardNumberPlaceholderChar ||= "X"
-    opts.typeInputSelector    ||= '[name="cc_type"]'
-    opts.numberInputSelector  ||= '[name="cc_number"]'
-    opts.expInputSelector     ||= '[name="cc_exp"]'
-    opts.nameInputSelector    ||= '[name="cc_name"]'
-    opts.cvcInputSelector     ||= '[name="cc_cvc"]'
-    opts.frontFlipTabBody     ||= 'Click here to<br /> fill in the other side.'
-    opts.backFlipTabBody      ||= "Forgot something?"
+    optDefaults = 
+      debug: false
+      acceptedCardProducts: []
+      cardNumberPlaceholderChar: 'X'
+      genericPlaceholder: "XXXX XXXX XXXX XXXX"
+      typeInputSelector: '[name="cc_type"]'
+      numberInputSelector: '[name="cc_number"]'
+      expInputSelector: '[name="cc_exp"]'
+      nameInputSelector: '[name="cc_name"]'
+      cvcInputSelector: '[name="cc_cvc"]'
+      currentDate: new Date()
+      initialValues: {}
+      validationState: {}
+      strings:
+        hiddenFaceFillPrompt: "Click here to<br /> fill in the other side."
+        hiddenFaceErrorWarning: "There's an error on the other side."
+        hiddenFaceSwitchPrompt: "Forgot something?"
+
     opts.flipTabFrontEl       ||= $("<div class=\"flip-tab front\">" +
                                     "<p>#{opts.frontFlipTabBody}</p></div>")
     opts.flipTabBackEl        ||= $("<div class=\"flip-tab back\">" +
                                     "<p>#{opts.backFlipTabBody}</p></div>")
-    opts.currentDate          ||= new Date()
-    opts.genericPlaceholder   ||= "XXXX XXXX XXXX XXXX"
-    opts.initialValues        ||= {}
-    opts.validationState      ||= {}
 
-    @options = opts
+    @options = $.extend(optDefaults, opts)
 
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
@@ -98,6 +102,20 @@ class Skeuocard
     @el.surfaceFront.appendTo(@el.cardBody)
     @el.surfaceBack.appendTo(@el.cardBody)
     @el.cardBody.appendTo(@el.container)
+    # create the validation indicator (flip tab)
+    @el.flipTabFront = $("<div class=\"flip-tab front\"><p>" +
+                         @options.strings.hiddenFaceFillPrompt +
+                         "</p></div>")
+    @el.surfaceFront.prepend(@el.flipTabFront)
+    @el.flipTabBack = $("<div class=\"flip-tab back\"><p>" +
+                        @options.strings.hiddenFaceFillPrompt +
+                        "</p></div>")
+    @el.surfaceBack.prepend(@el.flipTabBack)
+
+    @el.flipTabFront.click =>
+      @flip()
+    @el.flipTabBack.click =>
+      @flip()
 
     return @el.container
 
@@ -154,17 +172,6 @@ class Skeuocard
     @_inputViews.exp.setValue @_getUnderlyingValue('exp')
     @_inputViews.name.el.val @_getUnderlyingValue('name')
     @_inputViews.cvc.el.val @_getUnderlyingValue('cvc')
-
-    # create the validation indicator (flip tab)
-    @el.flipTabFront = @options.flipTabFrontEl
-    @el.flipTabBack = @options.flipTabBackEl
-    @el.surfaceFront.prepend(@el.flipTabFront)
-    @el.surfaceBack.prepend(@el.flipTabBack)
-
-    @el.flipTabFront.click =>
-      @flip()
-    @el.flipTabBack.click =>
-      @flip()
 
   _bindEvents: ->
     @el.container.bind "productchanged", (e)=>

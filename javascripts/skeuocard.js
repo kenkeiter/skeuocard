@@ -22,6 +22,7 @@
   Skeuocard = (function() {
 
     function Skeuocard(el, opts) {
+      var optDefaults;
       if (opts == null) {
         opts = {};
       }
@@ -34,23 +35,28 @@
       this.issuer = null;
       this.acceptedCardProducts = {};
       this.visibleFace = 'front';
-      opts.debug || (opts.debug = false);
-      opts.acceptedCardProducts || (opts.acceptedCardProducts = []);
-      opts.cardNumberPlaceholderChar || (opts.cardNumberPlaceholderChar = "X");
-      opts.typeInputSelector || (opts.typeInputSelector = '[name="cc_type"]');
-      opts.numberInputSelector || (opts.numberInputSelector = '[name="cc_number"]');
-      opts.expInputSelector || (opts.expInputSelector = '[name="cc_exp"]');
-      opts.nameInputSelector || (opts.nameInputSelector = '[name="cc_name"]');
-      opts.cvcInputSelector || (opts.cvcInputSelector = '[name="cc_cvc"]');
-      opts.frontFlipTabBody || (opts.frontFlipTabBody = 'Click here to<br /> fill in the other side.');
-      opts.backFlipTabBody || (opts.backFlipTabBody = "Forgot something?");
+      optDefaults = {
+        debug: false,
+        acceptedCardProducts: [],
+        cardNumberPlaceholderChar: 'X',
+        genericPlaceholder: "XXXX XXXX XXXX XXXX",
+        typeInputSelector: '[name="cc_type"]',
+        numberInputSelector: '[name="cc_number"]',
+        expInputSelector: '[name="cc_exp"]',
+        nameInputSelector: '[name="cc_name"]',
+        cvcInputSelector: '[name="cc_cvc"]',
+        currentDate: new Date(),
+        initialValues: {},
+        validationState: {},
+        strings: {
+          hiddenFaceFillPrompt: "Click here to<br /> fill in the other side.",
+          hiddenFaceErrorWarning: "There's an error on the other side.",
+          hiddenFaceSwitchPrompt: "Forgot something?"
+        }
+      };
       opts.flipTabFrontEl || (opts.flipTabFrontEl = $("<div class=\"flip-tab front\">" + ("<p>" + opts.frontFlipTabBody + "</p></div>")));
       opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
-      opts.currentDate || (opts.currentDate = new Date());
-      opts.genericPlaceholder || (opts.genericPlaceholder = "XXXX XXXX XXXX XXXX");
-      opts.initialValues || (opts.initialValues = {});
-      opts.validationState || (opts.validationState = {});
-      this.options = opts;
+      this.options = $.extend(optDefaults, opts);
       this._conformDOM();
       this._setAcceptedCardProducts();
       this._createInputs();
@@ -111,6 +117,16 @@
       this.el.surfaceFront.appendTo(this.el.cardBody);
       this.el.surfaceBack.appendTo(this.el.cardBody);
       this.el.cardBody.appendTo(this.el.container);
+      this.el.flipTabFront = $("<div class=\"flip-tab front\"><p>" + this.options.strings.hiddenFaceFillPrompt + "</p></div>");
+      this.el.surfaceFront.prepend(this.el.flipTabFront);
+      this.el.flipTabBack = $("<div class=\"flip-tab back\"><p>" + this.options.strings.hiddenFaceFillPrompt + "</p></div>");
+      this.el.surfaceBack.prepend(this.el.flipTabBack);
+      this.el.flipTabFront.click(function() {
+        return _this.flip();
+      });
+      this.el.flipTabBack.click(function() {
+        return _this.flip();
+      });
       return this.el.container;
     };
 
@@ -171,17 +187,7 @@
       this._inputViews.number.setValue(this._getUnderlyingValue('number'));
       this._inputViews.exp.setValue(this._getUnderlyingValue('exp'));
       this._inputViews.name.el.val(this._getUnderlyingValue('name'));
-      this._inputViews.cvc.el.val(this._getUnderlyingValue('cvc'));
-      this.el.flipTabFront = this.options.flipTabFrontEl;
-      this.el.flipTabBack = this.options.flipTabBackEl;
-      this.el.surfaceFront.prepend(this.el.flipTabFront);
-      this.el.surfaceBack.prepend(this.el.flipTabBack);
-      this.el.flipTabFront.click(function() {
-        return _this.flip();
-      });
-      return this.el.flipTabBack.click(function() {
-        return _this.flip();
-      });
+      return this._inputViews.cvc.el.val(this._getUnderlyingValue('cvc'));
     };
 
     Skeuocard.prototype._bindEvents = function() {
