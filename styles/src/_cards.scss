@@ -3,12 +3,24 @@
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
+$color-field-glow: #0096de;
 $color-invalid: #ff655a;
 
 // *****************************************************************************
 // Generic card layout
 // *****************************************************************************
 .skeuocard.js {
+
+  input{
+    border: none;
+    @include vendor-prefix(border-radius, 3px);
+    outline: none;
+  }
+
+  input:focus{
+    outline: none;
+    @include vendor-prefix(box-shadow, 0 0 10px $color-field-glow);
+  }
 
   .face.front {
     background: #eee url('/images/products/generic-front.png') no-repeat right bottom;
@@ -86,20 +98,19 @@ $color-invalid: #ff655a;
     display: block; 
     font-size: 1em;
   }
-  .cc-number.invalid, .cc-exp.invalid, .cc-name.invalid, .cc-cvc.invalid {
+  .invalid{
     -webkit-border-radius: 5px;
-       -moz-border-radius: 5px;
-            border-radius: 5px;
-    -webkit-transition: box-shadow linear 0.15s;
-    transition: box-shadow linear 0.15s;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+  }
+  .invalid{
     outline: none;
     box-shadow: 0 0 10px $color-invalid;
+    @include vendor-prefix(transition, box-shadow linear 0.15s);
     input:focus{
       border: 1px solid blue;
       outline: none;
-      -webkit-border-radius: 3px;
-       -moz-border-radius: 3px;
-            border-radius: 3px;
+      @include vendor-prefix(border-radius, 3px);
     }
   }
 }

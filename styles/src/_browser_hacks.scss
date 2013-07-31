@@ -1,7 +1,7 @@
 // Firefox-specific hacks
 .gecko .skeuocard{
-  input { box-shadow:none; }
-  input:-moz-placeholder, input:focus { box-shadow:none !important; }
+  // input { box-shadow:none; }
+  // input:-moz-placeholder, input:focus { box-shadow:none !important; }
   input:invalid { box-shadow:none; }
   &.product-visa.issuer-simple .face.front input,.separator{
     text-shadow: none;
