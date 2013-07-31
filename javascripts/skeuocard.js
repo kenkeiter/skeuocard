@@ -32,9 +32,12 @@
       this._underlyingFormEls = {};
       this._inputViews = {};
       this.product = null;
-      this.issuer = null;
+      this.productShortname = null;
+      this.issuerShortname = null;
       this.acceptedCardProducts = {};
       this.visibleFace = 'front';
+      this._initialValidationState = {};
+      this._validationState = {};
       optDefaults = {
         debug: false,
         acceptedCardProducts: [],
@@ -54,8 +57,6 @@
           hiddenFaceSwitchPrompt: "Forgot something?"
         }
       };
-      opts.flipTabFrontEl || (opts.flipTabFrontEl = $("<div class=\"flip-tab front\">" + ("<p>" + opts.frontFlipTabBody + "</p></div>")));
-      opts.flipTabBackEl || (opts.flipTabBackEl = $("<div class=\"flip-tab back\">" + ("<p>" + opts.backFlipTabBody + "</p></div>")));
       this.options = $.extend(optDefaults, opts);
       this._conformDOM();
       this._setAcceptedCardProducts();
@@ -65,9 +66,9 @@
     }
 
     Skeuocard.prototype._conformDOM = function() {
-      var fieldName, fieldValue, _ref,
+      var el, fieldName, fieldValue, _ref, _ref1, _ref2,
         _this = this;
-      this.el.container.addClass("js");
+      this.el.container.addClass("skeuocard js");
       this.el.container.find("> :not(input,select,textarea)").remove();
       this.el.container.find("> input,select,textarea").hide();
       this._underlyingFormEls = {
@@ -77,6 +78,26 @@
         name: this.el.container.find(this.options.nameInputSelector),
         cvc: this.el.container.find(this.options.cvcInputSelector)
       };
+      _ref = this.options.initialValues;
+      for (fieldName in _ref) {
+        fieldValue = _ref[fieldName];
+        this._underlyingFormEls[fieldName].val(fieldValue);
+      }
+      _ref1 = this._underlyingFormEls;
+      for (fieldName in _ref1) {
+        el = _ref1[fieldName];
+        this.options.initialValues[fieldName] = el.val();
+      }
+      _ref2 = this._underlyingFormEls;
+      for (fieldName in _ref2) {
+        el = _ref2[fieldName];
+        if (this.options.validationState[fieldName] === false || el.hasClass('invalid')) {
+          this._initialValidationState[fieldName] = false;
+          if (!el.hasClass('invalid')) {
+            el.addClass('invalid');
+          }
+        }
+      }
       this._underlyingFormEls.number.bind("change", function(e) {
         _this._inputViews.number.setValue(_this._getUnderlyingValue('number'));
         return _this.render();
@@ -93,17 +114,6 @@
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('cvc'));
         return _this.render();
       });
-      _ref = this.options.initialValues;
-      for (fieldName in _ref) {
-        fieldValue = _ref[fieldName];
-        this._underlyingFormEls[fieldName].val(fieldValue);
-      }
-      this._validationState = {
-        number: this._underlyingFormEls.number.hasClass('invalid'),
-        exp: this._underlyingFormEls.exp.hasClass('invalid'),
-        name: this._underlyingFormEls.name.hasClass('invalid'),
-        cvc: this._underlyingFormEls.cvc.hasClass('invalid')
-      };
       this.el.surfaceFront = $("<div>").attr({
         "class": "face front"
       });
@@ -113,7 +123,6 @@
       this.el.cardBody = $("<div>").attr({
         "class": "card-body"
       });
-      this.el.container.addClass("skeuocard");
       this.el.surfaceFront.appendTo(this.el.cardBody);
       this.el.surfaceBack.appendTo(this.el.cardBody);
       this.el.cardBody.appendTo(this.el.container);
@@ -217,8 +226,8 @@
       matchedProduct = this.getProductForNumber(number);
       matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
       matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
-      if (this.product !== matchedProductIdentifier || this.issuer !== matchedIssuerIdentifier) {
-        this.trigger('productWillChange.skeuocard', [this, this.product, matchedProductIdentifier]);
+      if (this.productShortname !== matchedProductIdentifier || this.issuerShortname !== matchedIssuerIdentifier) {
+        this.trigger('productWillChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
         if (matchedProduct !== void 0) {
           this._log("Changing product:", matchedProduct);
           this.el.container.removeClass(function(index, css) {
@@ -245,7 +254,7 @@
             container = this.el[sel];
             inputEl = this._inputViews[fieldName].el;
             if (!(container.has(inputEl).length > 0)) {
-              console.log("Moving", inputEl, "=>", container);
+              this._log("Moving", inputEl, "=>", container);
               el = this._inputViews[fieldName].el.detach();
               $(el).appendTo(this.el[sel]);
             }
@@ -266,12 +275,15 @@
             return (css.match(/\bissuer-\S+/g) || []).join(' ');
           });
         }
-        this.trigger('productDidChange.skeuocard', [this, this.product, matchedProductIdentifier]);
-        this.product = matchedProductIdentifier;
-        this.issuer = matchedIssuerIdentifier;
+        this.trigger('productDidChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
+        this.productShortname = matchedProductIdentifier;
+        this.issuerShortname = matchedIssuerIdentifier;
+        this.product = matchedProduct;
       }
       this._updateValidationState();
+      this.showInitialValidationErrors();
       if (this.visibleFaceIsValid()) {
+        this._log('visible face is apparently valid?');
         this.el.flipTabFront.show();
         return this.el.flipTabFront.addClass('valid-anim');
       } else {
@@ -280,49 +292,73 @@
       }
     };
 
+    Skeuocard.prototype.showInitialValidationErrors = function() {
+      var fieldName, state, _ref, _results;
+      _ref = this._initialValidationState;
+      _results = [];
+      for (fieldName in _ref) {
+        state = _ref[fieldName];
+        if (state === false && this._validationState[fieldName] === false) {
+          _results.push(this._inputViews[fieldName].addClass('invalid'));
+        } else {
+          _results.push(this._inputViews[fieldName].removeClass('invalid'));
+        }
+      }
+      return _results;
+    };
+
+    Skeuocard.prototype.showValidationErrors = function() {
+      var fieldName, state, _ref, _results;
+      _ref = this._validationState;
+      _results = [];
+      for (fieldName in _ref) {
+        state = _ref[fieldName];
+        if (state === true) {
+          _results.push(this._inputViews[fieldName].removeClass('invalid'));
+        } else {
+          _results.push(this._inputViews[fieldName].addClass('invalid'));
+        }
+      }
+      return _results;
+    };
+
+    Skeuocard.prototype.hideValidationErrors = function() {
+      var fieldName, state, _ref;
+      _ref = this._validationState;
+      for (fieldName in _ref) {
+        state = _ref[fieldName];
+        if ((this._initialValidationState[fieldName] === false && state === true) || (!this._initialValidationState[fieldName])) {
+          el.removeClass('invalid');
+        }
+      }
+      return this.el.container.removeClass('invalid');
+    };
+
+    Skeuocard.prototype.setFieldValidationState = function(fieldName, valid) {
+      if (valid) {
+        this._underlyingFormEls[fieldName].removeClass('invalid');
+      } else {
+        this._underlyingFormEls[fieldName].addClass('invalid');
+      }
+      return this._validationState[fieldName] = valid;
+    };
+
     Skeuocard.prototype._updateValidationState = function() {
-      var cardValid, cvcValid, expValid, nameValid, _triggerStateChangeEvent;
+      var fieldName, newState, newValidationState, _triggerStateChangeEvent;
       _triggerStateChangeEvent = false;
-      cardValid = this.isValidLuhn(this._inputViews.number.value) && (this._inputViews.number.maxLength() === this._inputViews.number.value.length);
-      expValid = this._inputViews.exp.date && ((this._inputViews.exp.date.getFullYear() === this.options.currentDate.getFullYear() && this._inputViews.exp.date.getMonth() >= this.options.currentDate.getMonth()) || this._inputViews.exp.date.getFullYear() > this.options.currentDate.getFullYear());
-      nameValid = this._inputViews.name.el.val().length > 0;
-      cvcValid = this._inputViews.cvc.el.val().length > 0;
-      if (cardValid !== this._validationState.number) {
-        _triggerStateChangeEvent = true;
-        if (cardValid) {
-          this._inputViews.number.el.removeClass('invalid');
-        } else {
-          this._inputViews.number.el.addClass('invalid');
+      newValidationState = {
+        number: this.isValidLuhn(this._inputViews.number.value) && (this._inputViews.number.maxLength() === this._inputViews.number.value.length) && !(this._initialValidationState.number === false && this._inputViews.number.value === this.options.initialValues.number),
+        exp: (this._inputViews.exp.date != null) && ((this._inputViews.exp.date.getFullYear() === this.options.currentDate.getFullYear() && this._inputViews.exp.date.getMonth() >= this.options.currentDate.getMonth()) || this._inputViews.exp.date.getFullYear() > this.options.currentDate.getFullYear()) && !(this._initialValidationState.exp === false && this._inputViews.exp.value === this.options.initialValues.exp),
+        name: this._inputViews.name.el.val().length > 0 && !(this._initialValidationState.name === false && this._inputViews.name.el.val() === this.options.initialValues.name),
+        cvc: this._inputViews.cvc.el.val().length > 0 && !(this._initialValidationState.cvc === false && this._inputViews.cvc.el.val() === this.options.initialValues.cvc)
+      };
+      for (fieldName in newValidationState) {
+        newState = newValidationState[fieldName];
+        if (this._validationState[fieldName] !== newState) {
+          this.setFieldValidationState(fieldName, newState);
+          _triggerStateChangeEvent = true;
         }
       }
-      if (expValid !== this._validationState.exp) {
-        _triggerStateChangeEvent = true;
-        if (expValid) {
-          this._inputViews.exp.el.removeClass('invalid');
-        } else {
-          this._inputViews.exp.el.addClass('invalid');
-        }
-      }
-      if (nameValid !== this._validationState.name) {
-        _triggerStateChangeEvent = true;
-        if (nameValid) {
-          this._inputViews.name.el.removeClass('invalid');
-        } else {
-          this._inputViews.name.el.addClass('invalid');
-        }
-      }
-      if (cvcValid !== this._validationState.cvc) {
-        _triggerStateChangeEvent = true;
-        if (cvcValid) {
-          this._inputViews.cvc.el.removeClass('invalid');
-        } else {
-          this._inputViews.cvc.el.addClass('invalid');
-        }
-      }
-      this._validationState.number = cardValid;
-      this._validationState.exp = expValid;
-      this._validationState.name = nameValid;
-      this._validationState.cvc = cvcValid;
       if (_triggerStateChangeEvent) {
         if (!this.isValid()) {
           this.el.container.addClass('invalid');
@@ -333,10 +369,31 @@
       }
     };
 
+    Skeuocard.prototype.faceIsValid = function(faceName) {
+      var face, fieldName, valid, _ref, _ref1;
+      valid = true;
+      if ((_ref = this.product) != null ? _ref.layout : void 0) {
+        _ref1 = this.product.layout;
+        for (fieldName in _ref1) {
+          face = _ref1[fieldName];
+          if (face === faceName) {
+            valid &= this._validationState[fieldName];
+          }
+        }
+        return valid;
+      } else {
+        return false;
+      }
+    };
+
     Skeuocard.prototype.visibleFaceIsValid = function() {
-      var sel;
-      sel = this.visibleFace === 'front' ? 'surfaceFront' : 'surfaceBack';
-      return this.el[sel].find('.invalid').length === 0;
+      return this.faceIsValid(this.visibleFace);
+    };
+
+    Skeuocard.prototype.hiddenFaceIsValid = function() {
+      var oppositeFace;
+      oppositeFace = this.visibleFace === 'front' ? 'back' : 'front';
+      return this.faceIsValid(oppositeFace);
     };
 
     Skeuocard.prototype.isValid = function() {
@@ -491,6 +548,18 @@
 
     TextInputView.prototype.hide = function() {
       return this.el.hide();
+    };
+
+    TextInputView.prototype.addClass = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).addClass.apply(_ref, args);
+    };
+
+    TextInputView.prototype.removeClass = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).removeClass.apply(_ref, args);
     };
 
     TextInputView.prototype._zeroPadNumber = function(num, places) {
