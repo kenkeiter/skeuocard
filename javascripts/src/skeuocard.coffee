@@ -12,8 +12,7 @@
 class Skeuocard
   
   constructor: (el, opts = {})->
-    @el = {container: $(el)}
-    @_underlyingFormEls = {}
+    @el = {container: $(el), underlyingFields: {}}
     @_inputViews = {}
     @_tabViews = {}
     @product = undefined
@@ -24,6 +23,8 @@ class Skeuocard
     @visibleFace = 'front'
     @_initialValidationState = {}
     @_validationState = {}
+    @_faceFillState = {front: false, back: false}
+    
     # configure default opts
     optDefaults = 
       debug: false
@@ -40,9 +41,10 @@ class Skeuocard
       validationState: {}
       strings:
         hiddenFaceFillPrompt: "Click here to<br /> fill in the other side."
-        hiddenFaceErrorWarning: "There's an error on the other side."
+        hiddenFaceErrorWarning: "There's a problem on the other side."
         hiddenFaceSwitchPrompt: "Forgot something?"
     @options = $.extend(optDefaults, opts)
+    
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
@@ -61,7 +63,7 @@ class Skeuocard
     @el.container.find("> :not(input,select,textarea)").remove()
     @el.container.find("> input,select,textarea").hide()
     # attach underlying form elements
-    @_underlyingFormEls =
+    @el.underlyingFields =
       type: @el.container.find(@options.typeInputSelector)
       number: @el.container.find(@options.numberInputSelector)
       exp: @el.container.find(@options.expInputSelector)
@@ -69,27 +71,27 @@ class Skeuocard
       cvc: @el.container.find(@options.cvcInputSelector)
     # sync initial values, with constructor options taking precedence
     for fieldName, fieldValue of @options.initialValues
-      @_underlyingFormEls[fieldName].val(fieldValue)
-    for fieldName, el of @_underlyingFormEls
+      @el.underlyingFields[fieldName].val(fieldValue)
+    for fieldName, el of @el.underlyingFields
       @options.initialValues[fieldName] = el.val()
     # sync initial validation state, with constructor options taking precedence
     # we use the underlying form values to track state
-    for fieldName, el of @_underlyingFormEls
+    for fieldName, el of @el.underlyingFields
       if @options.validationState[fieldName] is false or el.hasClass('invalid')
         @_initialValidationState[fieldName] = false
         unless el.hasClass('invalid')
           el.addClass('invalid')
     # bind change handlers to render
-    @_underlyingFormEls.number.bind "change", (e)=> 
+    @el.underlyingFields.number.bind "change", (e)=> 
       @_inputViews.number.setValue @_getUnderlyingValue('number')
       @render()
-    @_underlyingFormEls.exp.bind "change", (e)=> 
+    @el.underlyingFields.exp.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('exp')
       @render()
-    @_underlyingFormEls.name.bind "change", (e)=> 
+    @el.underlyingFields.name.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('name')
       @render()
-    @_underlyingFormEls.cvc.bind "change", (e)=> 
+    @el.underlyingFields.cvc.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
       @render()
     # construct the necessary card elements
@@ -118,7 +120,7 @@ class Skeuocard
   _setAcceptedCardProducts: ->
     # build the set of accepted card products
     if @options.acceptedCardProducts.length is 0
-      @_underlyingFormEls.type.find('option').each (i, _el)=>
+      @el.underlyingFields.type.find('option').each (i, _el)=>
         el = $(_el)
         cardProductShortname = el.attr('data-card-product-shortname') || el.attr('value')
         @options.acceptedCardProducts.push cardProductShortname
@@ -132,11 +134,11 @@ class Skeuocard
   # Create the new inputs, and attach them to their appropriate card face els.
   _createInputs: ->
     @_inputViews.number = new @SegmentedCardNumberInputView()
-    @_inputViews.exp = new @ExpirationInputView()
+    @_inputViews.exp = new @ExpirationInputView(currentDate: @options.currentDate)
     @_inputViews.name = new @TextInputView(
       class: "cc-name", placeholder: "YOUR NAME")
     @_inputViews.cvc = new @TextInputView(
-      class: "cc-cvc", placeholder: "XXX")
+      class: "cc-cvc", placeholder: "XXX", requireMaxLength: true)
 
     # style and attach the number view to the DOM
     @_inputViews.number.el.addClass('cc-number')
@@ -218,6 +220,8 @@ class Skeuocard
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
           pattern: @product.expirationFormat
+        @_inputViews.cvc.show()
+        @_inputViews.cvc.attr('maxlength', @product.cvcLength)
         for fieldName, surfaceName of @product.layout
           sel = if surfaceName is 'front' then 'surfaceFront' else 'surfaceBack'
           container = @el[sel]
@@ -244,18 +248,44 @@ class Skeuocard
 
     # Render validation changes
     @showInitialValidationErrors()
+    # If the current face is filled, and there are validation errors, show 'em
+    _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
+    _visibleFaceFilled = @_faceFillState[@visibleFace]
+    _visibleFaceValid = @isFaceValid(@visibleFace)
+    _hiddenFaceFilled = @_faceFillState[_oppositeFace]
+    _hiddenFaceValid = @isFaceValid(_oppositeFace)
 
+    if _visibleFaceFilled and not _visibleFaceValid
+      @_log("Visible face is filled, but invalid; showing validation errors.")
+      @showValidationErrors()
+    else if not _visibleFaceFilled
+      @_log("Visible face hasn't been filled; hiding validation errors.")
+      @hideValidationErrors()
+    else
+      @_log("Visible face has been filled, and is valid.")
+      @hideValidationErrors()
+
+    if @visibleFace is 'front' 
+      if _visibleFaceFilled and _visibleFaceValid and not _hiddenFaceFilled
+        @_tabViews.front.prompt(@options.strings.hiddenFaceFillPrompt, true)
+      else if _hiddenFaceFilled and not _hiddenFaceValid
+        @_tabViews.front.warn(@options.strings.hiddenFaceErrorWarning, true)
+      else if _hiddenFaceFilled and _hiddenFaceValid
+        @_tabViews.front.prompt(@options.strings.hiddenFaceSwitchPrompt, true)
+      else
+        @_tabViews.front.hide()
+    else
+      if _hiddenFaceValid
+        @_tabViews.back.prompt(@options.strings.hiddenFaceSwitchPrompt, true)
+      else
+        @_tabViews.back.warn(@options.strings.hiddenFaceErrorWarning, true)
+
+    # Update the validity indicator for the whole card body
     if not @isValid()
       @el.container.addClass('invalid')
     else
       @el.container.removeClass('invalid')
     
-    # If we're viewing the front, and the data is "valid", show the flip tab.
-    if @visibleFaceIsValid()
-      @_tabViews.front.show()
-      @_tabViews.front.prompt(@options.strings.hiddenFaceFillPrompt, true)
-    else
-      @_tabViews.front.hide()
     @_log("*** rendering complete ***")
 
   # We should *always* show initial validation errors; they shouldn't show and 
@@ -277,65 +307,68 @@ class Skeuocard
 
   hideValidationErrors: ->
     for fieldName, state of @_validationState
-      if (@_initialValidationState[fieldName] is false and 
-        state is true) or (not @_initialValidationState[fieldName])
-          el.removeClass('invalid')
-    @el.container.removeClass('invalid')
+      if (@_initialValidationState[fieldName] is false and state is true) or 
+        (not @_initialValidationState[fieldName]?)
+          @_inputViews[fieldName].el.removeClass('invalid')
 
   setFieldValidationState: (fieldName, valid)->
     if valid
-      @_underlyingFormEls[fieldName].removeClass('invalid')
+      @el.underlyingFields[fieldName].removeClass('invalid')
     else
-      @_underlyingFormEls[fieldName].addClass('invalid')
+      @el.underlyingFields[fieldName].addClass('invalid')
     @_validationState[fieldName] = valid
+
+  isFaceFilled: (faceName)->
+    if @product?.layout
+      for fieldName, face of @product.layout
+        if face == faceName and not @_inputViews[fieldName].isFilled()
+          return false
+      return true
+    else
+      return false
 
   _updateValidationState: ->
     _triggerStateChangeEvent = false
     newValidationState =
-      number: @isValidLuhn(@_inputViews.number.value) and 
-        (@_inputViews.number.maxLength() == @_inputViews.number.value.length) and
+      number: @_inputViews.number.isValid() and
         not (@_initialValidationState.number is false and 
              @_inputViews.number.value == @options.initialValues.number)
-      exp: @_inputViews.exp.date? and
-        ((@_inputViews.exp.date.getFullYear() == @options.currentDate.getFullYear() and
-        @_inputViews.exp.date.getMonth() >= @options.currentDate.getMonth()) or
-        @_inputViews.exp.date.getFullYear() > @options.currentDate.getFullYear()) and
+      exp: @_inputViews.exp.isValid() and
         not (@_initialValidationState.exp is false and 
              @_inputViews.exp.value == @options.initialValues.exp)
-      name: @_inputViews.name.el.val().length > 0 and
+      name: @_inputViews.name.isValid() and
         not (@_initialValidationState.name is false and
              @_inputViews.name.el.val() == @options.initialValues.name)
-      cvc: @_inputViews.cvc.el.val().length > 0 and
+      cvc: @_inputViews.cvc.isValid() and
         not (@_initialValidationState.cvc is false and
              @_inputViews.cvc.el.val() == @options.initialValues.cvc)
-
     for fieldName, newState of newValidationState
       if @_validationState[fieldName] isnt newState
         @setFieldValidationState(fieldName, newState)
         _triggerStateChangeEvent = true
-
+    # If the face filled state has changed, trigger state change event
+    newFaceFillState =
+      front: @isFaceFilled('front')
+      back: @isFaceFilled('back')
+    if @_faceFillState.front isnt newFaceFillState.front or
+      @_faceFillState.back isnt newFaceFillState.back
+        _triggerStateChangeEvent = true
+        @_faceFillState = newFaceFillState
     # trigger event if need be
     if _triggerStateChangeEvent
       @trigger('validationStateDidChange.skeuocard', [@, @_validationState])
       @_log("Triggering render because validation state changed.")
       @render()
 
-  faceIsValid: (faceName)->
+  isFaceValid: (faceName)->
     valid = true
     if @product?.layout
       for fieldName, face of @product.layout
         if face == faceName
           valid &= @_validationState[fieldName]
-      return valid
+      return !!valid
     else
       return false
-
-  visibleFaceIsValid: ->
-    @faceIsValid(@visibleFace)
-
-  hiddenFaceIsValid: ->
-    oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
-    @faceIsValid(oppositeFace)
 
   isValid: ->
     @_validationState.number and @_validationState.exp and 
@@ -343,12 +376,12 @@ class Skeuocard
 
   # Get a value from the underlying form.
   _getUnderlyingValue: (field)->
-    @_underlyingFormEls[field].val()
+    @el.underlyingFields[field].val()
 
   # Set a value in the underlying form.
   _setUnderlyingValue: (field, newValue)->
     @trigger('change.skeuocard', [@]) # changing the underlying value triggers a change.
-    @_underlyingFormEls[field].val(newValue)
+    @el.underlyingFields[field].val(newValue)
 
   # Flip the card over.
   flip: ->
@@ -362,6 +395,7 @@ class Skeuocard
       @el.cardBody.removeClass('flip')
       @visibleFace = 'front'
       @trigger('faceDidBecomeVisible.skeuocard', [@, 'front'])
+    @render()
 
   getProductForNumber: (num)->
     for m, d of @acceptedCardProducts
@@ -380,21 +414,8 @@ class Skeuocard
         return d
     return undefined
 
-  isValidLuhn: (identifier)->
-    sum = 0
-    alt = false
-    for i in [identifier.length - 1..0] by -1
-      num = parseInt identifier.charAt(i), 10
-      return false if isNaN(num)
-      if alt
-        num *= 2
-        num = (num % 10) + 1 if num > 9
-      alt = !alt
-      sum += num
-    sum % 10 is 0
-
   _setUnderlyingCardType: (shortname)->
-    @_underlyingFormEls.type.find('option').each (i, _el)=>
+    @el.underlyingFields.type.find('option').each (i, _el)=>
       el = $(_el)
       if shortname is (el.attr('data-card-product-shortname') || el.attr('value'))
         el.val(el.attr('value')) # change which option is selected
@@ -412,13 +433,14 @@ prompt states.
 ###
 class Skeuocard::FlipTabView
   constructor: (face, opts = {})->
-    @el = $("<div class=\"flip-tab front\"><p></p></div>")
+    @el = $("<div class=\"flip-tab #{face}\"><p></p></div>")
     @options = opts
 
   _setText: (text)->
     @el.find('p').html(text)
 
   warn: (message, withAnimation = false)->
+    @show()
     @el.removeClass('prompt')
     @el.addClass('warn')
     @_setText(message)
@@ -427,6 +449,7 @@ class Skeuocard::FlipTabView
       @el.addClass('warn-anim')
 
   prompt: (message, withAnimation = false)->
+    @show()
     @el.removeClass('warn')
     @el.addClass('prompt')
     @_setText(message)
@@ -648,7 +671,28 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
   maxLength: ->
     @options.groupings.reduce((a,b)->(a+b))
 
+  isFilled: ->
+    @value.length == @maxLength()
 
+  isValid: ->
+    @isFilled() and @isValidLuhn(@value)
+
+  isValidLuhn: (identifier)->
+    sum = 0
+    alt = false
+    for i in [identifier.length - 1..0] by -1
+      num = parseInt identifier.charAt(i), 10
+      return false if isNaN(num)
+      if alt
+        num *= 2
+        num = (num % 10) + 1 if num > 9
+      alt = !alt
+      sum += num
+    sum % 10 is 0
+
+###
+Skeuocard::ExpirationInputView
+###
 class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
   constructor: (opts = {})->
     # setup option defaults
@@ -657,6 +701,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
     opts.dateParser ||= (value)->
       dateParts = value.split('-')
       new Date(dateParts[2], dateParts[1]-1, dateParts[0])
+    opts.currentDate ||= new Date()
     opts.pattern ||= "MM/YY"
     
     @options = opts
@@ -847,13 +892,41 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
   _inputGroupEls: ->
     @el.find("input")
 
+  isFilled: ->
+    for inputEl in @groupEls
+      el = $(inputEl)
+      return false if el.val().length != parseInt(el.attr('maxlength'))
+    return true
+
+  isValid: ->
+    @isFilled() and
+      ((@date.getFullYear() == @options.currentDate.getFullYear() and
+        @date.getMonth() >= @options.currentDate.getMonth()) or
+        @date.getFullYear() > @options.currentDate.getFullYear())
+
 
 class Skeuocard::TextInputView extends Skeuocard::TextInputView
   constructor: (opts)->
-    @el = $("<input>").attr $.extend({type: 'text'}, opts)
+    @el = $("<input>").attr
+      type: 'text'
+      placeholder: opts.placeholder
+      class: opts.class
+    @options = opts
 
   clear: ->
     @el.val("")
+
+  attr: (args...)->
+    @el.attr(args...)
+
+  isFilled: ->
+    return @el.val().length > 0
+
+  isValid: ->
+    if @options.requireMaxLength 
+      return @el.val().length is parseInt(@el.attr('maxlength'))
+    else
+      return @isFilled()
 
 # Export the object.
 window.Skeuocard = Skeuocard

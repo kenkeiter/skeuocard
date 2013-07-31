@@ -3,6 +3,8 @@
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
+$color-invalid: #ff655a;
+
 // *****************************************************************************
 // Generic card layout
 // *****************************************************************************
@@ -77,11 +79,28 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
     font-family: $cc-field-family;
     background-color: transparent;
     border: none;
+    text-transform: uppercase;
   }
   .cc-cvc {
     position: absolute;
     display: block; 
     font-size: 1em;
+  }
+  .cc-number.invalid, .cc-exp.invalid, .cc-name.invalid, .cc-cvc.invalid {
+    -webkit-border-radius: 5px;
+       -moz-border-radius: 5px;
+            border-radius: 5px;
+    -webkit-transition: box-shadow linear 0.15s;
+    transition: box-shadow linear 0.15s;
+    outline: none;
+    box-shadow: 0 0 10px $color-invalid;
+    input:focus{
+      border: 1px solid blue;
+      outline: none;
+      -webkit-border-radius: 3px;
+       -moz-border-radius: 3px;
+            border-radius: 3px;
+    }
   }
 }
 
