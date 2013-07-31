@@ -1,3 +1,5 @@
+![Skeuocard at its finest.](http://raw.github.com/kenkeiter/skeuocard/master/screenshot.png)
+
 # Skeuocard
 
 _Skeuocard_ is a re-think of the way we handle credit card input on the web. It progressively enhances credit card input forms so that the card inputs become skeuomorphic, facilitating accurate and fast card entry, and removing barriers to purchase.
