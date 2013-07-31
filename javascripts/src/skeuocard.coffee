@@ -15,9 +15,11 @@ class Skeuocard
     @el = {container: $(el)}
     @_underlyingFormEls = {}
     @_inputViews = {}
-    @product = null
-    @productShortname = null
-    @issuerShortname = null
+    @_tabViews = {}
+    @product = undefined
+    @productShortname = undefined
+    @issuerShortname = undefined
+    @_cardProductNeedsLayout = true
     @acceptedCardProducts = {}
     @visibleFace = 'front'
     @_initialValidationState = {}
@@ -45,7 +47,6 @@ class Skeuocard
     @_conformDOM()   # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
     @_createInputs() # create reconfigurable input views
-    @_bindEvents()   # bind custom events to the containers
 
     # call initial render to pick up existing values from non-enhanced inputs
     @render()
@@ -99,19 +100,17 @@ class Skeuocard
     @el.surfaceFront.appendTo(@el.cardBody)
     @el.surfaceBack.appendTo(@el.cardBody)
     @el.cardBody.appendTo(@el.container)
-    # create the validation indicator (flip tab)
-    @el.flipTabFront = $("<div class=\"flip-tab front\"><p>" +
-                         @options.strings.hiddenFaceFillPrompt +
-                         "</p></div>")
-    @el.surfaceFront.prepend(@el.flipTabFront)
-    @el.flipTabBack = $("<div class=\"flip-tab back\"><p>" +
-                        @options.strings.hiddenFaceFillPrompt +
-                        "</p></div>")
-    @el.surfaceBack.prepend(@el.flipTabBack)
+    # create the validation indicator (flip tab), and attach them.
+    @_tabViews.front = new @FlipTabView('front')
+    @_tabViews.back = new @FlipTabView('back')
+    @el.surfaceFront.prepend(@_tabViews.front.el)
+    @el.surfaceBack.prepend(@_tabViews.back.el)
+    @_tabViews.front.hide()
+    @_tabViews.back.hide()
 
-    @el.flipTabFront.click =>
+    @_tabViews.front.el.click =>
       @flip()
-    @el.flipTabBack.click =>
+    @_tabViews.back.el.click =>
       @flip()
 
     return @el.container
@@ -153,16 +152,34 @@ class Skeuocard
     # bind change events to their underlying form elements
     @_inputViews.number.bind "keyup", (e, input)=>
       @_setUnderlyingValue('number', input.value)
-      @render()
+      @_updateValidationState()
+      # determine if product changed; if so, change it globally, and 
+      # call render() to render the changes.
+      number = @_getUnderlyingValue('number')
+      matchedProduct = @getProductForNumber(number)
+      matchedProductIdentifier = matchedProduct?.companyShortname || ''
+      matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
+
+      if (@productShortname isnt matchedProductIdentifier) or 
+         (@issuerShortname isnt matchedIssuerIdentifier)
+          @productShortname = matchedProductIdentifier
+          @issuerShortname = matchedIssuerIdentifier
+          @product = matchedProduct
+          @_cardProductNeedsLayout = true
+          @trigger 'productWillChange.skeuocard', 
+            [@, @productShortname, matchedProductIdentifier]
+          @render()
+          @trigger('productDidChange.skeuocard', [@, @productShortname, matchedProductIdentifier])
+
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
-      @render()
+      @_updateValidationState()
     @_inputViews.name.bind "keyup", (e)=>
       @_setUnderlyingValue('name', $(e.target).val())
-      @render()
+      @_updateValidationState()
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
-      @render()
+      @_updateValidationState()
 
     # setup default values; when render is called, these will be picked up
     @_inputViews.number.setValue @_getUnderlyingValue('number')
@@ -170,49 +187,38 @@ class Skeuocard
     @_inputViews.name.el.val @_getUnderlyingValue('name')
     @_inputViews.cvc.el.val @_getUnderlyingValue('cvc')
 
-  _bindEvents: ->
-    @el.container.bind "productchanged", (e)=>
-      @updateLayout()
-    @el.container.bind "issuerchanged", (e)=>
-      @updateLayout()
-
   # Debugging helper; if debug is set to true at instantiation, messages will 
   # be printed to the console.
   _log: (msg...)->
     if console?.log and !!@options.debug
       console.log("[skeuocard]", msg...) if @options.debug?
 
-  # Render changes to the skeuocard; state-agnostic -- should transform content 
-  # without clearing input.
+  # Update the card's visual representation to reflect internal state.
   render: ->
-    number = @_getUnderlyingValue('number')
-    matchedProduct = @getProductForNumber(number)
-    matchedProductIdentifier = matchedProduct?.companyShortname || ''
-    matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
+    @_log("*** start rendering ***")
 
-    if @productShortname isnt matchedProductIdentifier or @issuerShortname isnt matchedIssuerIdentifier
-      @trigger 'productWillChange.skeuocard', 
-        [@, @productShortname, matchedProductIdentifier]
+    # Render card product layout changes.
+    if @_cardProductNeedsLayout is true
       # Update product-specific details
-      if matchedProduct isnt undefined
+      if @product isnt undefined
         # change the design and layout of the card to match the matched prod.
-        @_log("Changing product:", matchedProduct)
+        @_log("[render]", "Activating product", @product)
         @el.container.removeClass (index, css)=>
           (css.match(/\b(product|issuer)-\S+/g) || []).join(' ')
-        @el.container.addClass("product-#{matchedProduct.companyShortname}")
-        if matchedProduct.issuerShortname?
-          @el.container.addClass("issuer-#{matchedProduct.issuerShortname}")
+        @el.container.addClass("product-#{@product.companyShortname}")
+        if @product.issuerShortname?
+          @el.container.addClass("issuer-#{@product.issuerShortname}")
         # Adjust underlying card type to match detected type
-        @_setUnderlyingCardType(matchedProduct.companyShortname)
+        @_setUnderlyingCardType(@product.companyShortname)
         # Reconfigure input to match product
         @_inputViews.number.reconfigure 
-          groupings: matchedProduct.cardNumberGrouping
+          groupings: @product.cardNumberGrouping
           placeholderChar: @options.cardNumberPlaceholderChar
         @_inputViews.exp.show()
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
-          pattern: matchedProduct.expirationFormat
-        for fieldName, surfaceName of matchedProduct.layout
+          pattern: @product.expirationFormat
+        for fieldName, surfaceName of @product.layout
           sel = if surfaceName is 'front' then 'surfaceFront' else 'surfaceBack'
           container = @el[sel]
           inputEl = @_inputViews[fieldName].el
@@ -221,6 +227,7 @@ class Skeuocard
             el = @_inputViews[fieldName].el.detach()
             $(el).appendTo(@el[sel])
       else
+        @_log("[render]", "Becoming generic.")
         # Reset to generic input
         @_inputViews.exp.clear()
         @_inputViews.cvc.clear()
@@ -233,22 +240,23 @@ class Skeuocard
           (css.match(/\bproduct-\S+/g) || []).join(' ')
         @el.container.removeClass (index, css)=>
           (css.match(/\bissuer-\S+/g) || []).join(' ')
-      @trigger('productDidChange.skeuocard', [@, @productShortname, matchedProductIdentifier])
-      @productShortname = matchedProductIdentifier
-      @issuerShortname = matchedIssuerIdentifier
-      @product = matchedProduct
+      @_cardProductNeedsLayout = false
 
-    @_updateValidationState()
+    # Render validation changes
     @showInitialValidationErrors()
+
+    if not @isValid()
+      @el.container.addClass('invalid')
+    else
+      @el.container.removeClass('invalid')
     
     # If we're viewing the front, and the data is "valid", show the flip tab.
     if @visibleFaceIsValid()
-      @_log('visible face is apparently valid?')
-      @el.flipTabFront.show()
-      @el.flipTabFront.addClass('valid-anim')
+      @_tabViews.front.show()
+      @_tabViews.front.prompt(@options.strings.hiddenFaceFillPrompt, true)
     else
-      @el.flipTabFront.hide()
-      @el.flipTabFront.removeClass('valid-anim')
+      @_tabViews.front.hide()
+    @_log("*** rendering complete ***")
 
   # We should *always* show initial validation errors; they shouldn't show and 
   # hide with the rest of the errors unless their value has been changed.
@@ -308,11 +316,9 @@ class Skeuocard
 
     # trigger event if need be
     if _triggerStateChangeEvent
-      if not @isValid()
-        @el.container.addClass('invalid')
-      else
-        @el.container.removeClass('invalid')
       @trigger('validationStateDidChange.skeuocard', [@, @_validationState])
+      @_log("Triggering render because validation state changed.")
+      @render()
 
   faceIsValid: (faceName)->
     valid = true
@@ -399,7 +405,44 @@ class Skeuocard
   bind: (args...)->
     @el.container.trigger(args...)
 
+###
+Skeuocard::FlipTabView
+Handles rendering of the "flip button" control and its various warning and 
+prompt states.
+###
+class Skeuocard::FlipTabView
+  constructor: (face, opts = {})->
+    @el = $("<div class=\"flip-tab front\"><p></p></div>")
+    @options = opts
 
+  _setText: (text)->
+    @el.find('p').html(text)
+
+  warn: (message, withAnimation = false)->
+    @el.removeClass('prompt')
+    @el.addClass('warn')
+    @_setText(message)
+    if withAnimation
+      @el.removeClass('warn-anim')
+      @el.addClass('warn-anim')
+
+  prompt: (message, withAnimation = false)->
+    @el.removeClass('warn')
+    @el.addClass('prompt')
+    @_setText(message)
+    if withAnimation
+      @el.removeClass('valid-anim')
+      @el.addClass('valid-anim')
+
+  show: ->
+    @el.show()
+
+  hide: ->
+    @el.hide()
+
+###
+Skeuocard::TextInputView
+###
 class Skeuocard::TextInputView
 
   bind: (args...)->
@@ -444,7 +487,6 @@ class Skeuocard::TextInputView
   _zeroPadNumber: (num, places)->
     zero = places - num.toString().length + 1
     return Array(zero).join("0") + num
-
 
 class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
   constructor: (opts = {})->

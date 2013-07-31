@@ -107,6 +107,8 @@
     background-position: 10.05em 0.6em;
     background-image: url("/images/card-valid-anim.gif");
     background-size: 2.3em 2.3em; }
+  .skeuocard.js .flip-tab.warn {
+    background-color: #ff655a; }
 
 .skeuocard.js .face.front {
   background: #eeeeee url("/images/products/generic-front.png") no-repeat right bottom; }

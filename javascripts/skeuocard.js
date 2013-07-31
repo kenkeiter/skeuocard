@@ -31,9 +31,11 @@
       };
       this._underlyingFormEls = {};
       this._inputViews = {};
-      this.product = null;
-      this.productShortname = null;
-      this.issuerShortname = null;
+      this._tabViews = {};
+      this.product = void 0;
+      this.productShortname = void 0;
+      this.issuerShortname = void 0;
+      this._cardProductNeedsLayout = true;
       this.acceptedCardProducts = {};
       this.visibleFace = 'front';
       this._initialValidationState = {};
@@ -61,7 +63,6 @@
       this._conformDOM();
       this._setAcceptedCardProducts();
       this._createInputs();
-      this._bindEvents();
       this.render();
     }
 
@@ -126,14 +127,16 @@
       this.el.surfaceFront.appendTo(this.el.cardBody);
       this.el.surfaceBack.appendTo(this.el.cardBody);
       this.el.cardBody.appendTo(this.el.container);
-      this.el.flipTabFront = $("<div class=\"flip-tab front\"><p>" + this.options.strings.hiddenFaceFillPrompt + "</p></div>");
-      this.el.surfaceFront.prepend(this.el.flipTabFront);
-      this.el.flipTabBack = $("<div class=\"flip-tab back\"><p>" + this.options.strings.hiddenFaceFillPrompt + "</p></div>");
-      this.el.surfaceBack.prepend(this.el.flipTabBack);
-      this.el.flipTabFront.click(function() {
+      this._tabViews.front = new this.FlipTabView('front');
+      this._tabViews.back = new this.FlipTabView('back');
+      this.el.surfaceFront.prepend(this._tabViews.front.el);
+      this.el.surfaceBack.prepend(this._tabViews.back.el);
+      this._tabViews.front.hide();
+      this._tabViews.back.hide();
+      this._tabViews.front.el.click(function() {
         return _this.flip();
       });
-      this.el.flipTabBack.click(function() {
+      this._tabViews.back.el.click(function() {
         return _this.flip();
       });
       return this.el.container;
@@ -178,35 +181,39 @@
       this._inputViews.exp.el.appendTo(this.el.surfaceFront);
       this._inputViews.cvc.el.appendTo(this.el.surfaceBack);
       this._inputViews.number.bind("keyup", function(e, input) {
+        var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number;
         _this._setUnderlyingValue('number', input.value);
-        return _this.render();
+        _this._updateValidationState();
+        number = _this._getUnderlyingValue('number');
+        matchedProduct = _this.getProductForNumber(number);
+        matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
+        matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
+        if ((_this.productShortname !== matchedProductIdentifier) || (_this.issuerShortname !== matchedIssuerIdentifier)) {
+          _this.productShortname = matchedProductIdentifier;
+          _this.issuerShortname = matchedIssuerIdentifier;
+          _this.product = matchedProduct;
+          _this._cardProductNeedsLayout = true;
+          _this.trigger('productWillChange.skeuocard', [_this, _this.productShortname, matchedProductIdentifier]);
+          _this.render();
+          return _this.trigger('productDidChange.skeuocard', [_this, _this.productShortname, matchedProductIdentifier]);
+        }
       });
       this._inputViews.exp.bind("keyup", function(e, input) {
         _this._setUnderlyingValue('exp', input.value);
-        return _this.render();
+        return _this._updateValidationState();
       });
       this._inputViews.name.bind("keyup", function(e) {
         _this._setUnderlyingValue('name', $(e.target).val());
-        return _this.render();
+        return _this._updateValidationState();
       });
       this._inputViews.cvc.bind("keyup", function(e) {
         _this._setUnderlyingValue('cvc', $(e.target).val());
-        return _this.render();
+        return _this._updateValidationState();
       });
       this._inputViews.number.setValue(this._getUnderlyingValue('number'));
       this._inputViews.exp.setValue(this._getUnderlyingValue('exp'));
       this._inputViews.name.el.val(this._getUnderlyingValue('name'));
       return this._inputViews.cvc.el.val(this._getUnderlyingValue('cvc'));
-    };
-
-    Skeuocard.prototype._bindEvents = function() {
-      var _this = this;
-      this.el.container.bind("productchanged", function(e) {
-        return _this.updateLayout();
-      });
-      return this.el.container.bind("issuerchanged", function(e) {
-        return _this.updateLayout();
-      });
     };
 
     Skeuocard.prototype._log = function() {
@@ -220,34 +227,30 @@
     };
 
     Skeuocard.prototype.render = function() {
-      var container, el, fieldName, inputEl, matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number, sel, surfaceName, _ref,
+      var container, el, fieldName, inputEl, sel, surfaceName, _ref,
         _this = this;
-      number = this._getUnderlyingValue('number');
-      matchedProduct = this.getProductForNumber(number);
-      matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
-      matchedIssuerIdentifier = (matchedProduct != null ? matchedProduct.issuerShortname : void 0) || '';
-      if (this.productShortname !== matchedProductIdentifier || this.issuerShortname !== matchedIssuerIdentifier) {
-        this.trigger('productWillChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
-        if (matchedProduct !== void 0) {
-          this._log("Changing product:", matchedProduct);
+      this._log("*** start rendering ***");
+      if (this._cardProductNeedsLayout === true) {
+        if (this.product !== void 0) {
+          this._log("[render]", "Activating product", this.product);
           this.el.container.removeClass(function(index, css) {
             return (css.match(/\b(product|issuer)-\S+/g) || []).join(' ');
           });
-          this.el.container.addClass("product-" + matchedProduct.companyShortname);
-          if (matchedProduct.issuerShortname != null) {
-            this.el.container.addClass("issuer-" + matchedProduct.issuerShortname);
+          this.el.container.addClass("product-" + this.product.companyShortname);
+          if (this.product.issuerShortname != null) {
+            this.el.container.addClass("issuer-" + this.product.issuerShortname);
           }
-          this._setUnderlyingCardType(matchedProduct.companyShortname);
+          this._setUnderlyingCardType(this.product.companyShortname);
           this._inputViews.number.reconfigure({
-            groupings: matchedProduct.cardNumberGrouping,
+            groupings: this.product.cardNumberGrouping,
             placeholderChar: this.options.cardNumberPlaceholderChar
           });
           this._inputViews.exp.show();
           this._inputViews.name.show();
           this._inputViews.exp.reconfigure({
-            pattern: matchedProduct.expirationFormat
+            pattern: this.product.expirationFormat
           });
-          _ref = matchedProduct.layout;
+          _ref = this.product.layout;
           for (fieldName in _ref) {
             surfaceName = _ref[fieldName];
             sel = surfaceName === 'front' ? 'surfaceFront' : 'surfaceBack';
@@ -260,6 +263,7 @@
             }
           }
         } else {
+          this._log("[render]", "Becoming generic.");
           this._inputViews.exp.clear();
           this._inputViews.cvc.clear();
           this._inputViews.exp.hide();
@@ -275,21 +279,21 @@
             return (css.match(/\bissuer-\S+/g) || []).join(' ');
           });
         }
-        this.trigger('productDidChange.skeuocard', [this, this.productShortname, matchedProductIdentifier]);
-        this.productShortname = matchedProductIdentifier;
-        this.issuerShortname = matchedIssuerIdentifier;
-        this.product = matchedProduct;
+        this._cardProductNeedsLayout = false;
       }
-      this._updateValidationState();
       this.showInitialValidationErrors();
-      if (this.visibleFaceIsValid()) {
-        this._log('visible face is apparently valid?');
-        this.el.flipTabFront.show();
-        return this.el.flipTabFront.addClass('valid-anim');
+      if (!this.isValid()) {
+        this.el.container.addClass('invalid');
       } else {
-        this.el.flipTabFront.hide();
-        return this.el.flipTabFront.removeClass('valid-anim');
+        this.el.container.removeClass('invalid');
       }
+      if (this.visibleFaceIsValid()) {
+        this._tabViews.front.show();
+        this._tabViews.front.prompt(this.options.strings.hiddenFaceFillPrompt, true);
+      } else {
+        this._tabViews.front.hide();
+      }
+      return this._log("*** rendering complete ***");
     };
 
     Skeuocard.prototype.showInitialValidationErrors = function() {
@@ -360,12 +364,9 @@
         }
       }
       if (_triggerStateChangeEvent) {
-        if (!this.isValid()) {
-          this.el.container.addClass('invalid');
-        } else {
-          this.el.container.removeClass('invalid');
-        }
-        return this.trigger('validationStateDidChange.skeuocard', [this, this._validationState]);
+        this.trigger('validationStateDidChange.skeuocard', [this, this._validationState]);
+        this._log("Triggering render because validation state changed.");
+        return this.render();
       }
     };
 
@@ -498,6 +499,70 @@
     return Skeuocard;
 
   })();
+
+  /*
+  Skeuocard::FlipTabView
+  Handles rendering of the "flip button" control and its various warning and 
+  prompt states.
+  */
+
+
+  Skeuocard.prototype.FlipTabView = (function() {
+
+    function FlipTabView(face, opts) {
+      if (opts == null) {
+        opts = {};
+      }
+      this.el = $("<div class=\"flip-tab front\"><p></p></div>");
+      this.options = opts;
+    }
+
+    FlipTabView.prototype._setText = function(text) {
+      return this.el.find('p').html(text);
+    };
+
+    FlipTabView.prototype.warn = function(message, withAnimation) {
+      if (withAnimation == null) {
+        withAnimation = false;
+      }
+      this.el.removeClass('prompt');
+      this.el.addClass('warn');
+      this._setText(message);
+      if (withAnimation) {
+        this.el.removeClass('warn-anim');
+        return this.el.addClass('warn-anim');
+      }
+    };
+
+    FlipTabView.prototype.prompt = function(message, withAnimation) {
+      if (withAnimation == null) {
+        withAnimation = false;
+      }
+      this.el.removeClass('warn');
+      this.el.addClass('prompt');
+      this._setText(message);
+      if (withAnimation) {
+        this.el.removeClass('valid-anim');
+        return this.el.addClass('valid-anim');
+      }
+    };
+
+    FlipTabView.prototype.show = function() {
+      return this.el.show();
+    };
+
+    FlipTabView.prototype.hide = function() {
+      return this.el.hide();
+    };
+
+    return FlipTabView;
+
+  })();
+
+  /*
+  Skeuocard::TextInputView
+  */
+
 
   Skeuocard.prototype.TextInputView = (function() {
 
