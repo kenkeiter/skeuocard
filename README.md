@@ -1,8 +1,10 @@
-![Skeuocard at its finest.](http://raw.github.com/kenkeiter/skeuocard/master/screenshot.png)
-
 # Skeuocard
 
 _Skeuocard_ is a re-think of the way we handle credit card input on the web. It progressively enhances credit card input forms so that the card inputs become skeuomorphic, facilitating accurate and fast card entry, and removing barriers to purchase.
+
+For more on the theory behind Skeuocard, check out the blog post that started it all: [_"Redesigning Credit Card Inputs"_](http://kenkeiter.com/2013/07/21/redesigning-credit-card-inputs/) by [me (Ken Keiter)](http://kenkeiter.com/).
+
+![Skeuocard at its finest.](http://raw.github.com/kenkeiter/skeuocard/master/screenshot.png)
 
 ## Usage
 
@@ -212,6 +214,10 @@ new Skeuocard($("#skeuocard"), {
 ```
 
 Note that, if the CVC is on the back of the card for the matching card product, the card will automatically flip to show the invalid field.
+
+#### Design Customization
+
+You might not like the way Skeuocard looks. That's easy to fix; CSS is used to style and position most elements in Skeuocard, with the exception of the card faces.
 
 ## Browser Compatibility
 
