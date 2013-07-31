@@ -323,7 +323,7 @@
         } else {
           this.el.container.removeClass('invalid');
         }
-        return this.trigger('validationStateDidChange', [this, this._validationState]);
+        return this.trigger('validationStateDidChange.skeuocard', [this, this._validationState]);
       }
     };
 

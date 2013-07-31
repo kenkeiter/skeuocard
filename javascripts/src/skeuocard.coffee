@@ -289,7 +289,7 @@ class Skeuocard
         @el.container.addClass('invalid')
       else
         @el.container.removeClass('invalid')
-      @trigger('validationStateDidChange', [@, @_validationState])
+      @trigger('validationStateDidChange.skeuocard', [@, @_validationState])
 
   visibleFaceIsValid: ->
     sel = if @visibleFace is 'front' then 'surfaceFront' else 'surfaceBack'
