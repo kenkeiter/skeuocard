@@ -17,10 +17,10 @@
   }
 
   .face.front {
-    background: #eee url('/images/products/generic-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/generic-front.png') no-repeat right bottom;
   }
   .face.back {
-    background: #eee url('/images/products/generic-back.png') no-repeat center center;
+    background: #eee url('../images/products/generic-back.png') no-repeat center center;
   }
 
   .cc-number{
@@ -120,10 +120,10 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('/images/products/visa-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/visa-front.png') no-repeat right bottom;
   }
   .face.back {
-    background: #eee url('/images/products/visa-back.png') no-repeat center center;
+    background: #eee url('../images/products/visa-back.png') no-repeat center center;
   }
 
   .cc-number{
@@ -151,7 +151,7 @@
   // This card puts all required information on the back, rather than the front.
   &.issuer-chase-sapphire{
     .face.front{
-      background-image: url('/images/issuers/visa-chase-sapphire.png');
+      background-image: url('../images/issuers/visa-chase-sapphire.png');
     }
     .cc-name{
       left: 1.25em;
@@ -189,7 +189,7 @@
 
   &.issuer-simple{
     .face.front{
-      background-image: url('/images/issuers/visa-simple-front.png');
+      background-image: url('../images/issuers/visa-simple-front.png');
     }
     input, .separator {
       color: #eee;
@@ -217,7 +217,7 @@
   @extend .skeuocard.card-product;
 
   .face.front {
-    background: #eee url('/images/products/amex-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/amex-front.png') no-repeat right bottom;
   }
 
   .cc-number{
@@ -249,7 +249,7 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('/images/products/dinersclubintl-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/dinersclubintl-front.png') no-repeat right bottom;
   }
   .cc-number{
     left: 1.8em;
@@ -272,7 +272,7 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('/images/products/mastercard-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/mastercard-front.png') no-repeat right bottom;
   }
 
   .cc-number{
@@ -298,7 +298,7 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('/images/products/discover-front.png') no-repeat right bottom;
+    background: #eee url('../images/products/discover-front.png') no-repeat right bottom;
   }
 
   .cc-number{

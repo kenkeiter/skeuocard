@@ -138,9 +138,9 @@
   -moz-box-shadow: 0 0 10px #0096de;
   -o-box-shadow: 0 0 10px #0096de; }
 .skeuocard.js .face.front {
-  background: #eeeeee url("/images/products/generic-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/generic-front.png") no-repeat right bottom; }
 .skeuocard.js .face.back {
-  background: #eeeeee url("/images/products/generic-back.png") no-repeat center center; }
+  background: #eeeeee url("../images/products/generic-back.png") no-repeat center center; }
 .skeuocard.js .cc-number {
   position: absolute;
   display: block;
@@ -228,9 +228,9 @@
     -o-border-radius: 3px; }
 
 .skeuocard.product-visa .face.front {
-  background: #eeeeee url("/images/products/visa-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/visa-front.png") no-repeat right bottom; }
 .skeuocard.product-visa .face.back {
-  background: #eeeeee url("/images/products/visa-back.png") no-repeat center center; }
+  background: #eeeeee url("../images/products/visa-back.png") no-repeat center center; }
 .skeuocard.product-visa .cc-number {
   left: 1.8em;
   top: 8.05em; }
@@ -246,7 +246,7 @@
   left: 18.1em;
   width: 3em; }
 .skeuocard.product-visa.issuer-chase-sapphire .face.front {
-  background-image: url("/images/issuers/visa-chase-sapphire.png"); }
+  background-image: url("../images/issuers/visa-chase-sapphire.png"); }
 .skeuocard.product-visa.issuer-chase-sapphire .cc-name {
   left: 1.25em;
   top: 8.90em;
@@ -274,7 +274,7 @@
   top: 6.3em;
   left: 15.25em; }
 .skeuocard.product-visa.issuer-simple .face.front {
-  background-image: url("/images/issuers/visa-simple-front.png"); }
+  background-image: url("../images/issuers/visa-simple-front.png"); }
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {
   color: #eee;
   background-color: transparent;
@@ -305,7 +305,7 @@
   background-color: transparent; }
 
 .skeuocard.product-amex .face.front {
-  background: #eeeeee url("/images/products/amex-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/amex-front.png") no-repeat right bottom; }
 .skeuocard.product-amex .cc-number {
   left: 3em;
   top: 8em; }
@@ -321,7 +321,7 @@
   width: 3em; }
 
 .skeuocard.product-dinersclubintl .face.front {
-  background: #eeeeee url("/images/products/dinersclubintl-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/dinersclubintl-front.png") no-repeat right bottom; }
 .skeuocard.product-dinersclubintl .cc-number {
   left: 1.8em;
   top: 8.05em; }
@@ -333,7 +333,7 @@
   top: 13.5em; }
 
 .skeuocard.product-mastercard .face.front {
-  background: #eeeeee url("/images/products/mastercard-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/mastercard-front.png") no-repeat right bottom; }
 .skeuocard.product-mastercard .cc-number {
   left: 1.8em;
   top: 8.05em; }
@@ -345,7 +345,7 @@
   top: 10.8em; }
 
 .skeuocard.product-discover .face.front {
-  background: #eeeeee url("/images/products/discover-front.png") no-repeat right bottom; }
+  background: #eeeeee url("../images/products/discover-front.png") no-repeat right bottom; }
 .skeuocard.product-discover .cc-number {
   left: 1.8em;
   top: 8.05em; }
