@@ -1,28 +1,32 @@
-// Firefox-specific hacks
-.gecko .skeuocard{
-  // input { box-shadow:none; }
-  // input:-moz-placeholder, input:focus { box-shadow:none !important; }
-  input:invalid { box-shadow:none; }
-  &.product-visa.issuer-simple .face.front input,.separator{
-    text-shadow: none;
-    color: #999;
-    @include input-placeholder{
-      color: #ccc;
-      text-shadow: none; 
-    }
-  }
-}
-
 .ie10 .skeuocard{
   .cc-number input{
     ::-ms-clear { display: none !important; }
   }
 }
 
-/*
-.chrome.win .skeuocard, {
-  .card-body.flip .face.back{
-    display: none;
+/* 
+Fix for issue with Chrome in which no GPU acceleration will mess with 
+backface visibility in 3d transforms
+see: https://code.google.com/p/chromium/issues/detail?id=127844 
+*/
+.chrome.win .skeuocard {
+  @media screen and (-webkit-transform-3d: 0) {
+    .card-body .face{
+      -webkit-transition-property: -webkit-transform, opacity;
+      -webkit-transition-duration: 0.25s, 0;
+      -webkit-transition-timing-function:ease-in-out,ease-in-out;
+      -webkit-transition-delay:0, 0;
+    }
+    .card-body .face.back{
+      opacity: 0;
+    }
+    .card-body.flip .face.front{
+      -webkit-transform: rotateX(0deg) rotateY(-180deg);
+      opacity: 0;
+      z-index: -1;
+    }
+    .card-body.flip .face.back{
+      opacity: 1;
+    }
   }
 }
-*/

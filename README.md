@@ -28,21 +28,22 @@ Side note: If you'd like to use different input `name`s or selectors, you can sp
 ```html
 <div class="credit-card-input" id="skeuocard">
   <label for="cc_type">Card Type</label>
-  <select class="field cc-type" name="cc_type">
+  <select name="cc_type">
     <option value="">...</option>
     <option value="visa">Visa</option>
     <option value="discover">Discover</option>
     <option value="mastercard">MasterCard</option>
     <option value="amex">American Express</option>
+    <option value="dinersclubintl">Diners Club</option>
   </select>
   <label for="cc_number">Card Number</label>
-  <input class="cc-number value" type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
+  <input type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
   <label for="cc_exp">Expiration Date (mm/yy)</label>
-  <input class="cc-exp value" type="text" name="cc_exp" placeholder="00/00">
+  <input type="text" name="cc_exp" placeholder="00/00">
   <label for="cc_name">Cardholder's Name</label>
-  <input class="cc-name" type="text" name="cc_name" placeholder="John Doe">
+  <input type="text" name="cc_name" placeholder="John Doe">
   <label for="cc_cvc">Card Validation Code</label>
-  <input class="cc-cvc" type="text" name="cc_cvc" placeholder="XXX" maxlength="3" size="3">
+  <input type="text" name="cc_cvc" placeholder="XXX" maxlength="3" size="3">
 </div>
 ```
 

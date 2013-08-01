@@ -21,6 +21,8 @@
       -webkit-backface-visibility: hidden;
       -moz-backface-visibility: hidden;
       backface-visibility: hidden;
+      -webkit-backface-visibility: visible;
+      -webkit-backface-visibility: hidden;
       -webkit-transform-style: preserve-3d;
       -moz-transform-style: preserve-3d;
       -o-transform-style: preserve-3d;
@@ -43,6 +45,7 @@
       background-position: right bottom;
       border: 1px solid #ddd; }
     .skeuocard.js .card-body .face.front {
+      -webkit-transform: translate3d(0, 0, 0);
       z-index: 2; }
     .skeuocard.js .card-body .face.back {
       -webkit-transform: rotateY(-180deg);
@@ -61,6 +64,12 @@
     -moz-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);
     transform: rotateY(180deg); }
+  .skeuocard.js.valid .card-body .face {
+    box-shadow: 0 0 10px #00cfa7;
+    -webkit-box-shadow: 0 0 10px #00cfa7;
+    -ms-box-shadow: 0 0 10px #00cfa7;
+    -moz-box-shadow: 0 0 10px #00cfa7;
+    -o-box-shadow: 0 0 10px #00cfa7; }
   .skeuocard.js .flip-tab {
     position: absolute;
     -webkit-border-radius: 3.55em;
@@ -189,9 +198,14 @@
   border: none;
   text-transform: uppercase; }
 .skeuocard.card-product .cc-cvc, .skeuocard.product-visa .cc-cvc, .skeuocard.product-amex .cc-cvc, .skeuocard.product-dinersclubintl .cc-cvc, .skeuocard.product-mastercard .cc-cvc, .skeuocard.product-discover .cc-cvc {
+  margin: 0;
+  padding: 0;
   position: absolute;
   display: block;
-  font-size: 1em; }
+  font-size: 1em;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: transparent;
+  border: none; }
 .skeuocard.card-product .invalid, .skeuocard.product-visa .invalid, .skeuocard.product-amex .invalid, .skeuocard.product-dinersclubintl .invalid, .skeuocard.product-mastercard .invalid, .skeuocard.product-discover .invalid {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
@@ -301,6 +315,10 @@
 .skeuocard.product-amex .cc-exp {
   left: 2.5em;
   top: 11.5em; }
+.skeuocard.product-amex .cc-cvc {
+  left: 21.25em;
+  top: 7em;
+  width: 3em; }
 
 .skeuocard.product-dinersclubintl .face.front {
   background: #eeeeee url("/images/products/dinersclubintl-front.png") no-repeat right bottom; }
@@ -338,34 +356,25 @@
   left: 13.15em;
   top: 11.61em; }
 
-.gecko .skeuocard input:invalid {
-  box-shadow: none; }
-.gecko .skeuocard.product-visa.issuer-simple .face.front input, .gecko .skeuocard .separator {
-  text-shadow: none;
-  color: #999; }
-  .gecko .skeuocard.product-visa.issuer-simple .face.front input.placeholder, .gecko .skeuocard .separator.placeholder {
-    color: #ccc;
-    text-shadow: none; }
-  .gecko .skeuocard.product-visa.issuer-simple .face.front input:-moz-placeholder, .gecko .skeuocard .separator:-moz-placeholder {
-    color: #ccc;
-    text-shadow: none; }
-  .gecko .skeuocard.product-visa.issuer-simple .face.front input::-moz-placeholder, .gecko .skeuocard .separator::-moz-placeholder {
-    color: #ccc;
-    text-shadow: none; }
-  .gecko .skeuocard.product-visa.issuer-simple .face.front input:-ms-input-placeholder, .gecko .skeuocard .separator:-ms-input-placeholder {
-    color: #ccc;
-    text-shadow: none; }
-  .gecko .skeuocard.product-visa.issuer-simple .face.front input::-webkit-input-placeholder, .gecko .skeuocard .separator::-webkit-input-placeholder {
-    color: #ccc;
-    text-shadow: none; }
-
 .ie10 .skeuocard .cc-number input ::-ms-clear {
   display: none !important; }
 
-/*
-.chrome.win .skeuocard, {
-  .card-body.flip .face.back{
-    display: none;
-  }
-}
+/* 
+Fix for issue with Chrome in which no GPU acceleration will mess with 
+backface visibility in 3d transforms
+see: https://code.google.com/p/chromium/issues/detail?id=127844 
 */
+@media screen and (-webkit-transform-3d: 0) {
+  .chrome.win .skeuocard .card-body .face {
+    -webkit-transition-property: -webkit-transform, opacity;
+    -webkit-transition-duration: 0.25s, 0;
+    -webkit-transition-timing-function: ease-in-out,ease-in-out;
+    -webkit-transition-delay: 0, 0; }
+  .chrome.win .skeuocard .card-body .face.back {
+    opacity: 0; }
+  .chrome.win .skeuocard .card-body.flip .face.front {
+    -webkit-transform: rotateX(0deg) rotateY(-180deg);
+    opacity: 0;
+    z-index: -1; }
+  .chrome.win .skeuocard .card-body.flip .face.back {
+    opacity: 1; } }

@@ -88,9 +88,13 @@
     text-transform: uppercase;
   }
   .cc-cvc {
-    position: absolute;
+    margin: 0; padding: 0;
+    position: absolute; 
     display: block; 
     font-size: 1em;
+    font-family: $cc-label-family;
+    background-color: transparent;
+    border: none;
   }
   .invalid{
     -webkit-border-radius: 5px;
@@ -229,6 +233,12 @@
   .cc-exp{
     left: 2.5em;
     top: 11.5em;
+  }
+
+  .cc-cvc{
+    left: 21.25em;
+    top: 7em;
+    width: 3em;
   }
 }
 

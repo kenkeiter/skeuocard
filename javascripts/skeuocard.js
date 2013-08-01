@@ -39,7 +39,12 @@
       this.acceptedCardProducts = {};
       this.visibleFace = 'front';
       this._initialValidationState = {};
-      this._validationState = {};
+      this._validationState = {
+        number: false,
+        exp: false,
+        name: false,
+        cvc: false
+      };
       this._faceFillState = {
         front: false,
         back: false
@@ -60,7 +65,7 @@
         strings: {
           hiddenFaceFillPrompt: "Click here to<br /> fill in the other side.",
           hiddenFaceErrorWarning: "There's a problem on the other side.",
-          hiddenFaceSwitchPrompt: "Forgotten something?"
+          hiddenFaceSwitchPrompt: "Flip the card back over"
         }
       };
       this.options = $.extend(optDefaults, opts);
@@ -74,6 +79,7 @@
     Skeuocard.prototype._conformDOM = function() {
       var el, fieldName, fieldValue, _ref, _ref1, _ref2,
         _this = this;
+      this.el.container.removeClass('no-js');
       this.el.container.addClass("skeuocard js");
       this.el.container.find("> :not(input,select,textarea)").remove();
       this.el.container.find("> input,select,textarea").hide();
@@ -106,22 +112,18 @@
       }
       this.el.underlyingFields.number.bind("change", function(e) {
         _this._inputViews.number.setValue(_this._getUnderlyingValue('number'));
-        _this._log("Triggering render because underlying value for number changed.");
         return _this.render();
       });
       this.el.underlyingFields.exp.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('exp'));
-        _this._log("Triggering render because underlying value for exp changed.");
         return _this.render();
       });
       this.el.underlyingFields.name.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('name'));
-        _this._log("Triggering render because underlying value for name changed.");
         return _this.render();
       });
       this.el.underlyingFields.cvc.bind("change", function(e) {
         _this._inputViews.exp.setValue(_this._getUnderlyingValue('cvc'));
-        _this._log("Triggering render because underlying value for cvc changed.");
         return _this.render();
       });
       this.el.surfaceFront = $("<div>").attr({
@@ -173,7 +175,6 @@
 
     Skeuocard.prototype._updateProductIfNeeded = function() {
       var matchedIssuerIdentifier, matchedProduct, matchedProductIdentifier, number;
-      this._updateValidationState();
       number = this._getUnderlyingValue('number');
       matchedProduct = this.getProductForNumber(number);
       matchedProductIdentifier = (matchedProduct != null ? matchedProduct.companyShortname : void 0) || '';
@@ -213,19 +214,20 @@
       this._inputViews.cvc.el.appendTo(this.el.surfaceBack);
       this._inputViews.number.bind("keyup", function(e, input) {
         _this._setUnderlyingValue('number', input.value);
+        _this._updateValidationStateForInputView('number');
         return _this._updateProductIfNeeded();
       });
       this._inputViews.exp.bind("keyup", function(e, input) {
         _this._setUnderlyingValue('exp', input.value);
-        return _this._updateValidationState();
+        return _this._updateValidationStateForInputView('exp');
       });
       this._inputViews.name.bind("keyup", function(e) {
         _this._setUnderlyingValue('name', $(e.target).val());
-        return _this._updateValidationState();
+        return _this._updateValidationStateForInputView('name');
       });
       this._inputViews.cvc.bind("keyup", function(e) {
         _this._setUnderlyingValue('cvc', $(e.target).val());
-        return _this._updateValidationState();
+        return _this._updateValidationStateForInputView('cvc');
       });
       this._inputViews.number.setValue(this._getUnderlyingValue('number'));
       this._inputViews.exp.setValue(this._getUnderlyingValue('exp'));
@@ -287,7 +289,10 @@
             pattern: this.product.expirationFormat
           });
           this._inputViews.cvc.show();
-          this._inputViews.cvc.attr('maxlength', this.product.cvcLength);
+          this._inputViews.cvc.attr({
+            maxlength: this.product.cvcLength,
+            placeholder: new Array(this.product.cvcLength + 1).join(this.options.cardNumberPlaceholderChar)
+          });
           _ref = this.product.layout;
           for (fieldName in _ref) {
             surfaceName = _ref[fieldName];
@@ -306,6 +311,7 @@
           this._inputViews.cvc.clear();
           this._inputViews.exp.hide();
           this._inputViews.name.hide();
+          this._inputViews.cvc.hide();
           this._inputViews.number.reconfigure({
             groupings: [this.options.genericPlaceholder.length],
             placeholder: this.options.genericPlaceholder
@@ -319,6 +325,7 @@
         }
         this._cardProductNeedsLayout = false;
       }
+      this._log("Validation state:", this._validationState);
       this.showInitialValidationErrors();
       _oppositeFace = this.visibleFace === 'front' ? 'back' : 'front';
       _visibleFaceFilled = this._faceFillState[this.visibleFace];
@@ -335,7 +342,7 @@
         this._log("Visible face has been filled, and is valid.");
         this.hideValidationErrors();
       }
-      if (this.visibleFace === 'front') {
+      if (this.visibleFace === 'front' && this.fieldsForFace('back').length > 0) {
         if (_visibleFaceFilled && _visibleFaceValid && !_hiddenFaceFilled) {
           this._tabViews.front.prompt(this.options.strings.hiddenFaceFillPrompt, true);
         } else if (_hiddenFaceFilled && !_hiddenFaceValid) {
@@ -353,8 +360,10 @@
         }
       }
       if (!this.isValid()) {
+        this.el.container.removeClass('valid');
         this.el.container.addClass('invalid');
       } else {
+        this.el.container.addClass('valid');
         this.el.container.removeClass('invalid');
       }
       return this._log("*** rendering complete ***");
@@ -415,67 +424,68 @@
     };
 
     Skeuocard.prototype.isFaceFilled = function(faceName) {
-      var face, fieldName, _ref, _ref1;
-      if ((_ref = this.product) != null ? _ref.layout : void 0) {
-        _ref1 = this.product.layout;
-        for (fieldName in _ref1) {
-          face = _ref1[fieldName];
-          if (face === faceName && !this._inputViews[fieldName].isFilled()) {
-            return false;
+      var fields, filled, name;
+      fields = this.fieldsForFace(faceName);
+      filled = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = fields.length; _i < _len; _i++) {
+          name = fields[_i];
+          if (this._inputViews[name].isFilled()) {
+            _results.push(name);
           }
         }
-        return true;
+        return _results;
+      }).call(this);
+      if (fields.length > 0) {
+        return filled.length === fields.length;
       } else {
         return false;
       }
     };
 
-    Skeuocard.prototype._updateValidationState = function() {
-      var fieldName, newFaceFillState, newState, newValidationState, _triggerStateChangeEvent;
-      _triggerStateChangeEvent = false;
-      newValidationState = {
-        number: this._inputViews.number.isValid() && !(this._initialValidationState.number === false && this._inputViews.number.value === this.options.initialValues.number),
-        exp: this._inputViews.exp.isValid() && !(this._initialValidationState.exp === false && this._inputViews.exp.value === this.options.initialValues.exp),
-        name: this._inputViews.name.isValid() && !(this._initialValidationState.name === false && this._inputViews.name.el.val() === this.options.initialValues.name),
-        cvc: this._inputViews.cvc.isValid() && !(this._initialValidationState.cvc === false && this._inputViews.cvc.el.val() === this.options.initialValues.cvc)
-      };
-      for (fieldName in newValidationState) {
-        newState = newValidationState[fieldName];
-        if (this._validationState[fieldName] !== newState) {
-          this.setFieldValidationState(fieldName, newState);
-          _triggerStateChangeEvent = true;
-        }
+    Skeuocard.prototype.fieldsForFace = function(faceName) {
+      var face, fn, _ref;
+      if ((_ref = this.product) != null ? _ref.layout : void 0) {
+        return (function() {
+          var _ref1, _results;
+          _ref1 = this.product.layout;
+          _results = [];
+          for (fn in _ref1) {
+            face = _ref1[fn];
+            if (face === faceName) {
+              _results.push(fn);
+            }
+          }
+          return _results;
+        }).call(this);
       }
-      newFaceFillState = {
-        front: this.isFaceFilled('front'),
-        back: this.isFaceFilled('back')
-      };
-      if (this._faceFillState.front !== newFaceFillState.front || this._faceFillState.back !== newFaceFillState.back) {
-        _triggerStateChangeEvent = true;
-        this._faceFillState = newFaceFillState;
-      }
-      if (_triggerStateChangeEvent) {
+      return [];
+    };
+
+    Skeuocard.prototype._updateValidationStateForInputView = function(fieldName) {
+      var field, fieldValid;
+      field = this._inputViews[fieldName];
+      fieldValid = field.isValid() && !(this._initialValidationState[fieldName] === false && field.getValue() === this.options.initialValues[fieldName]);
+      if (fieldValid !== this._validationState[fieldName]) {
+        this.setFieldValidationState(fieldName, fieldValid);
+        this._faceFillState.front = this.isFaceFilled('front');
+        this._faceFillState.back = this.isFaceFilled('back');
         this.trigger('validationStateDidChange.skeuocard', [this, this._validationState]);
-        this._log("Triggering render because validation state changed.");
+        this._log("Change in validation for " + fieldName + " triggers re-render.");
         return this.render();
       }
     };
 
     Skeuocard.prototype.isFaceValid = function(faceName) {
-      var face, fieldName, valid, _ref, _ref1;
+      var fieldName, valid, _i, _len, _ref;
       valid = true;
-      if ((_ref = this.product) != null ? _ref.layout : void 0) {
-        _ref1 = this.product.layout;
-        for (fieldName in _ref1) {
-          face = _ref1[fieldName];
-          if (face === faceName) {
-            valid &= this._validationState[fieldName];
-          }
-        }
-        return !!valid;
-      } else {
-        return false;
+      _ref = this.fieldsForFace(faceName);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        fieldName = _ref[_i];
+        valid &= this._validationState[fieldName];
       }
+      return !!valid;
     };
 
     Skeuocard.prototype.isValid = function() {
@@ -492,18 +502,13 @@
     };
 
     Skeuocard.prototype.flip = function() {
-      if (this.visibleFace === 'front') {
-        this.trigger('faceWillBecomeVisible.skeuocard', [this, 'back']);
-        this.el.cardBody.addClass('flip');
-        this.visibleFace = 'back';
-        this.trigger('faceDidBecomeVisible.skeuocard', [this, 'back']);
-      } else {
-        this.trigger('faceWillBecomeVisible.skeuocard', [this, 'front']);
-        this.el.cardBody.removeClass('flip');
-        this.visibleFace = 'front';
-        this.trigger('faceDidBecomeVisible.skeuocard', [this, 'front']);
-      }
-      return this.render();
+      var targetFace;
+      targetFace = this.visibleFace === 'front' ? 'back' : 'front';
+      this.trigger('faceWillBecomeVisible.skeuocard', [this, targetFace]);
+      this.visibleFace = targetFace;
+      this.render();
+      this.el.cardBody.toggleClass('flip');
+      return this.trigger('faceDidBecomeVisible.skeuocard', [this, targetFace]);
     };
 
     Skeuocard.prototype.getProductForNumber = function(num) {
@@ -1262,6 +1267,10 @@
       }
     };
 
+    TextInputView.prototype.getValue = function() {
+      return this.el.val();
+    };
+
     return TextInputView;
 
   })(Skeuocard.prototype.TextInputView);
@@ -1277,7 +1286,7 @@
 
   CCProducts[/^30[0-5][0-9]/] = {
     companyName: "Diners Club",
-    companyShortname: "dinersclub",
+    companyShortname: "dinersclubintl",
     cardNumberGrouping: [4, 6, 4],
     expirationFormat: "MM/YY",
     cvcLength: 3,
@@ -1290,6 +1299,20 @@
   };
 
   CCProducts[/^3095/] = {
+    companyName: "Diners Club International",
+    companyShortname: "dinersclubintl",
+    cardNumberGrouping: [4, 6, 4],
+    expirationFormat: "MM/YY",
+    cvcLength: 3,
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
+  };
+
+  CCProducts[/^36\d{2}/] = {
     companyName: "Diners Club International",
     companyShortname: "dinersclubintl",
     cardNumberGrouping: [4, 6, 4],
@@ -1317,20 +1340,6 @@
     }
   };
 
-  CCProducts[/^36\d{2}/] = {
-    companyName: "Diners Club International",
-    companyShortname: "dinersclubintl",
-    cardNumberGrouping: [4, 6, 4],
-    expirationFormat: "MM/YY",
-    cvcLength: 3,
-    layout: {
-      number: 'front',
-      exp: 'front',
-      name: 'front',
-      cvc: 'back'
-    }
-  };
-
   CCProducts[/^37/] = {
     companyName: "American Express",
     companyShortname: "amex",
@@ -1341,7 +1350,7 @@
       number: 'front',
       exp: 'front',
       name: 'front',
-      cvc: 'back'
+      cvc: 'front'
     }
   };
 

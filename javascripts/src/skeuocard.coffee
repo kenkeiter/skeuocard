@@ -22,7 +22,7 @@ class Skeuocard
     @acceptedCardProducts = {}
     @visibleFace = 'front'
     @_initialValidationState = {}
-    @_validationState = {}
+    @_validationState = {number: false, exp: false, name: false, cvc: false}
     @_faceFillState = {front: false, back: false}
     
     # configure default opts
@@ -42,7 +42,7 @@ class Skeuocard
       strings:
         hiddenFaceFillPrompt: "Click here to<br /> fill in the other side."
         hiddenFaceErrorWarning: "There's a problem on the other side."
-        hiddenFaceSwitchPrompt: "Forgotten something?"
+        hiddenFaceSwitchPrompt: "Flip the card back over"
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
@@ -58,6 +58,7 @@ class Skeuocard
   _conformDOM: ->
     # for CSS determination that this is an enhanced input, add 'js' class to 
     # the container
+    @el.container.removeClass('no-js')
     @el.container.addClass("skeuocard js")
     # remove anything that's not an underlying form field
     @el.container.find("> :not(input,select,textarea)").remove()
@@ -84,19 +85,15 @@ class Skeuocard
     # bind change handlers to render
     @el.underlyingFields.number.bind "change", (e)=> 
       @_inputViews.number.setValue @_getUnderlyingValue('number')
-      @_log("Triggering render because underlying value for number changed.")
       @render()
     @el.underlyingFields.exp.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('exp')
-      @_log("Triggering render because underlying value for exp changed.")
       @render()
     @el.underlyingFields.name.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('name')
-      @_log("Triggering render because underlying value for name changed.")
       @render()
     @el.underlyingFields.cvc.bind "change", (e)=> 
       @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
-      @_log("Triggering render because underlying value for cvc changed.")
       @render()
     # construct the necessary card elements
     @el.surfaceFront = $("<div>").attr(class: "face front")
@@ -136,7 +133,6 @@ class Skeuocard
     return @acceptedCardProducts
 
   _updateProductIfNeeded: ->
-    @_updateValidationState()
     # determine if product changed; if so, change it globally, and 
     # call render() to render the changes.
     number = @_getUnderlyingValue('number')
@@ -179,16 +175,17 @@ class Skeuocard
     # bind change events to their underlying form elements
     @_inputViews.number.bind "keyup", (e, input)=>
       @_setUnderlyingValue('number', input.value)
+      @_updateValidationStateForInputView('number')
       @_updateProductIfNeeded()
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
-      @_updateValidationState()
+      @_updateValidationStateForInputView('exp')
     @_inputViews.name.bind "keyup", (e)=>
       @_setUnderlyingValue('name', $(e.target).val())
-      @_updateValidationState()
+      @_updateValidationStateForInputView('name')
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
-      @_updateValidationState()
+      @_updateValidationStateForInputView('cvc')
 
     # setup default values; when render is called, these will be picked up
     @_inputViews.number.setValue @_getUnderlyingValue('number')
@@ -238,7 +235,9 @@ class Skeuocard
         @_inputViews.exp.reconfigure 
           pattern: @product.expirationFormat
         @_inputViews.cvc.show()
-        @_inputViews.cvc.attr('maxlength', @product.cvcLength)
+        @_inputViews.cvc.attr
+          maxlength: @product.cvcLength
+          placeholder: new Array(@product.cvcLength + 1).join(@options.cardNumberPlaceholderChar)
         for fieldName, surfaceName of @product.layout
           sel = if surfaceName is 'front' then 'surfaceFront' else 'surfaceBack'
           container = @el[sel]
@@ -254,6 +253,7 @@ class Skeuocard
         @_inputViews.cvc.clear()
         @_inputViews.exp.hide()
         @_inputViews.name.hide()
+        @_inputViews.cvc.hide()
         @_inputViews.number.reconfigure
           groupings: [@options.genericPlaceholder.length],
           placeholder: @options.genericPlaceholder
@@ -263,8 +263,11 @@ class Skeuocard
           (css.match(/\bissuer-\S+/g) || []).join(' ')
       @_cardProductNeedsLayout = false
 
+    @_log("Validation state:", @_validationState)
+
     # Render validation changes
     @showInitialValidationErrors()
+
     # If the current face is filled, and there are validation errors, show 'em
     _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
     _visibleFaceFilled = @_faceFillState[@visibleFace]
@@ -282,7 +285,7 @@ class Skeuocard
       @_log("Visible face has been filled, and is valid.")
       @hideValidationErrors()
 
-    if @visibleFace is 'front' 
+    if @visibleFace is 'front' and @fieldsForFace('back').length > 0
       if _visibleFaceFilled and _visibleFaceValid and not _hiddenFaceFilled
         @_tabViews.front.prompt(@options.strings.hiddenFaceFillPrompt, true)
       else if _hiddenFaceFilled and not _hiddenFaceValid
@@ -299,8 +302,10 @@ class Skeuocard
 
     # Update the validity indicator for the whole card body
     if not @isValid()
+      @el.container.removeClass('valid')
       @el.container.addClass('invalid')
     else
+      @el.container.addClass('valid')
       @el.container.removeClass('invalid')
     
     @_log("*** rendering complete ***")
@@ -336,60 +341,44 @@ class Skeuocard
     @_validationState[fieldName] = valid
 
   isFaceFilled: (faceName)->
-    if @product?.layout
-      for fieldName, face of @product.layout
-        if face == faceName and not @_inputViews[fieldName].isFilled()
-          return false
-      return true
+    fields = @fieldsForFace(faceName)
+    filled = (name for name in fields when @_inputViews[name].isFilled())
+    if fields.length > 0
+      return filled.length is fields.length
     else
       return false
 
-  _updateValidationState: ->
-    _triggerStateChangeEvent = false
-    newValidationState =
-      number: @_inputViews.number.isValid() and
-        not (@_initialValidationState.number is false and 
-             @_inputViews.number.value == @options.initialValues.number)
-      exp: @_inputViews.exp.isValid() and
-        not (@_initialValidationState.exp is false and 
-             @_inputViews.exp.value == @options.initialValues.exp)
-      name: @_inputViews.name.isValid() and
-        not (@_initialValidationState.name is false and
-             @_inputViews.name.el.val() == @options.initialValues.name)
-      cvc: @_inputViews.cvc.isValid() and
-        not (@_initialValidationState.cvc is false and
-             @_inputViews.cvc.el.val() == @options.initialValues.cvc)
-    for fieldName, newState of newValidationState
-      if @_validationState[fieldName] isnt newState
-        @setFieldValidationState(fieldName, newState)
-        _triggerStateChangeEvent = true
-    # If the face filled state has changed, trigger state change event
-    newFaceFillState =
-      front: @isFaceFilled('front')
-      back: @isFaceFilled('back')
-    if @_faceFillState.front isnt newFaceFillState.front or
-      @_faceFillState.back isnt newFaceFillState.back
-        _triggerStateChangeEvent = true
-        @_faceFillState = newFaceFillState
-    # trigger event if need be
-    if _triggerStateChangeEvent
+  fieldsForFace: (faceName)->
+    if @product?.layout
+      return (fn for fn, face of @product.layout when face is faceName)
+    return []
+
+  _updateValidationStateForInputView: (fieldName)->
+    field = @_inputViews[fieldName]
+    fieldValid = field.isValid() and
+      not (@_initialValidationState[fieldName] is false and
+           field.getValue() is @options.initialValues[fieldName])
+    # trigger a change event if the field has changed
+    if fieldValid isnt @_validationState[fieldName]
+      @setFieldValidationState(fieldName, fieldValid)
+      # Update the fill state
+      @_faceFillState.front = @isFaceFilled('front')
+      @_faceFillState.back = @isFaceFilled('back')
       @trigger('validationStateDidChange.skeuocard', [@, @_validationState])
-      @_log("Triggering render because validation state changed.")
+      @_log("Change in validation for #{fieldName} triggers re-render.")
       @render()
 
   isFaceValid: (faceName)->
     valid = true
-    if @product?.layout
-      for fieldName, face of @product.layout
-        if face == faceName
-          valid &= @_validationState[fieldName]
-      return !!valid
-    else
-      return false
+    for fieldName in @fieldsForFace(faceName)
+      valid &= @_validationState[fieldName]
+    return !!valid
 
   isValid: ->
-    @_validationState.number and @_validationState.exp and 
-    @_validationState.name and @_validationState.cvc
+    @_validationState.number and 
+      @_validationState.exp and 
+      @_validationState.name and 
+      @_validationState.cvc
 
   # Get a value from the underlying form.
   _getUnderlyingValue: (field)->
@@ -402,17 +391,12 @@ class Skeuocard
 
   # Flip the card over.
   flip: ->
-    if @visibleFace == 'front'
-      @trigger('faceWillBecomeVisible.skeuocard', [@, 'back'])
-      @el.cardBody.addClass('flip')
-      @visibleFace = 'back'
-      @trigger('faceDidBecomeVisible.skeuocard', [@, 'back'])
-    else
-      @trigger('faceWillBecomeVisible.skeuocard', [@, 'front'])
-      @el.cardBody.removeClass('flip')
-      @visibleFace = 'front'
-      @trigger('faceDidBecomeVisible.skeuocard', [@, 'front'])
+    targetFace = if @visibleFace is 'front' then 'back' else 'front'
+    @trigger('faceWillBecomeVisible.skeuocard', [@, targetFace])
+    @visibleFace = targetFace
     @render()
+    @el.cardBody.toggleClass('flip')
+    @trigger('faceDidBecomeVisible.skeuocard', [@, targetFace])
 
   getProductForNumber: (num)->
     for m, d of @acceptedCardProducts
@@ -951,6 +935,9 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
     else
       return @isFilled()
 
+  getValue: ->
+    @el.val()
+
 # Export the object.
 window.Skeuocard = Skeuocard
 
@@ -963,7 +950,7 @@ CCProducts = {}
 
 CCProducts[/^30[0-5][0-9]/] =
   companyName: "Diners Club"
-  companyShortname: "dinersclub"
+  companyShortname: "dinersclubintl"
   cardNumberGrouping: [4,6,4]
   expirationFormat: "MM/YY"
   cvcLength: 3
@@ -974,6 +961,18 @@ CCProducts[/^30[0-5][0-9]/] =
     cvc: 'back'
 
 CCProducts[/^3095/] =
+  companyName: "Diners Club International"
+  companyShortname: "dinersclubintl"
+  cardNumberGrouping: [4,6,4]
+  expirationFormat: "MM/YY"
+  cvcLength: 3
+  layout:
+    number: 'front'
+    exp: 'front'
+    name: 'front'
+    cvc: 'back'
+
+CCProducts[/^36\d{2}/] =
   companyName: "Diners Club International"
   companyShortname: "dinersclubintl"
   cardNumberGrouping: [4,6,4]
@@ -997,18 +996,6 @@ CCProducts[/^35\d{2}/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^36\d{2}/] =
-  companyName: "Diners Club International"
-  companyShortname: "dinersclubintl"
-  cardNumberGrouping: [4,6,4]
-  expirationFormat: "MM/YY"
-  cvcLength: 3
-  layout:
-    number: 'front'
-    exp: 'front'
-    name: 'front'
-    cvc: 'back'
-
 CCProducts[/^37/] =
   companyName: "American Express"
   companyShortname: "amex"
@@ -1019,7 +1006,7 @@ CCProducts[/^37/] =
     number: 'front'
     exp: 'front'
     name: 'front'
-    cvc: 'back'
+    cvc: 'front'
 
 CCProducts[/^38/] =
   companyName: "Hipercard"

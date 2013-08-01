@@ -41,6 +41,8 @@ $color-valid: #00CFA7;
       -webkit-backface-visibility: hidden;
       -moz-backface-visibility: hidden;
       backface-visibility: hidden;
+      -webkit-backface-visibility: visible;
+      -webkit-backface-visibility: hidden;
       
       -webkit-transform-style: preserve-3d;
       -moz-transform-style: preserve-3d;
@@ -68,6 +70,7 @@ $color-valid: #00CFA7;
     }
 
     .face.front{
+      -webkit-transform: translate3d(0,0,0);
       z-index: 2;
     }
 
@@ -94,9 +97,14 @@ $color-valid: #00CFA7;
       -moz-transform: rotateY(180deg);
       -o-transform: rotateY(180deg);
       transform: rotateY(180deg);
-    } 
+    }
   }
 
+  &.valid{
+    .card-body .face{
+      @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
+    }
+  }
 
   .flip-tab{
     position: absolute;
