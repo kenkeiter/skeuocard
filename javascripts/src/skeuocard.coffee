@@ -42,7 +42,7 @@ class Skeuocard
       strings:
         hiddenFaceFillPrompt: "Click here to<br /> fill in the other side."
         hiddenFaceErrorWarning: "There's a problem on the other side."
-        hiddenFaceSwitchPrompt: "Flip the card back over"
+        hiddenFaceSwitchPrompt: "Back to the other side..."
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
