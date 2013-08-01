@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles/demo.css">
     <script src="javascripts/vendor/css_browser_selector.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -34,6 +35,8 @@
           <div class="credit-card-input no-js" id="skeuocard">
             <p class="no-support-warning">
               Either you have Javascript disabled, or you're using an unsupported browser, amigo! That's why you're seeing this old-school credit card input form instead of a fancy new Skeuocard. On the other hand, at least you know it gracefully degrades...
+              <br />
+              <a href="#" id="enable-anyway-btn">Never tell me the odds! Enable it anyway.</a>
             </p>
             <label for="cc_type">Card Type</label>
             <select name="cc_type">
@@ -105,8 +108,24 @@ Diners Club: 30951111111116
             debug: false
           });
         }
+        $('#enable-anyway-btn').click(function(){
+          window.card = new Skeuocard($("#skeuocard"), {
+            debug: false
+          });
+        });
       });
 
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-17099432-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
     </script>
   </body>
 </html>
