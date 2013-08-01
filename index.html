@@ -1,64 +1,105 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!doctype html>
+<html>
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Credit Card Input</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width">
-    <!-- import Skeuocard styling -->
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Skeuocard by kenkeiter</title>
     <link rel="stylesheet" href="styles/skeuocard.reset.css" />
     <link rel="stylesheet" href="styles/skeuocard.css" />
-    <!-- styling necessary for demo -->
-    <link rel="stylesheet" href="styles/demo.css" />
-    <!-- needed by Skeuocard to determine browser and make fixes -->
-    <script src="/javascripts/vendor/css_browser_selector.js"></script>
+    <link rel="stylesheet" href="styles/demo.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Skeuocard</h1>
+        <p>Skeuocard progressively enhances credit card inputs to provide a skeuomorphic interface.</p>
+        <p>Learn more about the concepts behind the design: "<a href="http://kenkeiter.com/2013/07/21/redesigning-credit-card-inputs/" target="_blank">Redesigning The Credit Card Input</a>" by <a href="http://kenkeiter.com/">Ken Keiter</a>.</p>
+        <p class="view">
+          <a href="https://github.com/kenkeiter/skeuocard">View the Project on GitHub <small>kenkeiter/skeuocard</small></a>
+        </p>
+        <ul>
+          <li><a href="https://github.com/kenkeiter/skeuocard/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/kenkeiter/skeuocard/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/kenkeiter/skeuocard">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <!-- START FORM -->
+        
+          <div class="credit-card-input no-js" id="skeuocard">
+            <label for="cc_type">Card Type</label>
+            <select name="cc_type">
+              <option value="">...</option>
+              <option value="visa">Visa</option>
+              <option value="discover">Discover</option>
+              <option value="mastercard">MasterCard</option>
+              <option value="amex">American Express</option>
+              <option value="dinersclubintl">Diners Club</option>
+            </select>
+            <label for="cc_number">Card Number</label>
+            <input type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
+            <label for="cc_exp">Expiration Date (mm/yy)</label>
+            <input type="text" name="cc_exp" placeholder="00/00">
+            <label for="cc_name">Cardholder's Name</label>
+            <input type="text" name="cc_name" placeholder="John Doe">
+            <label for="cc_cvc">Card Validation Code</label>
+            <input type="text" name="cc_cvc" placeholder="123" maxlength="3" size="3">
+          </div>
 
-    <!--[if lt IE 10]>
-      <p class="chromeframe">You are using an <strong>outdated</strong> 
-      browser. Please <a href="http://browsehappy.com/">upgrade your 
-      browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">
-      activate Google Chrome Frame</a> to improve your experience.</p>
-      <p>At the moment, Skeuocard does not work properly with Internet Explorer 9 and below, although the credit-card entry itself will still work.</p>
-    <![endif]-->
+        <!-- END FORM -->
+      </section>
+      <section>
+<h3>Give it a try.</h3>
 
-    <form method="GET" action="">
-      <div class="credit-card-input no-js" id="skeuocard">
-        <label for="cc_type">Card Type</label>
-        <select name="cc_type">
-          <option value="">...</option>
-          <option value="visa">Visa</option>
-          <option value="discover">Discover</option>
-          <option value="mastercard">MasterCard</option>
-          <option value="amex">American Express</option>
-          <option value="dinersclubintl">Diners Club</option>
-        </select>
-        <label for="cc_number">Card Number</label>
-        <input type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
-        <label for="cc_exp">Expiration Date (mm/yy)</label>
-        <input type="text" name="cc_exp" placeholder="00/00">
-        <label for="cc_name">Cardholder's Name</label>
-        <input type="text" name="cc_name" placeholder="John Doe">
-        <label for="cc_cvc">Card Validation Code</label>
-        <input type="text" name="cc_cvc" placeholder="123" maxlength="3" size="3">
-      </div>
+<p>If you have a recent browser, the credit card input above will be progressively enhanced by Skeuocard. To begin, simply enter your card number (don't worry, it's not sent outside your browser). If that's too fishy for you (and I don't blame you), you can also try these valid credit card numbers to get the feel of it:</p>
 
-      <!--<input type="submit" />-->
-    </form>
+<pre>
+Visa: 4111111111111111
+American Express: 371111111111114
+MasterCard: 5111111111111118
+Discover: 6011111111111117
+Diners Club: 30951111111116
+</pre>
 
+<p>The numbers above will work with any expiration date (as long as it's in the future), any name, and any CVC code (the three or four digit verification code), since those are all validated on the server side upon authorization.</p>
+
+<h3>How It Works</h3>
+
+<p>When you begin entering your card number, Skeuocard attempts to match it to an accepted card type. Once it is able to do so, it modifies the layout of the card to match the card product (Visa, MasterCard, etc) and makes any tweaks specific to the issuer -- for example, the special layout of the Chase Sapphire card.</p>
+
+<p>As you enter your information, Skeuocard modifies the underlying form values from your original, non-enhanced form. It also validates each field to find simple user mistakes and missing fields.</p>
+
+<p>If the card product has fields on both sides of the card (for example, placing the CVC code on the back) the user will be prompted to flip the card to fill in the remaining fields.</p>
+
+<h3>Get It!</h3>
+
+<p>Check out <a href="http://github.com/kenkeiter/skeuocard/">Skeuocard's GitHub repository</a> for documentation and source. Skeuocard is a work in progress, and I'll be doing my best to add new credit card layouts as quickly as people contribute them.</p>
+
+<p>Skeuocard is provided under the flexible MIT license.</p>
+
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/kenkeiter">kenkeiter</a></p>
+      </footer>
+    </div>
+
+    <script src="/javascripts/vendor/css_browser_selector.js"></script>
+    <script src="javascripts/vendor/demo.fix.js"></script>
     <script src="/javascripts/vendor/jquery-2.0.3.min.js"></script>
     <script src="/javascripts/skeuocard.js"></script>
     <script>
 
       $(document).ready(function(){
-        window.card = new Skeuocard($("#skeuocard"), {
-          debug: false
-        });
+        if($('html').hasClass('ie10') || $('html').hasClass('webkit') || 
+           $('html').hasClass('firefox') || $('html').hasClass('opera')){
+          window.card = new Skeuocard($("#skeuocard"), {
+            debug: false
+          });
+        }
       });
 
     </script>
