@@ -60,7 +60,7 @@
         strings: {
           hiddenFaceFillPrompt: "Click here to<br /> fill in the other side.",
           hiddenFaceErrorWarning: "There's a problem on the other side.",
-          hiddenFaceSwitchPrompt: "Forgot something?"
+          hiddenFaceSwitchPrompt: "Forgotten something?"
         }
       };
       this.options = $.extend(optDefaults, opts);
@@ -586,10 +586,10 @@
       if (withAnimation == null) {
         withAnimation = false;
       }
-      this.show();
-      this.el.removeClass('prompt');
+      this._resetClasses();
       this.el.addClass('warn');
       this._setText(message);
+      this.show();
       if (withAnimation) {
         this.el.removeClass('warn-anim');
         return this.el.addClass('warn-anim');
@@ -600,14 +600,21 @@
       if (withAnimation == null) {
         withAnimation = false;
       }
-      this.show();
-      this.el.removeClass('warn');
+      this._resetClasses();
       this.el.addClass('prompt');
       this._setText(message);
+      this.show();
       if (withAnimation) {
         this.el.removeClass('valid-anim');
         return this.el.addClass('valid-anim');
       }
+    };
+
+    FlipTabView.prototype._resetClasses = function() {
+      this.el.removeClass('valid-anim');
+      this.el.removeClass('warn-anim');
+      this.el.removeClass('warn');
+      return this.el.removeClass('prompt');
     };
 
     FlipTabView.prototype.show = function() {

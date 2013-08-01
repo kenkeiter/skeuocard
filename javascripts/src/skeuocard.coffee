@@ -42,7 +42,7 @@ class Skeuocard
       strings:
         hiddenFaceFillPrompt: "Click here to<br /> fill in the other side."
         hiddenFaceErrorWarning: "There's a problem on the other side."
-        hiddenFaceSwitchPrompt: "Forgot something?"
+        hiddenFaceSwitchPrompt: "Forgotten something?"
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
@@ -457,22 +457,28 @@ class Skeuocard::FlipTabView
     @el.find('p').html(text)
 
   warn: (message, withAnimation = false)->
-    @show()
-    @el.removeClass('prompt')
+    @_resetClasses()
     @el.addClass('warn')
     @_setText(message)
+    @show()
     if withAnimation
       @el.removeClass('warn-anim')
       @el.addClass('warn-anim')
 
   prompt: (message, withAnimation = false)->
-    @show()
-    @el.removeClass('warn')
+    @_resetClasses()
     @el.addClass('prompt')
     @_setText(message)
+    @show()
     if withAnimation
       @el.removeClass('valid-anim')
       @el.addClass('valid-anim')
+
+  _resetClasses: ->
+    @el.removeClass('valid-anim')
+    @el.removeClass('warn-anim')
+    @el.removeClass('warn')
+    @el.removeClass('prompt')
 
   show: ->
     @el.show()

@@ -19,6 +19,10 @@ $cc-face-height: 15.6em;
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
 
+$color-field-glow: #0096de;
+$color-invalid: #ff655a;
+$color-valid: #00CFA7;
+
 .skeuocard.js {
   width: $cc-face-width;
   height: $cc-face-height;
@@ -102,15 +106,11 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
     height: 3.55em;
     width: 13em;
     display: block;
-    background: #00CFA7 url('/images/card-flip-arrow.png') no-repeat;
+    background: #666;
     background-size: 1.375em 1.725em;
-    -webkit-transition: all 0.25s ease;
-    -moz-transition: all 0.25s ease;
-    -o-transition: all 0.25s ease;
-    -ms-transition: all 0.25s ease;
-    transition: all 0.25s ease;
+    @include vendor-prefix(transition, all 0.25s ease);
     p{
-      margin: 0.3em;
+      margin: 0.6em;
       font-family: $cc-label-family;
       color: #fff;
       font-size: 1.0em;
@@ -119,37 +119,39 @@ $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", m
     &.front{
       right: -1.25em;
       top: 1em;
-      background-position: 10.65em 0.90em;
-      p{
-        margin-top: 0.6em;
-        margin-right: 2.9em;
-        margin-left: 1.25em;
-      }
-    }
-    &.front:hover{
-      right: -1.8em;
+      &:hover{ right: -1.8em; }
     }
     &.back{
       left: -1.25em;
       top: 1em;
-      background-position: 1.0em 0.90em;
-      p{
-        margin-right: 1.25em;
-        margin-left: 2.9em;
-        margin-top: 0.85em;
-      }
-    }
-    &.back:hover{
-      left: -1.8em;
+      &:hover{ left: -1.8em; }
     }
   }
   .flip-tab.valid-anim{
-    background-position: 10.05em 0.6em;
-    background-image: url('/images/card-valid-anim.gif');
+    background: $color-valid url('../images/card-valid-anim.gif') no-repeat;
     background-size: 2.3em 2.3em;
+    &.front{
+      background-position: 10.05em 0.6em;
+      p{
+        margin-right: 2.9em;
+        margin-left: 1.25em;
+        margin-top: 0.6em;
+      }
+    }
+    &.back{
+      background-position: 0.6em 0.6em;
+      p{
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.6em;
+      }
+    }
+  }
+  .flip-tab.prompt{
+    background-color: $color-valid;
   }
   .flip-tab.warn{
-    background-color: #ff655a;
+    background-color: $color-invalid;
   }
 
 }
