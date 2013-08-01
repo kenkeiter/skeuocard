@@ -26,7 +26,7 @@ Make sure your credit card inputs are within their own containing element (most 
 Side note: If you'd like to use different input `name`s or selectors, you can specify those at instantiation.
 
 ```html
-<div class="credit-card-input" id="skeuocard">
+<div class="credit-card-input no-js" id="skeuocard">
   <label for="cc_type">Card Type</label>
   <select name="cc_type">
     <option value="">...</option>

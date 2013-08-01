@@ -31,6 +31,9 @@
         <!-- START FORM -->
         
           <div class="credit-card-input no-js" id="skeuocard">
+            <p class="no-support-warning">
+              Either you have Javascript disabled, or you're using an unsupported browser, amigo! That's why you're seeing this old-school credit card input form instead of a fancy new Skeuocard. On the other hand, at least you know it gracefully degrades...
+            </p>
             <label for="cc_type">Card Type</label>
             <select name="cc_type">
               <option value="">...</option>
@@ -63,6 +66,8 @@ American Express: 371111111111114
 MasterCard: 5111111111111118
 Discover: 6011111111111117
 Diners Club: 30951111111116
+
+4111 1111 1111 1111
 </pre>
 
 <p>The numbers above will work with any expiration date (as long as it's in the future), any name, and any CVC code (the three or four digit verification code), since those are all validated on the server side upon authorization.</p>
