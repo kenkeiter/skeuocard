@@ -14,7 +14,7 @@
   -o-perspective: 1000;
   perspective: 1000; }
   .skeuocard.js input[type=number]::-webkit-inner-spin-button,
-  .skeyocard.js input[type=number]::-webkit-outer-spin-button {
+  .skeuocard.js input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance:none;
     margin: 0; }
   .skeuocard.js .card-body {
