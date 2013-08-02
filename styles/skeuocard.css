@@ -13,6 +13,10 @@
   -moz-perspective: 1000;
   -o-perspective: 1000;
   perspective: 1000; }
+  .skeuocard.js input[type=number]::-webkit-inner-spin-button,
+  .skeyocard.js input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance:none;
+    margin: 0; }
   .skeuocard.js .card-body {
     -moz-transform: perspective(1000px);
     -moz-transform-style: preserve-3d;

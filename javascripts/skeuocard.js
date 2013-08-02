@@ -809,7 +809,7 @@
       for (_i = 0, _len = groupings.length; _i < _len; _i++) {
         groupLength = groupings[_i];
         groupEl = $("<input>").attr({
-          type: 'text',
+          type: 'number',
           size: groupLength,
           maxlength: groupLength,
           "class": "group" + groupLength
