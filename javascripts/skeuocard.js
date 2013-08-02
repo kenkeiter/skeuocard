@@ -1049,7 +1049,7 @@
         groupChar = group[1];
         if (__indexOf.call(fieldChars, groupChar) >= 0) {
           input = $('<input>').attr({
-            type: 'text',
+            type: 'number',
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
             "class": 'cc-exp-field-' + groupChar.toLowerCase() + ' group' + groupLength
