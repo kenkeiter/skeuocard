@@ -1051,6 +1051,7 @@
         if (__indexOf.call(fieldChars, groupChar) >= 0) {
           input = $('<input>').attr({
             type: 'number',
+            pattern: '[0-9]*',
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
             "class": 'cc-exp-field-' + groupChar.toLowerCase() + ' group' + groupLength
