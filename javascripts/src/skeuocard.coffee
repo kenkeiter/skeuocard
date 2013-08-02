@@ -597,7 +597,8 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     _startLength = 0
     for groupLength in groupings
       groupEl = $("<input>").attr
-        type: 'text'
+        type: 'tel'
+        pattern: '[0-9]*'
         size: groupLength
         maxlength: groupLength
         class: "group#{groupLength}"
@@ -762,7 +763,8 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
       groupChar = group[1]
       if groupChar in fieldChars # this group is a field
         input = $('<input>').attr
-          type: 'text'
+          type: 'number'
+          pattern: '[0-9]*'
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength
           class: 'cc-exp-field-' + groupChar.toLowerCase() + 
