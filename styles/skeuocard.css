@@ -13,6 +13,10 @@
   -moz-perspective: 1000;
   -o-perspective: 1000;
   perspective: 1000; }
+  .skeuocard.js input[type=number]::-webkit-inner-spin-button,
+  .skeuocard.js input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0; }
   .skeuocard.js .card-body {
     -moz-transform: perspective(1000px);
     -moz-transform-style: preserve-3d;
@@ -43,7 +47,7 @@
       background-color: #eee;
       background-size: cover !important;
       background-position: right bottom;
-      border: 1px solid #ddd; }
+      border: 1px solid #dddddd; }
     .skeuocard.js .card-body .face.front {
       -webkit-transform: translate3d(0, 0, 0);
       z-index: 2; }
@@ -278,28 +282,28 @@
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {
   color: #eee;
   background-color: transparent;
-  text-shadow: 1px 1px 1px #bbb;
+  text-shadow: 1px 1px 1px #bbbbbb;
   filter: dropshadow(color=#aaaaaa, offx=1, offy=1);
   border: none; }
   .skeuocard.product-visa.issuer-simple input.placeholder, .skeuocard.product-visa.issuer-simple .separator.placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #ccc;
+    text-shadow: 1px 1px 1px #cccccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input:-moz-placeholder, .skeuocard.product-visa.issuer-simple .separator:-moz-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #ccc;
+    text-shadow: 1px 1px 1px #cccccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input::-moz-placeholder, .skeuocard.product-visa.issuer-simple .separator::-moz-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #ccc;
+    text-shadow: 1px 1px 1px #cccccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input:-ms-input-placeholder, .skeuocard.product-visa.issuer-simple .separator:-ms-input-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #ccc;
+    text-shadow: 1px 1px 1px #cccccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input::-webkit-input-placeholder, .skeuocard.product-visa.issuer-simple .separator::-webkit-input-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #ccc;
+    text-shadow: 1px 1px 1px #cccccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
 .skeuocard.product-visa.issuer-simple .cc-number {
   background-color: transparent; }
