@@ -502,12 +502,14 @@
     };
 
     Skeuocard.prototype.flip = function() {
-      var targetFace;
+      var surfaceName, targetFace;
       targetFace = this.visibleFace === 'front' ? 'back' : 'front';
       this.trigger('faceWillBecomeVisible.skeuocard', [this, targetFace]);
       this.visibleFace = targetFace;
       this.render();
       this.el.cardBody.toggleClass('flip');
+      surfaceName = this.visibleFace === 'front' ? 'surfaceFront' : 'surfaceBack';
+      this.el[surfaceName].find('input').first().focus();
       return this.trigger('faceDidBecomeVisible.skeuocard', [this, targetFace]);
     };
 
