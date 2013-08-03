@@ -399,6 +399,8 @@ class Skeuocard
     @visibleFace = targetFace
     @render()
     @el.cardBody.toggleClass('flip')
+    surfaceName = if @visibleFace is 'front' then 'surfaceFront' else 'surfaceBack'
+    @el[surfaceName].find('input').first().focus()
     @trigger('faceDidBecomeVisible.skeuocard', [@, targetFace])
 
   getProductForNumber: (num)->

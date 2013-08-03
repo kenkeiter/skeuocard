@@ -47,7 +47,7 @@
       background-color: #eee;
       background-size: cover !important;
       background-position: right bottom;
-      border: 1px solid #dddddd; }
+      border: 1px solid #ddd; }
     .skeuocard.js .card-body .face.front {
       -webkit-transform: translate3d(0, 0, 0);
       z-index: 2; }
@@ -282,28 +282,28 @@
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {
   color: #eee;
   background-color: transparent;
-  text-shadow: 1px 1px 1px #bbbbbb;
+  text-shadow: 1px 1px 1px #bbb;
   filter: dropshadow(color=#aaaaaa, offx=1, offy=1);
   border: none; }
   .skeuocard.product-visa.issuer-simple input.placeholder, .skeuocard.product-visa.issuer-simple .separator.placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #cccccc;
+    text-shadow: 1px 1px 1px #ccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input:-moz-placeholder, .skeuocard.product-visa.issuer-simple .separator:-moz-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #cccccc;
+    text-shadow: 1px 1px 1px #ccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input::-moz-placeholder, .skeuocard.product-visa.issuer-simple .separator::-moz-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #cccccc;
+    text-shadow: 1px 1px 1px #ccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input:-ms-input-placeholder, .skeuocard.product-visa.issuer-simple .separator:-ms-input-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #cccccc;
+    text-shadow: 1px 1px 1px #ccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
   .skeuocard.product-visa.issuer-simple input::-webkit-input-placeholder, .skeuocard.product-visa.issuer-simple .separator::-webkit-input-placeholder {
     color: #fff;
-    text-shadow: 1px 1px 1px #cccccc;
+    text-shadow: 1px 1px 1px #ccc;
     filter: dropshadow(color=#dddddd, offx=1, offy=1); }
 .skeuocard.product-visa.issuer-simple .cc-number {
   background-color: transparent; }
@@ -338,6 +338,8 @@
 
 .skeuocard.product-mastercard .face.front {
   background: #eeeeee url("../images/products/mastercard-front.png") no-repeat right bottom; }
+.skeuocard.product-mastercard .face.back {
+  background: #eeeeee url("../images/products/visa-back.png") no-repeat center center; }
 .skeuocard.product-mastercard .cc-number {
   left: 1.8em;
   top: 8.05em; }
@@ -347,6 +349,10 @@
 .skeuocard.product-mastercard .cc-exp {
   left: 11.5em;
   top: 10.8em; }
+.skeuocard.product-mastercard .cc-cvc {
+  top: 7.15em;
+  left: 18.1em;
+  width: 3em; }
 
 .skeuocard.product-discover .face.front {
   background: #eeeeee url("../images/products/discover-front.png") no-repeat right bottom; }
