@@ -1,7 +1,7 @@
 ###
 "Skeuocard" -- A Skeuomorphic Credit-Card Input Enhancement
-@description Skeuocard is a skeuomorphic credit card input plugin, supporting 
-             progressive enhancement. It renders a credit-card input which 
+@description Skeuocard is a skeuomorphic credit card input plugin, supporting
+             progressive enhancement. It renders a credit-card input which
              behaves similarly to a physical credit card.
 @author Ken Keiter <ken@kenkeiter.com>
 @updated 2013-07-25
@@ -9,8 +9,15 @@
 @exports [window.Skeuocard]
 ###
 
+validNumericInput = (key) ->
+  deleteKey = 8
+  numberKeys = [48..57].concat [96..105]
+  arrowKeys = [37..40]
+
+  (key in arrowKeys) or (key in numberKeys) or (key is deleteKey)
+
 class Skeuocard
-  
+
   constructor: (el, opts = {})->
     @el = {container: $(el), underlyingFields: {}}
     @_inputViews = {}
@@ -24,9 +31,9 @@ class Skeuocard
     @_initialValidationState = {}
     @_validationState = {number: false, exp: false, name: false, cvc: false}
     @_faceFillState = {front: false, back: false}
-    
+
     # configure default opts
-    optDefaults = 
+    optDefaults =
       debug: false
       acceptedCardProducts: []
       cardNumberPlaceholderChar: 'X'
@@ -44,7 +51,7 @@ class Skeuocard
         hiddenFaceErrorWarning: "There's a problem on the other side."
         hiddenFaceSwitchPrompt: "Back to the other side..."
     @options = $.extend(optDefaults, opts)
-    
+
     # initialize the card
     @_conformDOM()   # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
@@ -53,10 +60,10 @@ class Skeuocard
     @_flipToInvalidSide()
 
 
-  # Transform the elements within the container, conforming the DOM so that it 
+  # Transform the elements within the container, conforming the DOM so that it
   # becomes styleable, and that the underlying inputs are hidden.
   _conformDOM: ->
-    # for CSS determination that this is an enhanced input, add 'js' class to 
+    # for CSS determination that this is an enhanced input, add 'js' class to
     # the container
     @el.container.removeClass('no-js')
     @el.container.addClass("skeuocard js")
@@ -83,16 +90,16 @@ class Skeuocard
         unless el.hasClass('invalid')
           el.addClass('invalid')
     # bind change handlers to render
-    @el.underlyingFields.number.bind "change", (e)=> 
+    @el.underlyingFields.number.bind "change", (e)=>
       @_inputViews.number.setValue @_getUnderlyingValue('number')
       @render()
-    @el.underlyingFields.exp.bind "change", (e)=> 
+    @el.underlyingFields.exp.bind "change", (e)=>
       @_inputViews.exp.setValue @_getUnderlyingValue('exp')
       @render()
-    @el.underlyingFields.name.bind "change", (e)=> 
+    @el.underlyingFields.name.bind "change", (e)=>
       @_inputViews.exp.setValue @_getUnderlyingValue('name')
       @render()
-    @el.underlyingFields.cvc.bind "change", (e)=> 
+    @el.underlyingFields.cvc.bind "change", (e)=>
       @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
       @render()
     # construct the necessary card elements
@@ -125,7 +132,7 @@ class Skeuocard
         el = $(_el)
         cardProductShortname = el.attr('data-card-product-shortname') || el.attr('value')
         @options.acceptedCardProducts.push cardProductShortname
-    # find all matching card products by shortname, and add them to the 
+    # find all matching card products by shortname, and add them to the
     # list of @acceptedCardProducts
     for matcher, product of CCProducts
       if product.companyShortname in @options.acceptedCardProducts
@@ -133,20 +140,20 @@ class Skeuocard
     return @acceptedCardProducts
 
   _updateProductIfNeeded: ->
-    # determine if product changed; if so, change it globally, and 
+    # determine if product changed; if so, change it globally, and
     # call render() to render the changes.
     number = @_getUnderlyingValue('number')
     matchedProduct = @getProductForNumber(number)
     matchedProductIdentifier = matchedProduct?.companyShortname || ''
     matchedIssuerIdentifier = matchedProduct?.issuerShortname || ''
 
-    if (@productShortname isnt matchedProductIdentifier) or 
+    if (@productShortname isnt matchedProductIdentifier) or
        (@issuerShortname isnt matchedIssuerIdentifier)
         @productShortname = matchedProductIdentifier
         @issuerShortname = matchedIssuerIdentifier
         @product = matchedProduct
         @_cardProductNeedsLayout = true
-        @trigger 'productWillChange.skeuocard', 
+        @trigger 'productWillChange.skeuocard',
           [@, @productShortname, matchedProductIdentifier]
         @_log("Triggering render because product changed.")
         @render()
@@ -177,13 +184,15 @@ class Skeuocard
       @_setUnderlyingValue('number', input.getValue())
       @_updateValidationStateForInputView('number')
       @_updateProductIfNeeded()
-    
+
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
       @_updateValidationStateForInputView('exp')
     @_inputViews.name.bind "keyup", (e)=>
       @_setUnderlyingValue('name', $(e.target).val())
       @_updateValidationStateForInputView('name')
+    @_inputViews.cvc.bind "keydown", (e)=>
+      e.preventDefault() unless validNumericInput(e.which)
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
       @_updateValidationStateForInputView('cvc')
@@ -194,7 +203,7 @@ class Skeuocard
     @_inputViews.name.el.val @_getUnderlyingValue('name')
     @_inputViews.cvc.el.val @_getUnderlyingValue('cvc')
 
-  # Debugging helper; if debug is set to true at instantiation, messages will 
+  # Debugging helper; if debug is set to true at instantiation, messages will
   # be printed to the console.
   _log: (msg...)->
     if console?.log and !!@options.debug
@@ -232,7 +241,7 @@ class Skeuocard
         # TODO: dont forget to set placeholderChar: @options.cardNumberPlaceholderChar
         @_inputViews.exp.show()
         @_inputViews.name.show()
-        @_inputViews.exp.reconfigure 
+        @_inputViews.exp.reconfigure
           pattern: @product.expirationFormat
         @_inputViews.cvc.show()
         @_inputViews.cvc.attr
@@ -310,10 +319,10 @@ class Skeuocard
     else
       @el.container.addClass('valid')
       @el.container.removeClass('invalid')
-    
+
     @_log("*** rendering complete ***")
 
-  # We should *always* show initial validation errors; they shouldn't show and 
+  # We should *always* show initial validation errors; they shouldn't show and
   # hide with the rest of the errors unless their value has been changed.
   showInitialValidationErrors: ->
     for fieldName, state of @_initialValidationState
@@ -332,7 +341,7 @@ class Skeuocard
 
   hideValidationErrors: ->
     for fieldName, state of @_validationState
-      if (@_initialValidationState[fieldName] is false and state is true) or 
+      if (@_initialValidationState[fieldName] is false and state is true) or
         (not @_initialValidationState[fieldName]?)
           @_inputViews[fieldName].el.removeClass('invalid')
 
@@ -378,9 +387,9 @@ class Skeuocard
     return !!valid
 
   isValid: ->
-    @_validationState.number and 
-      @_validationState.exp and 
-      @_validationState.name and 
+    @_validationState.number and
+      @_validationState.exp and
+      @_validationState.name and
       @_validationState.cvc
 
   # Get a value from the underlying form.
@@ -434,7 +443,7 @@ class Skeuocard
 
 ###
 Skeuocard::FlipTabView
-Handles rendering of the "flip button" control and its various warning and 
+Handles rendering of the "flip button" control and its various warning and
 prompt states.
 
 TODO: Rebuild this so that it observes events and contains its own logic.
@@ -526,14 +535,14 @@ class Skeuocard::TextInputView
     return Array(zero).join("0") + num
 
 class Skeuocard::SegmentedCardNumberInputView
-  
+
   _digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
   _arrowKeys: {left: 37, up: 38, right: 39, down: 40}
-  _specialKeys: [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 
+  _specialKeys: [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40,
                   45, 46, 91, 93, 144, 145, 224]
 
   constructor: (opts = {})->
-    @optDefaults = 
+    @optDefaults =
       value: ""
       groupings: [19]
       placeholderChar: "X"
@@ -556,6 +565,8 @@ class Skeuocard::SegmentedCardNumberInputView
     if e.ctrlKey or e.metaKey
       return @_handleModifiedKeyDown(e)
 
+    e.preventDefault() unless validNumericInput(e.which)
+
     inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
     selectionEnd = currentTarget.selectionEnd
@@ -575,7 +586,7 @@ class Skeuocard::SegmentedCardNumberInputView
     currentTarget = e.currentTarget # get rid of that e.
     selectionEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
-    
+
     nextInputEl = inputGroupEl.nextAll('input')
 
     if e.ctrlKey or e.metaKey
@@ -611,7 +622,7 @@ class Skeuocard::SegmentedCardNumberInputView
     selectionEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
     isDigit = (String.fromCharCode(e.which) in @_digits)
-    
+
     nextInputEl = inputGroupEl.nextAll('input')
 
     if e.ctrlKey or e.metaKey or (e.which in @_specialKeys) or isDigit
@@ -635,7 +646,7 @@ class Skeuocard::SegmentedCardNumberInputView
       when 'A'
         @_beginSelectAll()
         e.preventDefault()
-  
+
   _handleGroupChange: (e)->
     e.stopPropagation()
 
@@ -797,7 +808,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
       new Date(dateParts[2], dateParts[1]-1, dateParts[0])
     opts.currentDate ||= new Date()
     opts.pattern ||= "MM/YY"
-    
+
     @options = opts
     # setup default values
     @date = undefined
@@ -853,7 +864,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
           pattern: '[0-9]*'
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength
-          class: 'cc-exp-field-' + groupChar.toLowerCase() + 
+          class: 'cc-exp-field-' + groupChar.toLowerCase() +
                  ' group' + groupLength
         input.data('fieldtype', groupChar)
         @el.append(input)
@@ -878,7 +889,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
         when 'D'
           el.val @_zeroPadNumber(currentDate.getDate(), groupLength)
         when 'Y'
-          year = if groupLength >= 4 then currentDate.getFullYear() else 
+          year = if groupLength >= 4 then currentDate.getFullYear() else
                  currentDate.getFullYear().toString().substr(2,4)
           el.val(year)
 
@@ -912,7 +923,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
 
   _onKeyDown: (e)->
     e.stopPropagation()
-    groupEl = $(e.currentTarget)
+    e.preventDefault() unless validNumericInput(e.which)
 
     groupEl = $(e.currentTarget)
     groupMaxLength = parseInt(groupEl.attr('maxlength'))
@@ -922,7 +933,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
     nextInputEl = groupEl.nextAll('input').first()
 
     # Handle delete key
-    if e.which is 8 and groupCaretPos is 0 and 
+    if e.which is 8 and groupCaretPos is 0 and
       not $.isEmptyObject(prevInputEl)
         prevInputEl.focus()
 
@@ -943,14 +954,14 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
 
   _onKeyUp: (e)->
     e.stopPropagation()
-    
+
     specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36,
                    37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224]
-    arrowKeys = [37, 38, 39, 40]
+    arrowKeys = [37..40]
     groupEl = $(e.currentTarget)
     groupMaxLength = parseInt(groupEl.attr('maxlength'))
     groupCaretPos = @_getFieldCaretPosition(groupEl)
-    
+
     if e.which not in specialKeys
       # intercept bad chars, returning user to the right char pos if need be
       groupValLength = groupEl.val().length
@@ -963,8 +974,8 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
 
     nextInputEl = groupEl.nextAll('input').first()
 
-    if e.which not in specialKeys and 
-      groupEl.val().length is groupMaxLength and 
+    if e.which not in specialKeys and
+      groupEl.val().length is groupMaxLength and
       not $.isEmptyObject(nextInputEl) and
       @_getFieldCaretPosition(groupEl) is groupMaxLength
         nextInputEl.focus()
@@ -1018,7 +1029,7 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
     return @el.val().length > 0
 
   isValid: ->
-    if @options.requireMaxLength 
+    if @options.requireMaxLength
       return @el.val().length is parseInt(@el.attr('maxlength'))
     else
       return @isFilled()
