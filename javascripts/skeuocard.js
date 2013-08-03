@@ -212,8 +212,8 @@
       this._inputViews.exp.el.addClass('cc-exp');
       this._inputViews.exp.el.appendTo(this.el.surfaceFront);
       this._inputViews.cvc.el.appendTo(this.el.surfaceBack);
-      this._inputViews.number.bind("keyup", function(e, input) {
-        _this._setUnderlyingValue('number', input.value);
+      this._inputViews.number.bind("change", function(e, input) {
+        _this._setUnderlyingValue('number', input.getValue());
         _this._updateValidationStateForInputView('number');
         return _this._updateProductIfNeeded();
       });
@@ -279,10 +279,7 @@
             this.el.container.addClass("issuer-" + this.product.issuerShortname);
           }
           this._setUnderlyingCardType(this.product.companyShortname);
-          this._inputViews.number.reconfigure({
-            groupings: this.product.cardNumberGrouping,
-            placeholderChar: this.options.cardNumberPlaceholderChar
-          });
+          this._inputViews.number.setGroupings(this.product.cardNumberGrouping);
           this._inputViews.exp.show();
           this._inputViews.name.show();
           this._inputViews.exp.reconfigure({
@@ -312,10 +309,13 @@
           this._inputViews.exp.hide();
           this._inputViews.name.hide();
           this._inputViews.cvc.hide();
-          this._inputViews.number.reconfigure({
-            groupings: [this.options.genericPlaceholder.length],
-            placeholder: this.options.genericPlaceholder
-          });
+          this._inputViews.number.setGroupings([this.options.genericPlaceholder.length]);
+          /*
+                  @_inputViews.number.reconfigure
+                    groupings: [@options.genericPlaceholder.length],
+                    placeholder: @options.genericPlaceholder
+          */
+
           this.el.container.removeClass(function(index, css) {
             return (css.match(/\bproduct-\S+/g) || []).join(' ');
           });
@@ -570,6 +570,8 @@
   Skeuocard::FlipTabView
   Handles rendering of the "flip button" control and its various warning and 
   prompt states.
+  
+  TODO: Rebuild this so that it observes events and contains its own logic.
   */
 
 
@@ -712,211 +714,290 @@
 
   })();
 
-  Skeuocard.prototype.SegmentedCardNumberInputView = (function(_super) {
+  Skeuocard.prototype.SegmentedCardNumberInputView = (function() {
 
-    __extends(SegmentedCardNumberInputView, _super);
+    SegmentedCardNumberInputView.prototype._digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+    SegmentedCardNumberInputView.prototype._arrowKeys = {
+      left: 37,
+      up: 38,
+      right: 39,
+      down: 40
+    };
+
+    SegmentedCardNumberInputView.prototype._specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224];
 
     function SegmentedCardNumberInputView(opts) {
-      var _this = this;
       if (opts == null) {
         opts = {};
       }
-      opts.value || (opts.value = "");
-      opts.groupings || (opts.groupings = [19]);
-      opts.placeholderChar || (opts.placeholderChar = "X");
-      this.options = opts;
-      this.value = this.options.value;
-      this.el = $("<fieldset>");
-      this.el.delegate("input", "keydown", function(e) {
-        return _this._onGroupKeyDown(e);
-      });
-      this.el.delegate("input", "keyup", function(e) {
-        return _this._onGroupKeyUp(e);
-      });
-      this.groupEls = $();
+      this.optDefaults = {
+        value: "",
+        groupings: [19],
+        placeholderChar: "X"
+      };
+      this.options = $.extend({}, this.optDefaults, opts);
+      this._state = {
+        selectingAll: false
+      };
+      this._buildDOM();
+      this.setGroupings(this.options.groupings);
     }
 
-    SegmentedCardNumberInputView.prototype._onGroupKeyDown = function(e) {
-      var arrowKeys, groupCaretPos, groupEl, groupMaxLength, _ref;
-      e.stopPropagation();
-      groupEl = $(e.currentTarget);
-      arrowKeys = [37, 38, 39, 40];
-      groupEl = $(e.currentTarget);
-      groupMaxLength = parseInt(groupEl.attr('maxlength'));
-      groupCaretPos = this._getFieldCaretPosition(groupEl);
-      if (e.which === 8 && groupCaretPos === 0 && !$.isEmptyObject(groupEl.prev())) {
-        groupEl.prev().focus();
+    SegmentedCardNumberInputView.prototype._buildDOM = function() {
+      this.el = $('<fieldset>');
+      this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
+      this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
+      this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
+      return this.el.delegate("input", "change", this._handleGroupChange.bind(this));
+    };
+
+    SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
+      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, selectionEnd, _ref, _ref1;
+      if (e.ctrlKey || e.metaKey) {
+        return this._handleModifiedKeyDown(e);
       }
-      if (_ref = e.which, __indexOf.call(arrowKeys, _ref) >= 0) {
-        switch (e.which) {
-          case 37:
-            if (groupCaretPos === 0 && !$.isEmptyObject(groupEl.prev())) {
-              return groupEl.prev().focus();
+      inputGroupEl = $(e.currentTarget);
+      currentTarget = e.currentTarget;
+      selectionEnd = currentTarget.selectionEnd;
+      inputMaxLength = currentTarget.maxLength;
+      prevInputEl = inputGroupEl.prevAll('input');
+      nextInputEl = inputGroupEl.nextAll('input');
+      switch (e.which) {
+        case 8:
+          if (prevInputEl.length > 0) {
+            if (selectionEnd === 0) {
+              this._focusField(prevInputEl.first(), 'end');
             }
-            break;
-          case 39:
-            if (groupCaretPos === groupMaxLength && !$.isEmptyObject(groupEl.next())) {
-              return groupEl.next().focus();
-            }
-            break;
-          case 38:
-            if (!$.isEmptyObject(groupEl.prev())) {
-              return groupEl.prev().focus();
-            }
-            break;
-          case 40:
-            if (!$.isEmptyObject(groupEl.next())) {
-              return groupEl.next().focus();
-            }
+          }
+          break;
+        default:
+          if (!(_ref = e.keyCode, __indexOf.call(this._specialKeys, _ref) >= 0) && !(_ref1 = String.fromCharCode(e.keyCode), __indexOf.call(this._digits, _ref1) >= 0)) {
+            e.preventDefault();
+          }
+      }
+      return true;
+    };
+
+    SegmentedCardNumberInputView.prototype._handleGroupKeyUp = function(e) {
+      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, selectionEnd, _ref, _ref1, _ref2;
+      inputGroupEl = $(e.currentTarget);
+      currentTarget = e.currentTarget;
+      selectionEnd = currentTarget.selectionEnd;
+      inputMaxLength = currentTarget.maxLength;
+      nextInputEl = inputGroupEl.nextAll('input');
+      if (e.ctrlKey || e.metaKey) {
+        return false;
+      }
+      if ((_ref = String.fromCharCode(e.which), __indexOf.call(this._digits, _ref) >= 0) || ((_ref1 = e.which) === 37 || _ref1 === 38 || _ref1 === 39 || _ref1 === 40)) {
+        if (this._state.selectingAll) {
+          this._endSelectAll();
         }
+      }
+      switch (e.which) {
+        case this._arrowKeys.left:
+          if (selectionEnd === 0) {
+            this._focusField(inputGroupEl.prev(), 'end');
+          }
+          break;
+        case this._arrowKeys.right:
+          if (selectionEnd === inputMaxLength) {
+            this._focusField(inputGroupEl.next(), 'start');
+          }
+          break;
+        case this._arrowKeys.up:
+          this._focusField(inputGroupEl.next(), 'start');
+          e.preventDefault();
+          break;
+        case this._arrowKeys.down:
+          this._focusField(inputGroupEl.prev(), 'start');
+          e.preventDefault();
+          break;
+        default:
+          if ((_ref2 = String.fromCharCode(e.keyCode), __indexOf.call(this._digits, _ref2) >= 0) && selectionEnd === inputMaxLength) {
+            if (nextInputEl.length !== 0) {
+              this._focusField(nextInputEl, 'start');
+            } else {
+              e.preventDefault();
+            }
+          }
+      }
+      this.trigger('change', [this]);
+      return true;
+    };
+
+    SegmentedCardNumberInputView.prototype._handleGroupPaste = function(e) {
+      var _this = this;
+      return setTimeout(function() {
+        var newValue;
+        newValue = _this.getValue().replace(/[^0-9]+/g, '');
+        if (_this._state.selectingAll) {
+          _this._endSelectAll();
+        }
+        _this.setValue(newValue);
+        return _this.trigger('change', [_this]);
+      }, 50);
+    };
+
+    SegmentedCardNumberInputView.prototype._handleModifiedKeyDown = function(e) {
+      var char;
+      char = String.fromCharCode(e.which);
+      switch (char) {
+        case 'A':
+          this._beginSelectAll();
+          return e.preventDefault();
       }
     };
 
-    SegmentedCardNumberInputView.prototype._onGroupKeyUp = function(e) {
-      var groupCaretPos, groupEl, groupMaxLength, groupValLength, newValue, pattern, specialKeys, _ref, _ref1;
-      e.stopPropagation();
-      specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224];
-      groupEl = $(e.currentTarget);
-      groupMaxLength = parseInt(groupEl.attr('maxlength'));
-      groupCaretPos = this._getFieldCaretPosition(groupEl);
-      if (_ref = e.which, __indexOf.call(specialKeys, _ref) < 0) {
-        groupValLength = groupEl.val().length;
-        pattern = new RegExp('[^0-9]+', 'g');
-        groupEl.val(groupEl.val().replace(pattern, ''));
-        if (groupEl.val().length < groupValLength) {
-          this._setFieldCaretPosition(groupEl, groupCaretPos - 1);
+    SegmentedCardNumberInputView.prototype._handleGroupChange = function(e) {
+      return e.stopPropagation();
+    };
+
+    SegmentedCardNumberInputView.prototype._getFocusedField = function() {
+      return this.el.find("input:focus");
+    };
+
+    SegmentedCardNumberInputView.prototype._beginSelectAll = function() {
+      var fieldEl;
+      if (this._state.selectingAll === false) {
+        this._state.selectingAll = true;
+        this._state.lastGrouping = this.options.groupings;
+        this._state.lastValue = this.getValue();
+        this.setGroupings(this.optDefaults.groupings);
+        this.el.addClass('selecting-all');
+        fieldEl = this.el.find("input");
+        return fieldEl[0].setSelectionRange(0, fieldEl.val().length);
+      } else {
+        fieldEl = this.el.find("input");
+        return fieldEl[0].setSelectionRange(0, fieldEl.val().length);
+      }
+    };
+
+    SegmentedCardNumberInputView.prototype._endSelectAll = function() {
+      if (this._state.selectingAll) {
+        if (this._state.lastValue === this.getValue()) {
+          this.setGroupings(this._state.lastGrouping);
         } else {
-          this._setFieldCaretPosition(groupEl, groupCaretPos);
+          this._focusField(this.el.find('input').last(), 'end');
+        }
+        this.el.removeClass('selecting-all');
+        console.log("Setting selecting all to no.");
+        return this._state.selectingAll = false;
+      }
+    };
+
+    SegmentedCardNumberInputView.prototype._indexInValueAtFieldSelection = function(field) {
+      var groupingIndex, i, len, offset, _i, _len, _ref;
+      groupingIndex = this.el.find('input').index(field);
+      offset = 0;
+      _ref = this.options.groupings;
+      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+        len = _ref[i];
+        if (i < groupingIndex) {
+          offset += len;
         }
       }
-      if ((_ref1 = e.which, __indexOf.call(specialKeys, _ref1) < 0) && groupEl.val().length === groupMaxLength && !$.isEmptyObject(groupEl.next()) && this._getFieldCaretPosition(groupEl) === groupMaxLength) {
-        groupEl.next().focus();
-      }
-      newValue = "";
-      this.groupEls.each(function() {
-        return newValue += $(this).val();
-      });
-      this.value = newValue;
-      this.trigger("keyup", [this]);
-      return false;
+      return offset + field[0].selectionEnd;
     };
 
     SegmentedCardNumberInputView.prototype.setGroupings = function(groupings) {
-      var caretPos, groupEl, groupLength, _i, _len, _startLength;
-      caretPos = this._caretPosition();
+      var groupEl, groupLength, _caretPosition, _currentField, _i, _len, _value;
+      _currentField = this._getFocusedField();
+      _value = this.getValue();
+      _caretPosition = 0;
+      if (_currentField.length > 0) {
+        _caretPosition = this._indexInValueAtFieldSelection(_currentField);
+      }
       this.el.empty();
-      _startLength = 0;
       for (_i = 0, _len = groupings.length; _i < _len; _i++) {
         groupLength = groupings[_i];
         groupEl = $("<input>").attr({
           type: 'text',
+          pattern: '[0-9]*',
           size: groupLength,
           maxlength: groupLength,
           "class": "group" + groupLength
         });
-        if (this.value.length > _startLength) {
-          groupEl.val(this.value.substr(_startLength, groupLength));
-          _startLength += groupLength;
-        }
         this.el.append(groupEl);
       }
       this.options.groupings = groupings;
-      this.groupEls = this.el.find("input");
-      this._caretTo(caretPos);
-      if (this.options.placeholderChar !== void 0) {
-        this.setPlaceholderChar(this.options.placeholderChar);
-      }
-      if (this.options.placeholder !== void 0) {
-        return this.setPlaceholder(this.options.placeholder);
+      this.setValue(_value);
+      _currentField = this._focusFieldForValue([_caretPosition, _caretPosition]);
+      if ((_currentField != null) && _currentField[0].selectionEnd === _currentField[0].maxLength) {
+        return this._focusField(_currentField.next(), 'start');
       }
     };
 
-    SegmentedCardNumberInputView.prototype.setPlaceholderChar = function(ch) {
-      this.groupEls.each(function() {
-        var el;
-        el = $(this);
-        return el.attr('placeholder', new Array(parseInt(el.attr('maxlength')) + 1).join(ch));
-      });
-      this.options.placeholder = void 0;
-      return this.options.placeholderChar = ch;
+    SegmentedCardNumberInputView.prototype._focusFieldForValue = function(place) {
+      var field, fieldOffset, fieldPosition, groupIndex, groupLength, value, _i, _lastStartPos, _len, _ref;
+      value = this.getValue();
+      if (place === 'start') {
+        field = this.el.find('input').first();
+        this._focusField(field, place);
+      } else if (place === 'end') {
+        field = this.el.find('input').last();
+        this._focusField(field, place);
+      } else {
+        field = void 0;
+        fieldOffset = void 0;
+        _lastStartPos = 0;
+        _ref = this.options.groupings;
+        for (groupIndex = _i = 0, _len = _ref.length; _i < _len; groupIndex = ++_i) {
+          groupLength = _ref[groupIndex];
+          if (place[1] > _lastStartPos && place[1] <= _lastStartPos + groupLength) {
+            field = $(this.el.find('input')[groupIndex]);
+            fieldPosition = place[1] - _lastStartPos;
+          }
+          _lastStartPos += groupLength;
+        }
+        if ((field != null) && (fieldPosition != null)) {
+          this._focusField(field, [fieldPosition, fieldPosition]);
+        } else {
+          this._focusField(this.el.find('input'), 'end');
+        }
+      }
+      return field;
     };
 
-    SegmentedCardNumberInputView.prototype.setPlaceholder = function(str) {
-      this.groupEls.each(function() {
-        return $(this).attr('placeholder', str);
-      });
-      this.options.placeholderChar = void 0;
-      return this.options.placeholder = str;
+    SegmentedCardNumberInputView.prototype._focusField = function(field, place) {
+      var fieldLen;
+      if (field.length !== 0) {
+        field.focus();
+        if (place === 'start') {
+          return field[0].setSelectionRange(0, 0);
+        } else if (place === 'end') {
+          fieldLen = field[0].maxLength;
+          return field[0].setSelectionRange(fieldLen, fieldLen);
+        } else {
+          return field[0].setSelectionRange(place[0], place[1]);
+        }
+      }
     };
 
     SegmentedCardNumberInputView.prototype.setValue = function(newValue) {
-      var lastPos;
-      lastPos = 0;
-      this.groupEls.each(function() {
-        var el, len;
-        el = $(this);
-        len = parseInt(el.attr('maxlength'));
-        el.val(newValue.substr(lastPos, len));
-        return lastPos += len;
-      });
-      return this.value = newValue;
+      var el, groupIndex, groupLength, groupVal, _i, _lastStartPos, _len, _ref, _results;
+      _lastStartPos = 0;
+      _ref = this.options.groupings;
+      _results = [];
+      for (groupIndex = _i = 0, _len = _ref.length; _i < _len; groupIndex = ++_i) {
+        groupLength = _ref[groupIndex];
+        el = $(this.el.find('input').get(groupIndex));
+        groupVal = newValue.substr(_lastStartPos, groupLength);
+        el.val(groupVal);
+        _results.push(_lastStartPos += groupLength);
+      }
+      return _results;
     };
 
     SegmentedCardNumberInputView.prototype.getValue = function() {
-      return this.value;
-    };
-
-    SegmentedCardNumberInputView.prototype.reconfigure = function(changes) {
-      if (changes == null) {
-        changes = {};
+      var buffer, el, _i, _len, _ref;
+      buffer = "";
+      _ref = this.el.find('input');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        el = _ref[_i];
+        buffer += $(el).val();
       }
-      if (changes.groupings != null) {
-        this.setGroupings(changes.groupings);
-      }
-      if (changes.placeholderChar != null) {
-        this.setPlaceholderChar(changes.placeholderChar);
-      }
-      if (changes.placeholder != null) {
-        this.setPlaceholder(changes.placeholder);
-      }
-      if (changes.value != null) {
-        return this.setValue(changes.value);
-      }
-    };
-
-    SegmentedCardNumberInputView.prototype._caretTo = function(index) {
-      var inputEl, inputElIndex, pos,
-        _this = this;
-      pos = 0;
-      inputEl = void 0;
-      inputElIndex = 0;
-      this.groupEls.each(function(i, e) {
-        var el, elLength;
-        el = $(e);
-        elLength = parseInt(el.attr('maxlength'));
-        if (index <= elLength + pos && index >= pos) {
-          inputEl = el;
-          inputElIndex = index - pos;
-        }
-        return pos += elLength;
-      });
-      return this._setFieldCaretPosition(inputEl, inputElIndex);
-    };
-
-    SegmentedCardNumberInputView.prototype._caretPosition = function() {
-      var finalPos, iPos,
-        _this = this;
-      iPos = 0;
-      finalPos = 0;
-      this.groupEls.each(function(i, e) {
-        var el;
-        el = $(e);
-        if (el.is(':focus')) {
-          finalPos = iPos + _this._getFieldCaretPosition(el);
-        }
-        return iPos += parseInt(el.attr('maxlength'));
-      });
-      return finalPos;
+      return buffer;
     };
 
     SegmentedCardNumberInputView.prototype.maxLength = function() {
@@ -926,11 +1007,11 @@
     };
 
     SegmentedCardNumberInputView.prototype.isFilled = function() {
-      return this.value.length === this.maxLength();
+      return this.getValue().length === this.maxLength();
     };
 
     SegmentedCardNumberInputView.prototype.isValid = function() {
-      return this.isFilled() && this.isValidLuhn(this.value);
+      return this.isFilled() && this.isValidLuhn(this.getValue());
     };
 
     SegmentedCardNumberInputView.prototype.isValidLuhn = function(identifier) {
@@ -954,9 +1035,41 @@
       return sum % 10 === 0;
     };
 
+    SegmentedCardNumberInputView.prototype.bind = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).bind.apply(_ref, args);
+    };
+
+    SegmentedCardNumberInputView.prototype.trigger = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).trigger.apply(_ref, args);
+    };
+
+    SegmentedCardNumberInputView.prototype.show = function() {
+      return this.el.show();
+    };
+
+    SegmentedCardNumberInputView.prototype.hide = function() {
+      return this.el.hide();
+    };
+
+    SegmentedCardNumberInputView.prototype.addClass = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).addClass.apply(_ref, args);
+    };
+
+    SegmentedCardNumberInputView.prototype.removeClass = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).removeClass.apply(_ref, args);
+    };
+
     return SegmentedCardNumberInputView;
 
-  })(Skeuocard.prototype.TextInputView);
+  })();
 
   /*
   Skeuocard::ExpirationInputView
@@ -1049,7 +1162,8 @@
         groupChar = group[1];
         if (__indexOf.call(fieldChars, groupChar) >= 0) {
           input = $('<input>').attr({
-            type: 'text',
+            type: 'number',
+            pattern: '[0-9]*',
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
             "class": 'cc-exp-field-' + groupChar.toLowerCase() + ' group' + groupLength

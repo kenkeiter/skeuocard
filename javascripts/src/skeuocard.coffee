@@ -173,10 +173,11 @@ class Skeuocard
     @_inputViews.cvc.el.appendTo(@el.surfaceBack)
 
     # bind change events to their underlying form elements
-    @_inputViews.number.bind "keyup", (e, input)=>
-      @_setUnderlyingValue('number', input.value)
+    @_inputViews.number.bind "change", (e, input)=>
+      @_setUnderlyingValue('number', input.getValue())
       @_updateValidationStateForInputView('number')
       @_updateProductIfNeeded()
+    
     @_inputViews.exp.bind "keyup", (e, input)=>
       @_setUnderlyingValue('exp', input.value)
       @_updateValidationStateForInputView('exp')
@@ -227,9 +228,8 @@ class Skeuocard
         # Adjust underlying card type to match detected type
         @_setUnderlyingCardType(@product.companyShortname)
         # Reconfigure input to match product
-        @_inputViews.number.reconfigure 
-          groupings: @product.cardNumberGrouping
-          placeholderChar: @options.cardNumberPlaceholderChar
+        @_inputViews.number.setGroupings(@product.cardNumberGrouping)
+        # TODO: dont forget to set placeholderChar: @options.cardNumberPlaceholderChar
         @_inputViews.exp.show()
         @_inputViews.name.show()
         @_inputViews.exp.reconfigure 
@@ -254,9 +254,12 @@ class Skeuocard
         @_inputViews.exp.hide()
         @_inputViews.name.hide()
         @_inputViews.cvc.hide()
+        @_inputViews.number.setGroupings([@options.genericPlaceholder.length])
+        ###
         @_inputViews.number.reconfigure
           groupings: [@options.genericPlaceholder.length],
           placeholder: @options.genericPlaceholder
+        ###
         @el.container.removeClass (index, css)=>
           (css.match(/\bproduct-\S+/g) || []).join(' ')
         @el.container.removeClass (index, css)=>
@@ -431,6 +434,8 @@ class Skeuocard
 Skeuocard::FlipTabView
 Handles rendering of the "flip button" control and its various warning and 
 prompt states.
+
+TODO: Rebuild this so that it observes events and contains its own logic.
 ###
 class Skeuocard::FlipTabView
   constructor: (face, opts = {})->
@@ -518,171 +523,222 @@ class Skeuocard::TextInputView
     zero = places - num.toString().length + 1
     return Array(zero).join("0") + num
 
-class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
-  constructor: (opts = {})->
-    # Setup option defaults
-    opts.value           ||= ""
-    opts.groupings       ||= [19]
-    opts.placeholderChar ||= "X"
-    @options = opts
-    # everythIng else
-    @value = @options.value
-    @el = $("<fieldset>")
-    @el.delegate "input", "keydown", (e)=> @_onGroupKeyDown(e)
-    @el.delegate "input", "keyup", (e)=> @_onGroupKeyUp(e)
-    @groupEls = $()
-
-  _onGroupKeyDown: (e)->
-    e.stopPropagation()
-    groupEl = $(e.currentTarget)
-
-    arrowKeys = [37, 38, 39, 40]
-    groupEl = $(e.currentTarget)
-    groupMaxLength = parseInt(groupEl.attr('maxlength'))
-    groupCaretPos = @_getFieldCaretPosition(groupEl)
-
-    if e.which is 8 and groupCaretPos is 0 and not $.isEmptyObject(groupEl.prev())
-      groupEl.prev().focus()
-
-    if e.which in arrowKeys
-      switch e.which
-        when 37 # left
-          if groupCaretPos is 0 and not $.isEmptyObject(groupEl.prev())
-            groupEl.prev().focus()
-        when 39 # right
-          if groupCaretPos is groupMaxLength and not $.isEmptyObject(groupEl.next())
-            groupEl.next().focus()
-        when 38 # up
-          if not $.isEmptyObject(groupEl.prev())
-            groupEl.prev().focus()
-        when 40 # down
-          if not $.isEmptyObject(groupEl.next())
-            groupEl.next().focus()
+class Skeuocard::SegmentedCardNumberInputView
   
-  _onGroupKeyUp: (e)->
-    e.stopPropagation() # prevent event from bubbling up
+  _digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+  _arrowKeys: {left: 37, up: 38, right: 39, down: 40}
+  _specialKeys: [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 
+                  45, 46, 91, 93, 144, 145, 224]
 
-    specialKeys = [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36,
-                   37, 38, 39, 40, 45, 46, 91, 93, 144, 145, 224]
-    groupEl = $(e.currentTarget)
-    groupMaxLength = parseInt(groupEl.attr('maxlength'))
-    groupCaretPos = @_getFieldCaretPosition(groupEl)
+  constructor: (opts = {})->
+    @optDefaults = 
+      value: ""
+      groupings: [19]
+      placeholderChar: "X"
+    @options = $.extend({}, @optDefaults, opts)
+    @_state =
+      selectingAll: false     # indicates whether the field is in "select all"
+    @_buildDOM()
+    @setGroupings(@options.groupings)
+
+  _buildDOM: ->
+    @el = $('<fieldset>')
+    @el.delegate "input", "keydown", @_handleGroupKeyDown.bind(@)
+    @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
+    @el.delegate "input", "paste", @_handleGroupPaste.bind(@)
+    @el.delegate "input", "change", @_handleGroupChange.bind(@)
+
+  _handleGroupKeyDown: (e)->
+    # If this is called with the control or meta key, defer to another handler
+    if e.ctrlKey or e.metaKey
+      return @_handleModifiedKeyDown(e)
+
+    inputGroupEl = $(e.currentTarget)
+    currentTarget = e.currentTarget # get rid of that e.
+    selectionEnd = currentTarget.selectionEnd
+    inputMaxLength = currentTarget.maxLength
+
+    prevInputEl = inputGroupEl.prevAll('input')
+    nextInputEl = inputGroupEl.nextAll('input')
+
+    switch e.which
+      when 8 # handle deletion
+        if prevInputEl.length > 0
+          @_focusField(prevInputEl.first(), 'end') if selectionEnd is 0
+      else # Filter the incoming character against the whitelist.
+        if not (e.keyCode in @_specialKeys) and 
+          not (String.fromCharCode(e.keyCode) in @_digits)
+            e.preventDefault()  # don't add the char to the input
+
+    # Allow the event to propagate, and otherwise be happy
+    return true
+
+  _handleGroupKeyUp: (e)->
+    inputGroupEl = $(e.currentTarget)
+    currentTarget = e.currentTarget # get rid of that e.
+    selectionEnd = currentTarget.selectionEnd
+    inputMaxLength = currentTarget.maxLength
     
-    if e.which not in specialKeys
-      # intercept bad chars, returning user to the right char pos if need be
-      groupValLength = groupEl.val().length
-      pattern = new RegExp('[^0-9]+', 'g')
-      groupEl.val(groupEl.val().replace(pattern, ''))
-      if groupEl.val().length < groupValLength # we caught bad char
-        @_setFieldCaretPosition(groupEl, groupCaretPos - 1)
+    nextInputEl = inputGroupEl.nextAll('input')
+
+    if e.ctrlKey or e.metaKey
+      return false # skip control keys
+
+    if (String.fromCharCode(e.which) in @_digits) or (e.which in [37,38,39,40])
+      @_endSelectAll() if @_state.selectingAll
+
+    switch e.which
+      when @_arrowKeys.left
+        @_focusField(inputGroupEl.prev(), 'end') if selectionEnd is 0
+      when @_arrowKeys.right
+        @_focusField(inputGroupEl.next(), 'start') if selectionEnd is inputMaxLength
+      when @_arrowKeys.up
+        @_focusField(inputGroupEl.next(), 'start')
+        e.preventDefault()
+      when @_arrowKeys.down
+        @_focusField(inputGroupEl.prev(), 'start')
+        e.preventDefault()
       else
-        @_setFieldCaretPosition(groupEl, groupCaretPos)
+        if (String.fromCharCode(e.keyCode) in @_digits) and selectionEnd is inputMaxLength
+          if nextInputEl.length isnt 0
+            @_focusField(nextInputEl, 'start')
+          else
+            e.preventDefault()
 
-    if e.which not in specialKeys and 
-      groupEl.val().length is groupMaxLength and 
-      not $.isEmptyObject(groupEl.next()) and
-      @_getFieldCaretPosition(groupEl) is groupMaxLength
-        groupEl.next().focus()    
+    @trigger('change', [@])
+    return true
 
-    # update the value
-    newValue = ""
-    @groupEls.each -> newValue += $(@).val()
-    @value = newValue
-    @trigger("keyup", [@])
-    return false
+  _handleGroupPaste: (e)->
+    # clean and re-split the value
+    setTimeout =>
+      newValue = @getValue().replace(/[^0-9]+/g, '')
+      @_endSelectAll() if @_state.selectingAll
+      @setValue(newValue)
+      @trigger('change', [@])
+    , 50
+
+  _handleModifiedKeyDown: (e)->
+    char = String.fromCharCode(e.which)
+    switch char
+      when 'A'
+        @_beginSelectAll()
+        e.preventDefault()
+  
+  _handleGroupChange: (e)->
+    e.stopPropagation()
+
+  _getFocusedField: ->
+    @el.find("input:focus")
+
+  _beginSelectAll: ->
+    # remember the previous grouping, regroup into one, and select all.
+    if @_state.selectingAll is false
+      @_state.selectingAll = true
+      @_state.lastGrouping = @options.groupings
+      @_state.lastValue = @getValue()
+      @setGroupings(@optDefaults.groupings)
+      @el.addClass('selecting-all')
+      fieldEl = @el.find("input")
+      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    else
+      fieldEl = @el.find("input")
+      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+
+  _endSelectAll: ->
+    if @_state.selectingAll
+      if @_state.lastValue is @getValue()
+        @setGroupings(@_state.lastGrouping)
+      else
+        @_focusField(@el.find('input').last(), 'end')
+      @el.removeClass('selecting-all')
+      console.log("Setting selecting all to no.")
+      @_state.selectingAll = false
+
+  # figure out what position in the overall value we're at given a selection
+  _indexInValueAtFieldSelection: (field)->
+    groupingIndex = @el.find('input').index(field)
+    offset = 0
+    offset += len for len, i in @options.groupings when i < groupingIndex
+    return offset + field[0].selectionEnd
 
   setGroupings: (groupings)->
-    caretPos = @_caretPosition()
-    @el.empty() # remove all inputs
-    _startLength = 0
+    # store the value and current caret position so we can reapply it
+    _currentField = @_getFocusedField()
+    _value = @getValue()
+    _caretPosition = 0
+    if _currentField.length > 0
+      _caretPosition = @_indexInValueAtFieldSelection(_currentField)
+    # remove any existing input elements
+    @el.empty() # remove all existing inputs
     for groupLength in groupings
       groupEl = $("<input>").attr
         type: 'text'
+        pattern: '[0-9]*'
         size: groupLength
         maxlength: groupLength
         class: "group#{groupLength}"
-      # restore value, if necessary
-      if @value.length > _startLength
-        groupEl.val(@value.substr(_startLength, groupLength))
-        _startLength += groupLength
       @el.append(groupEl)
     @options.groupings = groupings
-    @groupEls = @el.find("input")
-    # restore to previous settings
-    @_caretTo(caretPos)
-    if @options.placeholderChar isnt undefined
-      @setPlaceholderChar(@options.placeholderChar)
-    if @options.placeholder isnt undefined
-      @setPlaceholder(@options.placeholder)
+    @setValue(_value)
+    _currentField = @_focusFieldForValue([_caretPosition, _caretPosition])
+    if _currentField? and _currentField[0].selectionEnd is _currentField[0].maxLength
+      @_focusField(_currentField.next(), 'start')
 
-  setPlaceholderChar: (ch)->
-    @groupEls.each ->
-      el = $(@)
-      el.attr 'placeholder', new Array(parseInt(el.attr('maxlength'))+1).join(ch)
-    @options.placeholder = undefined
-    @options.placeholderChar = ch
+  _focusFieldForValue: (place)->
+    value = @getValue()
+    if place is 'start'
+      field = @el.find('input').first()
+      @_focusField(field, place)
+    else if place is 'end'
+      field = @el.find('input').last()
+      @_focusField(field, place)
+    else
+      field = undefined
+      fieldOffset = undefined
+      _lastStartPos = 0
+      for groupLength, groupIndex in @options.groupings
+        if place[1] > _lastStartPos and place[1] <= _lastStartPos + groupLength
+          field = $(@el.find('input')[groupIndex])
+          fieldPosition = place[1] - _lastStartPos
+        _lastStartPos += groupLength
+      if field? and fieldPosition?
+        @_focusField(field, [fieldPosition, fieldPosition])
+      else
+        @_focusField(@el.find('input'), 'end')
+    return field
 
-  setPlaceholder: (str)->
-    @groupEls.each ->
-      $(@).attr 'placeholder', str
-    @options.placeholderChar = undefined
-    @options.placeholder = str
+  _focusField: (field, place)->
+    if field.length isnt 0
+      field.focus()
+      if place is 'start'
+        field[0].setSelectionRange(0, 0)
+      else if place is 'end'
+        fieldLen = field[0].maxLength
+        field[0].setSelectionRange(fieldLen, fieldLen)
+      else # array of start, end
+        field[0].setSelectionRange(place[0], place[1])
 
   setValue: (newValue)->
-    lastPos = 0
-    @groupEls.each ->
-      el = $(@)
-      len = parseInt(el.attr('maxlength'))
-      el.val(newValue.substr(lastPos, len))
-      lastPos += len
-    @value = newValue
+    _lastStartPos = 0
+    for groupLength, groupIndex in @options.groupings
+      el = $(@el.find('input').get(groupIndex))
+      groupVal = newValue.substr(_lastStartPos, groupLength)
+      el.val(groupVal)
+      _lastStartPos += groupLength
 
   getValue: ->
-    @value
-
-  reconfigure: (changes = {})->
-    if changes.groupings?
-      @setGroupings(changes.groupings)
-    if changes.placeholderChar?
-      @setPlaceholderChar(changes.placeholderChar)
-    if changes.placeholder?
-      @setPlaceholder(changes.placeholder)
-    if changes.value?
-      @setValue(changes.value)
-
-  _caretTo: (index)->
-    pos = 0
-    inputEl = undefined
-    inputElIndex = 0
-    # figure out which group we're in
-    @groupEls.each (i, e)=>
-      el = $(e)
-      elLength = parseInt(el.attr('maxlength'))
-      if index <= elLength + pos and index >= pos
-        inputEl = el
-        inputElIndex = index - pos
-      pos += elLength
-    # move the caret there
-    @_setFieldCaretPosition(inputEl, inputElIndex)
-
-  _caretPosition: ->
-    iPos = 0
-    finalPos = 0
-    @groupEls.each (i, e)=>
-      el = $(e)
-      if el.is(':focus')
-        finalPos = iPos + @_getFieldCaretPosition(el)
-      iPos += parseInt(el.attr('maxlength'))
-    return finalPos
+    buffer = ""
+    buffer += $(el).val() for el in @el.find('input')
+    return buffer
 
   maxLength: ->
     @options.groupings.reduce((a,b)->(a+b))
 
   isFilled: ->
-    @value.length == @maxLength()
+    @getValue().length == @maxLength()
 
   isValid: ->
-    @isFilled() and @isValidLuhn(@value)
+    @isFilled() and @isValidLuhn(@getValue())
 
   isValidLuhn: (identifier)->
     sum = 0
@@ -696,6 +752,25 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
       alt = !alt
       sum += num
     sum % 10 is 0
+
+  bind: (args...)->
+    @el.bind(args...)
+
+  trigger: (args...)->
+    @el.trigger(args...)
+
+  show: ->
+    @el.show()
+
+  hide: ->
+    @el.hide()
+
+  addClass: (args...)->
+    @el.addClass(args...)
+
+  removeClass: (args...)->
+    @el.removeClass(args...)
+
 
 ###
 Skeuocard::ExpirationInputView
@@ -762,7 +837,8 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
       groupChar = group[1]
       if groupChar in fieldChars # this group is a field
         input = $('<input>').attr
-          type: 'text'
+          type: 'number'
+          pattern: '[0-9]*'
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength
           class: 'cc-exp-field-' + groupChar.toLowerCase() + 
