@@ -219,6 +219,9 @@
   .face.front {
     background: #eee url('../images/products/amex-front.png') no-repeat right bottom;
   }
+  .face.back{
+    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+  }
 
   .cc-number{
     left: 3em;
@@ -251,6 +254,9 @@
   .face.front{
     background: #eee url('../images/products/dinersclubintl-front.png') no-repeat right bottom;
   }
+  .face.back{
+    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+  }
   .cc-number{
     left: 1.8em;
     top: 8.05em;
@@ -262,6 +268,11 @@
   .cc-exp{
     left: 17.5em;
     top: 13.5em;
+  }
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
   }
 }
 
@@ -309,6 +320,9 @@
   .face.front{
     background: #eee url('../images/products/discover-front.png') no-repeat right bottom;
   }
+  .face.back{
+    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+  }
 
   .cc-number{
     left: 1.8em;
@@ -323,5 +337,10 @@
   .cc-exp{
     left: 13.15em;
     top: 11.61em;
+  }
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
   }
 }
