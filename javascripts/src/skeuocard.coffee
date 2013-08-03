@@ -543,6 +543,7 @@ class Skeuocard::SegmentedCardNumberInputView
 
   _buildDOM: ->
     @el = $('<fieldset>')
+    @el.delegate "input", "keypress", @_handleGroupKeyPress.bind(@)
     @el.delegate "input", "keydown", @_handleGroupKeyDown.bind(@)
     @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
     @el.delegate "input", "paste", @_handleGroupPaste.bind(@)
@@ -561,14 +562,8 @@ class Skeuocard::SegmentedCardNumberInputView
     prevInputEl = inputGroupEl.prevAll('input')
     nextInputEl = inputGroupEl.nextAll('input')
 
-    switch e.which
-      when 8 # handle deletion
-        if prevInputEl.length > 0
-          @_focusField(prevInputEl.first(), 'end') if selectionEnd is 0
-      else # Filter the incoming character against the whitelist.
-        if not (e.keyCode in @_specialKeys) and 
-          not (String.fromCharCode(e.keyCode) in @_digits)
-            e.preventDefault()  # don't add the char to the input
+    if e.which is 8 and prevInputEl.length > 0
+      @_focusField(prevInputEl.first(), 'end') if selectionEnd is 0
 
     # Allow the event to propagate, and otherwise be happy
     return true
@@ -584,7 +579,7 @@ class Skeuocard::SegmentedCardNumberInputView
     if e.ctrlKey or e.metaKey
       return false # skip control keys
 
-    if (String.fromCharCode(e.which) in @_digits) or (e.which in [37,38,39,40])
+    if e.which in [37,38,39,40]
       @_endSelectAll() if @_state.selectingAll
 
     switch e.which
@@ -599,14 +594,29 @@ class Skeuocard::SegmentedCardNumberInputView
         @_focusField(inputGroupEl.prev(), 'start')
         e.preventDefault()
       else
-        if (String.fromCharCode(e.keyCode) in @_digits) and selectionEnd is inputMaxLength
+        if selectionEnd is inputMaxLength
           if nextInputEl.length isnt 0
-            @_focusField(nextInputEl, 'start')
+            @_focusField(nextInputEl.first(), 'start')
           else
             e.preventDefault()
 
     @trigger('change', [@])
     return true
+
+  _handleGroupKeyPress: (e)->
+    inputGroupEl = $(e.currentTarget)
+    currentTarget = e.currentTarget # get rid of that e.
+    selectionEnd = currentTarget.selectionEnd
+    inputMaxLength = currentTarget.maxLength
+    isDigit = (String.fromCharCode(e.which) in @_digits)
+    
+    nextInputEl = inputGroupEl.nextAll('input')
+
+    if e.ctrlKey or e.metaKey or (e.which in @_specialKeys) or isDigit
+      return true
+    else
+      e.preventDefault()
+      return false
 
   _handleGroupPaste: (e)->
     # clean and re-split the value
@@ -651,7 +661,6 @@ class Skeuocard::SegmentedCardNumberInputView
       else
         @_focusField(@el.find('input').last(), 'end')
       @el.removeClass('selecting-all')
-      console.log("Setting selecting all to no.")
       @_state.selectingAll = false
 
   # figure out what position in the overall value we're at given a selection
@@ -838,7 +847,7 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
       groupChar = group[1]
       if groupChar in fieldChars # this group is a field
         input = $('<input>').attr
-          type: 'number'
+          type: 'text'
           pattern: '[0-9]*'
           placeholder: new Array(groupLength+1).join(groupChar)
           maxlength: groupLength

@@ -746,6 +746,7 @@
 
     SegmentedCardNumberInputView.prototype._buildDOM = function() {
       this.el = $('<fieldset>');
+      this.el.delegate("input", "keypress", this._handleGroupKeyPress.bind(this));
       this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
       this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
       this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
@@ -753,7 +754,7 @@
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
-      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, selectionEnd, _ref, _ref1;
+      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, selectionEnd;
       if (e.ctrlKey || e.metaKey) {
         return this._handleModifiedKeyDown(e);
       }
@@ -763,24 +764,16 @@
       inputMaxLength = currentTarget.maxLength;
       prevInputEl = inputGroupEl.prevAll('input');
       nextInputEl = inputGroupEl.nextAll('input');
-      switch (e.which) {
-        case 8:
-          if (prevInputEl.length > 0) {
-            if (selectionEnd === 0) {
-              this._focusField(prevInputEl.first(), 'end');
-            }
-          }
-          break;
-        default:
-          if (!(_ref = e.keyCode, __indexOf.call(this._specialKeys, _ref) >= 0) && !(_ref1 = String.fromCharCode(e.keyCode), __indexOf.call(this._digits, _ref1) >= 0)) {
-            e.preventDefault();
-          }
+      if (e.which === 8 && prevInputEl.length > 0) {
+        if (selectionEnd === 0) {
+          this._focusField(prevInputEl.first(), 'end');
+        }
       }
       return true;
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyUp = function(e) {
-      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, selectionEnd, _ref, _ref1, _ref2;
+      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, selectionEnd, _ref;
       inputGroupEl = $(e.currentTarget);
       currentTarget = e.currentTarget;
       selectionEnd = currentTarget.selectionEnd;
@@ -789,7 +782,7 @@
       if (e.ctrlKey || e.metaKey) {
         return false;
       }
-      if ((_ref = String.fromCharCode(e.which), __indexOf.call(this._digits, _ref) >= 0) || ((_ref1 = e.which) === 37 || _ref1 === 38 || _ref1 === 39 || _ref1 === 40)) {
+      if ((_ref = e.which) === 37 || _ref === 38 || _ref === 39 || _ref === 40) {
         if (this._state.selectingAll) {
           this._endSelectAll();
         }
@@ -814,9 +807,9 @@
           e.preventDefault();
           break;
         default:
-          if ((_ref2 = String.fromCharCode(e.keyCode), __indexOf.call(this._digits, _ref2) >= 0) && selectionEnd === inputMaxLength) {
+          if (selectionEnd === inputMaxLength) {
             if (nextInputEl.length !== 0) {
-              this._focusField(nextInputEl, 'start');
+              this._focusField(nextInputEl.first(), 'start');
             } else {
               e.preventDefault();
             }
@@ -824,6 +817,22 @@
       }
       this.trigger('change', [this]);
       return true;
+    };
+
+    SegmentedCardNumberInputView.prototype._handleGroupKeyPress = function(e) {
+      var currentTarget, inputGroupEl, inputMaxLength, isDigit, nextInputEl, selectionEnd, _ref, _ref1;
+      inputGroupEl = $(e.currentTarget);
+      currentTarget = e.currentTarget;
+      selectionEnd = currentTarget.selectionEnd;
+      inputMaxLength = currentTarget.maxLength;
+      isDigit = (_ref = String.fromCharCode(e.which), __indexOf.call(this._digits, _ref) >= 0);
+      nextInputEl = inputGroupEl.nextAll('input');
+      if (e.ctrlKey || e.metaKey || (_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0) || isDigit) {
+        return true;
+      } else {
+        e.preventDefault();
+        return false;
+      }
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupPaste = function(e) {
@@ -881,7 +890,6 @@
           this._focusField(this.el.find('input').last(), 'end');
         }
         this.el.removeClass('selecting-all');
-        console.log("Setting selecting all to no.");
         return this._state.selectingAll = false;
       }
     };
@@ -1163,7 +1171,7 @@
         groupChar = group[1];
         if (__indexOf.call(fieldChars, groupChar) >= 0) {
           input = $('<input>').attr({
-            type: 'number',
+            type: 'text',
             pattern: '[0-9]*',
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
