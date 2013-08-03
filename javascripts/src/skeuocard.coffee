@@ -523,7 +523,7 @@ class Skeuocard::TextInputView
     zero = places - num.toString().length + 1
     return Array(zero).join("0") + num
 
-class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
+class Skeuocard::SegmentedCardNumberInputView
   
   _digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
   _arrowKeys: {left: 37, up: 38, right: 39, down: 40}
@@ -531,16 +531,13 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
                   45, 46, 91, 93, 144, 145, 224]
 
   constructor: (opts = {})->
-    optDefaults = 
+    @optDefaults = 
       value: ""
       groupings: [19]
       placeholderChar: "X"
-    @options = $.extend(optDefaults, opts)
+    @options = $.extend({}, @optDefaults, opts)
     @_state =
-      bufferIndexPosition: 0 # the position of the caret in the whole value
-      fieldCaretPosition: 0  # the position of the caret in the focused field
-      focusedField: false    # a handle to the currently focused field
-      selectingAll: false    # indicates whether the field is in "select all"
+      selectingAll: false     # indicates whether the field is in "select all"
     @_buildDOM()
     @setGroupings(@options.groupings)
 
@@ -561,21 +558,14 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     selectionEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
 
+    prevInputEl = inputGroupEl.prevAll('input')
+    nextInputEl = inputGroupEl.nextAll('input')
+
     switch e.which
-      # handle deletion
-      when 8
-        @_focusField(inputGroupEl.prev(), 'end') if selectionEnd is 0
-      # handle arrow key navigation
-      when @_arrowKeys.left
-        @_focusField(inputGroupEl.prev(), 'end') if selectionEnd is 0
-      when @_arrowKeys.right
-        @_focusField(inputGroupEl.next(), 'start') if selectionEnd is inputMaxLength
-      when @_arrowKeys.up
-        @_focusField(inputGroupEl.prev(), 'start')
-      when @_arrowKeys.down
-        @_focusField(inputGroupEl.prev(), 'start')
-      else
-        # Filter the incoming character against the whitelist.
+      when 8 # handle deletion
+        if prevInputEl.length > 0
+          @_focusField(prevInputEl.first(), 'end') if selectionEnd is 0
+      else # Filter the incoming character against the whitelist.
         if not (e.keyCode in @_specialKeys) and 
           not (String.fromCharCode(e.keyCode) in @_digits)
             e.preventDefault()  # don't add the char to the input
@@ -584,16 +574,85 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     return true
 
   _handleGroupKeyUp: (e)->
+    inputGroupEl = $(e.currentTarget)
+    currentTarget = e.currentTarget # get rid of that e.
+    selectionEnd = currentTarget.selectionEnd
+    inputMaxLength = currentTarget.maxLength
+    
+    nextInputEl = inputGroupEl.nextAll('input')
+
+    if e.ctrlKey or e.metaKey
+      return false # skip control keys
+
+    if (String.fromCharCode(e.which) in @_digits) or (e.which in [37,38,39,40])
+      @_endSelectAll() if @_state.selectingAll
+
+    switch e.which
+      when @_arrowKeys.left
+        @_focusField(inputGroupEl.prev(), 'end') if selectionEnd is 0
+      when @_arrowKeys.right
+        @_focusField(inputGroupEl.next(), 'start') if selectionEnd is inputMaxLength
+      when @_arrowKeys.up
+        @_focusField(inputGroupEl.next(), 'start')
+        e.preventDefault()
+      when @_arrowKeys.down
+        @_focusField(inputGroupEl.prev(), 'start')
+        e.preventDefault()
+      else
+        if (String.fromCharCode(e.keyCode) in @_digits) and selectionEnd is inputMaxLength
+          if nextInputEl.length isnt 0
+            @_focusField(nextInputEl, 'start')
+          else
+            e.preventDefault()
+
     @trigger('change', [@])
+    return true
 
   _handleGroupPaste: (e)->
+    # clean and re-split the value
+    setTimeout =>
+      newValue = @getValue().replace(/[^0-9]+/g, '')
+      @_endSelectAll() if @_state.selectingAll
+      @setValue(newValue)
+      @trigger('change', [@])
+    , 50
+
   _handleModifiedKeyDown: (e)->
-    console.log("Modified key event:", e)
+    char = String.fromCharCode(e.which)
+    switch char
+      when 'A'
+        @_beginSelectAll()
+        e.preventDefault()
+  
   _handleGroupChange: (e)->
     e.stopPropagation()
 
   _getFocusedField: ->
-    @el.find("input :focus")
+    @el.find("input:focus")
+
+  _beginSelectAll: ->
+    # remember the previous grouping, regroup into one, and select all.
+    if @_state.selectingAll is false
+      @_state.selectingAll = true
+      @_state.lastGrouping = @options.groupings
+      @_state.lastValue = @getValue()
+      @setGroupings(@optDefaults.groupings)
+      @el.addClass('selecting-all')
+      fieldEl = @el.find("input")
+      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    else
+      fieldEl = @el.find("input")
+      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+
+  _endSelectAll: ->
+    if @_state.selectingAll
+      if @_state.lastValue is @getValue()
+        @setGroupings(@_state.lastGrouping)
+      else
+        @_focusField(@el.find('input').last(), 'end')
+      @el.removeClass('selecting-all')
+      console.log("Setting selecting all to no.")
+      @_state.selectingAll = false
 
   # figure out what position in the overall value we're at given a selection
   _indexInValueAtFieldSelection: (field)->
@@ -613,18 +672,20 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     @el.empty() # remove all existing inputs
     for groupLength in groupings
       groupEl = $("<input>").attr
-        type: 'number'
+        type: 'text'
         pattern: '[0-9]*'
         size: groupLength
         maxlength: groupLength
         class: "group#{groupLength}"
       @el.append(groupEl)
+    @options.groupings = groupings
     @setValue(_value)
-    @_focusFieldForValue(_caretPosition)
+    _currentField = @_focusFieldForValue([_caretPosition, _caretPosition])
+    if _currentField? and _currentField[0].selectionEnd is _currentField[0].maxLength
+      @_focusField(_currentField.next(), 'start')
 
   _focusFieldForValue: (place)->
     value = @getValue()
-    field = undefined
     if place is 'start'
       field = @el.find('input').first()
       @_focusField(field, place)
@@ -637,14 +698,17 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
       _lastStartPos = 0
       for groupLength, groupIndex in @options.groupings
         if place[1] > _lastStartPos and place[1] <= _lastStartPos + groupLength
-          field = @el.find('input')[groupIndex]
+          field = $(@el.find('input')[groupIndex])
           fieldPosition = place[1] - _lastStartPos
         _lastStartPos += groupLength
       if field? and fieldPosition?
         @_focusField(field, [fieldPosition, fieldPosition])
+      else
+        @_focusField(@el.find('input'), 'end')
+    return field
 
   _focusField: (field, place)->
-    unless $.isEmptyObject(field)
+    if field.length isnt 0
       field.focus()
       if place is 'start'
         field[0].setSelectionRange(0, 0)
@@ -658,7 +722,8 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     _lastStartPos = 0
     for groupLength, groupIndex in @options.groupings
       el = $(@el.find('input').get(groupIndex))
-      el.val(newValue.substr(_lastStartPos, _lastStartPos + groupLength))
+      groupVal = newValue.substr(_lastStartPos, groupLength)
+      el.val(groupVal)
       _lastStartPos += groupLength
 
   getValue: ->
@@ -673,7 +738,7 @@ class Skeuocard::SegmentedCardNumberInputView extends Skeuocard::TextInputView
     @getValue().length == @maxLength()
 
   isValid: ->
-    @isFilled() and @isValidLuhn(@value)
+    @isFilled() and @isValidLuhn(@getValue())
 
   isValidLuhn: (identifier)->
     sum = 0
