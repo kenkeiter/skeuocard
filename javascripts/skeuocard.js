@@ -916,7 +916,8 @@
           pattern: '[0-9]*',
           size: groupLength,
           maxlength: groupLength,
-          "class": "group" + groupLength
+          "class": "group" + groupLength,
+          placeholder: new Array(groupLength + 1).join(this.options.placeholderChar)
         });
         this.el.append(groupEl);
       }

@@ -677,6 +677,7 @@ class Skeuocard::SegmentedCardNumberInputView
         size: groupLength
         maxlength: groupLength
         class: "group#{groupLength}"
+        placeholder: new Array(groupLength+1).join(@options.placeholderChar)
       @el.append(groupEl)
     @options.groupings = groupings
     @setValue(_value)
