@@ -223,6 +223,7 @@ class Skeuocard
         @el.container.removeClass (index, css)=>
           (css.match(/\b(product|issuer)-\S+/g) || []).join(' ')
         @el.container.addClass("product-#{@product.companyShortname}")
+        @el.container.addClass("card-product")
         if @product.issuerShortname?
           @el.container.addClass("issuer-#{@product.issuerShortname}")
         # Adjust underlying card type to match detected type
@@ -262,6 +263,7 @@ class Skeuocard
         ###
         @el.container.removeClass (index, css)=>
           (css.match(/\bproduct-\S+/g) || []).join(' ')
+          (css.match(/\bcard-product/g) || []).join(' ')
         @el.container.removeClass (index, css)=>
           (css.match(/\bissuer-\S+/g) || []).join(' ')
       @_cardProductNeedsLayout = false
