@@ -236,6 +236,8 @@ It's recommended that you selectively disable Skeuocard based upon browser versi
 
 Contributing to Skeuocard is pretty simple. Simply fork the project, make your changes in a branch, and submit a pull request.
 
+We use SCSS and CoffeeScript to keep things short and easy. You should include compiled CSS and Javascript files in any pull requests you send -- otherwise, I'll probably have to reject them and apply your patches manually. Less fun for me, but at least the patches will get in!
+
 I'll do my best to keep an eye out for pull requests and triage any submitted issues.
 
 ## Licensing
