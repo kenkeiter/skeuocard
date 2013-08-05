@@ -236,9 +236,23 @@ It's recommended that you selectively disable Skeuocard based upon browser versi
 
 Contributing to Skeuocard is pretty simple. Simply fork the project, make your changes in a branch, and submit a pull request.
 
-We use SCSS and CoffeeScript to keep things short and easy. You should include compiled CSS and Javascript files in any pull requests you send -- otherwise, I'll probably have to reject them and apply your patches manually. Less fun for me, but at least the patches will get in!
-
 I'll do my best to keep an eye out for pull requests and triage any submitted issues.
+
+### Compiling SCSS and CoffeeScript
+
+We use SCSS and CoffeeScript to keep things short and easy. You should include compiled CSS and Javascript files in any pull requests you send. If you have [foreman](https://github.com/ddollar/foreman), [sass](http://sass-lang.com/), and [CoffeeScript](http://coffeescript.org/) installed, you can simply run
+
+    foreman start
+
+from within your Skeuocard working directory, and it'll watch for changes and automatically re-compile the files.
+
+### New Card Layouts & Graphics
+
+I've done my best to include layouts for all major card products (Visa, MasterCard, Amex, etc.) in the project. It is entirely possible that I've missed some products, and that the addition of a product is justified; however, I'm not accepting issuer-specific layouts (for things like Visa-branded products) at this time. There are literally thousands of them, and doing so could be seen as discriminatory. 
+
+For the time being, the only reason I'll make an exception is for cards like the Chase Sapphire, which is a Visa product, but has been granted an allowance by Visa to drastically alter the appearance and field layout of the card.
+
+All of that said, I'm working on a standardized method of distributing issuer-specific layouts for users who wish to cater to popular cards in their locale, etc.
 
 ## Licensing
 
