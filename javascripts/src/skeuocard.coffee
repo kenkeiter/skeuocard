@@ -1084,7 +1084,7 @@ CCProducts[/^35\d{2}/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^37/] =
+CCProducts[/^3[47]/] =
   companyName: "American Express"
   companyShortname: "amex"
   cardNumberGrouping: [4,6,5]
