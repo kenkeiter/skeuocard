@@ -43,3 +43,6 @@
   .skeuocard.js table {
     border-collapse: collapse;
     border-spacing: 0; }
+  .skeuocard.js input, .skeuocard.js fieldset {
+    line-height: normal;
+    height: 1.5em; }

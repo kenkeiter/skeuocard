@@ -1465,7 +1465,7 @@
     }
   };
 
-  CCProducts[/^37/] = {
+  CCProducts[/^3[47]/] = {
     companyName: "American Express",
     companyShortname: "amex",
     cardNumberGrouping: [4, 6, 5],
