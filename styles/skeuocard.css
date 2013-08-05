@@ -230,6 +230,21 @@
     -ms-border-radius: 3px;
     -moz-border-radius: 3px;
     -o-border-radius: 3px; }
+.skeuocard.card-product .face.back, .skeuocard.product-visa .face.back, .skeuocard.product-amex .face.back, .skeuocard.product-dinersclubintl .face.back, .skeuocard.product-mastercard .face.back, .skeuocard.product-discover .face.back {
+  background: #eeeeee url("../images/products/visa-back.png") no-repeat center center; }
+.skeuocard.card-product .cc-number, .skeuocard.product-visa .cc-number, .skeuocard.product-amex .cc-number, .skeuocard.product-dinersclubintl .cc-number, .skeuocard.product-mastercard .cc-number, .skeuocard.product-discover .cc-number {
+  left: 1.8em;
+  top: 8.05em; }
+.skeuocard.card-product .cc-name, .skeuocard.product-visa .cc-name, .skeuocard.product-amex .cc-name, .skeuocard.product-dinersclubintl .cc-name, .skeuocard.product-mastercard .cc-name, .skeuocard.product-discover .cc-name {
+  left: 2.5em;
+  top: 12.2em; }
+.skeuocard.card-product .cc-exp, .skeuocard.product-visa .cc-exp, .skeuocard.product-amex .cc-exp, .skeuocard.product-dinersclubintl .cc-exp, .skeuocard.product-mastercard .cc-exp, .skeuocard.product-discover .cc-exp {
+  left: 11.5em;
+  top: 10.8em; }
+.skeuocard.card-product .cc-cvc, .skeuocard.product-visa .cc-cvc, .skeuocard.product-amex .cc-cvc, .skeuocard.product-dinersclubintl .cc-cvc, .skeuocard.product-mastercard .cc-cvc, .skeuocard.product-discover .cc-cvc {
+  top: 7.15em;
+  left: 18.1em;
+  width: 3em; }
 
 .skeuocard.product-visa .face.front {
   background: #eeeeee url("../images/products/visa-front.png") no-repeat right bottom; }
@@ -277,6 +292,8 @@
 .skeuocard.product-visa.issuer-chase-sapphire .cc-cvc {
   top: 6.3em;
   left: 15.25em; }
+.skeuocard.product-visa.issuer-carte-bleue .face.front {
+  background-image: url("../images/issuers/visa-carte-bleue.png"); }
 .skeuocard.product-visa.issuer-simple .face.front {
   background-image: url("../images/issuers/visa-simple-front.png"); }
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {

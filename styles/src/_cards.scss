@@ -111,6 +111,37 @@
       @include vendor-prefix(border-radius, 3px);
     }
   }
+  
+  // *****************************************************************************
+  // The following is the base layout for the fields of a "generic card"
+  // it will be used in case no more specific product is available
+  // *****************************************************************************
+  .face.back{
+    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+  }
+
+  .cc-number{
+    left: 1.8em;
+    top: 8.05em;
+  }
+
+  .cc-name{
+    left: 2.5em;
+    top: 12.2em;
+  }
+
+  .cc-exp{
+    left: 11.5em;
+    top: 10.8em;
+  }
+
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
+  }
+  
+  
 }
 
 // *****************************************************************************
@@ -185,6 +216,12 @@
       left: 15.25em;
     }
 
+  }
+
+  &.issuer-carte-bleue{
+    .face.front{
+      background-image: url('../images/issuers/visa-carte-bleue.png');
+    }
   }
 
   &.issuer-simple{

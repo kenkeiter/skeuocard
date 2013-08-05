@@ -275,6 +275,7 @@
             return (css.match(/\b(product|issuer)-\S+/g) || []).join(' ');
           });
           this.el.container.addClass("product-" + this.product.companyShortname);
+          this.el.container.addClass("card-product");
           if (this.product.issuerShortname != null) {
             this.el.container.addClass("issuer-" + this.product.issuerShortname);
           }
@@ -317,7 +318,8 @@
           */
 
           this.el.container.removeClass(function(index, css) {
-            return (css.match(/\bproduct-\S+/g) || []).join(' ');
+            (css.match(/\bproduct-\S+/g) || []).join(' ');
+            return (css.match(/\bcard-product/g) || []).join(' ');
           });
           this.el.container.removeClass(function(index, css) {
             return (css.match(/\bissuer-\S+/g) || []).join(' ');
@@ -1536,6 +1538,18 @@
   };
 
   CCIssuers = {};
+
+  CCIssuers[/^497/] = {
+    issuingAuthority: "Carte Bleue",
+    issuerName: "Carte Bleue",
+    issuerShortname: "carte-bleue",
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
+  };
 
   /*
   Hack fixes the Chase Sapphire card's stupid (nice?) layout non-conformity.
