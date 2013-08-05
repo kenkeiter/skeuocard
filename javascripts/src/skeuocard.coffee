@@ -1148,6 +1148,18 @@ CCProducts[/^6011/] =
 
 CCIssuers = {}
 
+# Carte Bleue is a french variant of VISA cards
+CCIssuers[/^497/] =
+  issuingAuthority: "Carte Bleue"
+  issuerName: "Carte Bleue"
+  issuerShortname: "carte-bleue"
+  layout:
+    number: 'front'
+    exp: 'front'
+    name: 'front'
+    cvc: 'back'
+
+
 ###
 Hack fixes the Chase Sapphire card's stupid (nice?) layout non-conformity.
 ###

@@ -292,6 +292,8 @@
 .skeuocard.product-visa.issuer-chase-sapphire .cc-cvc {
   top: 6.3em;
   left: 15.25em; }
+.skeuocard.product-visa.issuer-carte-bleue .face.front {
+  background-image: url("../images/issuers/visa-carte-bleue.png"); }
 .skeuocard.product-visa.issuer-simple .face.front {
   background-image: url("../images/issuers/visa-simple-front.png"); }
 .skeuocard.product-visa.issuer-simple input, .skeuocard.product-visa.issuer-simple .separator {

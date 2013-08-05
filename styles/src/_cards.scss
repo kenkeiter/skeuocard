@@ -218,6 +218,12 @@
 
   }
 
+  &.issuer-carte-bleue{
+    .face.front{
+      background-image: url('../images/issuers/visa-carte-bleue.png');
+    }
+  }
+
   &.issuer-simple{
     .face.front{
       background-image: url('../images/issuers/visa-simple-front.png');
