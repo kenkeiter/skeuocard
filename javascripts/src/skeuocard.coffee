@@ -721,14 +721,15 @@ class Skeuocard::SegmentedCardNumberInputView
 
   _focusField: (field, place)->
     if field.length isnt 0
-      field.focus()
-      if place is 'start'
-        field[0].setSelectionRange(0, 0)
-      else if place is 'end'
-        fieldLen = field[0].maxLength
-        field[0].setSelectionRange(fieldLen, fieldLen)
-      else # array of start, end
-        field[0].setSelectionRange(place[0], place[1])
+      field[0].focus()
+      if $(field[0]).is(':visible') and field[0] is document.activeElement
+        if place is 'start'
+          field[0].setSelectionRange(0, 0)
+        else if place is 'end'
+          fieldLen = field[0].maxLength
+          field[0].setSelectionRange(fieldLen, fieldLen)
+        else # array of start, end
+          field[0].setSelectionRange(place[0], place[1])
 
   setValue: (newValue)->
     _lastStartPos = 0
