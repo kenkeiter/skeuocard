@@ -59,6 +59,7 @@
         expInputSelector: '[name="cc_exp"]',
         nameInputSelector: '[name="cc_name"]',
         cvcInputSelector: '[name="cc_cvc"]',
+        issuers: {},
         currentDate: new Date(),
         initialValues: {},
         validationState: {},
@@ -154,7 +155,7 @@
     };
 
     Skeuocard.prototype._setAcceptedCardProducts = function() {
-      var matcher, product, _ref,
+      var issuer, matcher, product, _ref, _ref1,
         _this = this;
       if (this.options.acceptedCardProducts.length === 0) {
         this.el.underlyingFields.type.find('option').each(function(i, _el) {
@@ -169,6 +170,11 @@
         if (_ref = product.companyShortname, __indexOf.call(this.options.acceptedCardProducts, _ref) >= 0) {
           this.acceptedCardProducts[matcher] = product;
         }
+      }
+      _ref1 = this.options.issuers;
+      for (matcher in _ref1) {
+        issuer = _ref1[matcher];
+        CCIssuers[matcher] = issuer;
       }
       return this.acceptedCardProducts;
     };
