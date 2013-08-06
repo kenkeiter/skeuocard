@@ -973,14 +973,16 @@
     SegmentedCardNumberInputView.prototype._focusField = function(field, place) {
       var fieldLen;
       if (field.length !== 0) {
-        field.focus();
-        if (place === 'start') {
-          return field[0].setSelectionRange(0, 0);
-        } else if (place === 'end') {
-          fieldLen = field[0].maxLength;
-          return field[0].setSelectionRange(fieldLen, fieldLen);
-        } else {
-          return field[0].setSelectionRange(place[0], place[1]);
+        field[0].focus();
+        if ($(field[0]).is(':visible') && field[0] === document.activeElement) {
+          if (place === 'start') {
+            return field[0].setSelectionRange(0, 0);
+          } else if (place === 'end') {
+            fieldLen = field[0].maxLength;
+            return field[0].setSelectionRange(fieldLen, fieldLen);
+          } else {
+            return field[0].setSelectionRange(place[0], place[1]);
+          }
         }
       }
     };
@@ -1465,7 +1467,7 @@
     }
   };
 
-  CCProducts[/^37/] = {
+  CCProducts[/^3[47]/] = {
     companyName: "American Express",
     companyShortname: "amex",
     cardNumberGrouping: [4, 6, 5],

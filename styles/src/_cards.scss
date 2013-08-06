@@ -1,5 +1,13 @@
 @import "util";
 
+$image-front-background: url('../images/card-front-background.png');
+$image-generic-front: url('../images/products/generic-front.png');
+$image-generic-back: url('../images/products/generic-back.png');
+
+$card-face-width: 24.8em;
+$card-face-height: 15.6em;
+$sprite-front-height: 93.6em;
+
 // *****************************************************************************
 // Generic card layout
 // *****************************************************************************
@@ -7,8 +15,8 @@
 
   input{
     border: none;
-    @include vendor-prefix(border-radius, 3px);
     outline: none;
+    @include vendor-prefix(border-radius, 3px);
   }
 
   input:focus{
@@ -17,10 +25,17 @@
   }
 
   .face.front {
-    background: #eee url('../images/products/generic-front.png') no-repeat right bottom;
+    background-color: #eee;
+    background-image: url('../images/products/generic-front.png'), $image-front-background;
+    background-repeat: no-repeat;
+    background-size: cover;
   }
+
   .face.back {
-    background: #eee url('../images/products/generic-back.png') no-repeat center center;
+    background-color: #eee;
+    background-image: url('../images/products/generic-back.png');
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
   .cc-number{
@@ -50,6 +65,14 @@
 // This is inherited by card products.
 // *****************************************************************************
 .skeuocard.card-product {
+  .face.front{
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+  }
+  .face.back{
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+  }
   .cc-number {
     background-color: transparent;
     padding: 0.1em;
@@ -120,10 +143,10 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('../images/products/visa-front.png') no-repeat right bottom;
+    background-image: url('../images/products/visa-front.png'), $image-front-background;
   }
   .face.back {
-    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
 
   .cc-number{
@@ -187,6 +210,7 @@
 
   }
 
+  /*
   &.issuer-simple{
     .face.front{
       background-image: url('../images/issuers/visa-simple-front.png');
@@ -207,6 +231,7 @@
       background-color: transparent;
     }
   }
+  */
 
 }
 
@@ -217,10 +242,10 @@
   @extend .skeuocard.card-product;
 
   .face.front {
-    background: #eee url('../images/products/amex-front.png') no-repeat right bottom;
+    background-image: url('../images/products/amex-front.png'), $image-front-background;
   }
   .face.back{
-    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
 
   .cc-number{
@@ -252,10 +277,10 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('../images/products/dinersclubintl-front.png') no-repeat right bottom;
+    background-image: url('../images/products/dinersclubintl-front.png'), $image-front-background;
   }
   .face.back{
-    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
   .cc-number{
     left: 1.8em;
@@ -283,10 +308,10 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('../images/products/mastercard-front.png') no-repeat right bottom;
+    background-image: url('../images/products/mastercard-front.png'), $image-front-background;
   }
   .face.back{
-    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
 
   .cc-number{
@@ -318,10 +343,10 @@
   @extend .skeuocard.card-product;
 
   .face.front{
-    background: #eee url('../images/products/discover-front.png') no-repeat right bottom;
+    background-image: url('../images/products/discover-front.png'), $image-front-background;
   }
   .face.back{
-    background: #eee url('../images/products/visa-back.png') no-repeat center center;
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
 
   .cc-number{
@@ -343,4 +368,14 @@
     left: 18.1em;
     width: 3em;
   }
+}
+
+/* Preload face images */
+body:after{
+    display:none;
+    content: url('../images/products/visa-front.png') 
+             url('../images/products/amex-front.png') 
+             url('../images/products/discover-front.png') 
+             url('../images/products/mastercard-front.png') 
+             url('../images/products/dinersclubintl-front.png');
 }
