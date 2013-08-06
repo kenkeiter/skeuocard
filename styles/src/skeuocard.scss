@@ -50,17 +50,12 @@ $color-valid: #00CFA7;
       -webkit-backface-visibility: visible;
       -webkit-backface-visibility: hidden;
       
-      -webkit-transform-style: preserve-3d;
-      -moz-transform-style: preserve-3d;
-      -o-transform-style: preserve-3d;
-      -ms-transform-style: preserve-3d;
-      transform-style: preserve-3d;
-
-      -webkit-transition: all 0.25s ease;
-      -moz-transition: all 0.25s ease;
-      -o-transition: all 0.25s ease;
-      -ms-transition: all 0.25s ease;
-      transition: all 0.25s ease;
+      @include vendor-prefix(transform-style, preserve-3d);
+      -webkit-transition: -webkit-transform 0.25s ease, background-image 0.25s ease;
+      -ms-transition: -ms-transform 0.25s ease, background-image 0.25s ease;
+      -moz-transition: -moz-transform 0.25s ease, background-image 0.25s ease;
+      -o-transition: -o-transform 0.25s ease, background-image 0.25s ease;
+      transition: transform 0.25s ease, background-image 0.25s ease;
 
       position: absolute;
       top: 0;
@@ -70,8 +65,7 @@ $color-valid: #00CFA7;
       -webkit-border-radius: 1.15em;
       border-radius: 1.15em;
       background-color: #eee;
-      background-size: cover !important;
-      background-position: right bottom;
+      background-size: cover;
       border: 1px solid #ddd;
     }
 
