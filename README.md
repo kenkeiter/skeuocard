@@ -216,6 +216,35 @@ new Skeuocard($("#skeuocard"), {
 
 Note that, if the CVC is on the back of the card for the matching card product, the card will automatically flip to show the invalid field.
 
+#### Registering Custom Card Layouts
+
+You may wish to add a custom layout to support a card (BIN) specific to your locale, or for promotional reasons. You can do so easily.
+
+You'll need to create a set of transparent PNG file containing any elements you wish to appear on the card faces. For an example, see any of the images in the `images/products/` folder. If you have Adobe Fireworks installed, the editable images are also included in `images/src/`.
+
+Skeuocard accepts an `issuers` option upon instantion. The `issuers` option should be an object whose keys are regexes which match the BIN, and whose value is an object describing the issuer and layout features. When the issuer's regex matches the entered card number, a css class is added to the container in the format `issuer-<issuerShortname>`, which you will use to match and style the container to match your issuer.
+
+```javascript
+var myIssuers = {}
+myIssuers[/^414720/] = {
+  issuingAuthority: "Chase",
+  issuerName: "Chase Sapphire Card",
+  issuerShortname: "chase-sapphire",
+  layout: {
+    number: 'front',
+    exp: 'back',
+    name: 'front',
+    cvc: 'back'
+  }
+}
+
+new Skeuocard($("#skeuocard"), {
+  issuers: myIssuers
+});
+```
+
+For an example of how to style a card, see `styles/_cards.scss`.
+
 #### Design Customization
 
 You might not like the way Skeuocard looks. That's easy to fix; CSS is used to style and position most elements in Skeuocard, with the exception of the card faces.
