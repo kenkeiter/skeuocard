@@ -232,6 +232,10 @@ Skeuocard aims to gain better compatibility with older browsers, but for the tim
 
 It's recommended that you selectively disable Skeuocard based upon browser version, to retain maximum compatibility. If you have an odd or obscure browser, and wish to submit a patch, that's always appreciated!
 
+## Integration
+
+* The [skeuocard-rails](https://github.com/rougecardinal/skeuocard-rails) gem provides integration with the Rails asset pipeline.
+
 ## Development
 
 Contributing to Skeuocard is pretty simple. Simply fork the project, make your changes in a branch, and submit a pull request.
