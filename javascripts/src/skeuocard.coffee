@@ -36,6 +36,7 @@ class Skeuocard
       expInputSelector: '[name="cc_exp"]'
       nameInputSelector: '[name="cc_name"]'
       cvcInputSelector: '[name="cc_cvc"]'
+      issuers: {}
       currentDate: new Date()
       initialValues: {}
       validationState: {}
@@ -130,6 +131,10 @@ class Skeuocard
     for matcher, product of CCProducts
       if product.companyShortname in @options.acceptedCardProducts
         @acceptedCardProducts[matcher] = product
+    # register any additonal supplied issuers
+    for matcher, issuer of @options.issuers
+      CCIssuers[matcher] = issuer
+
     return @acceptedCardProducts
 
   _updateProductIfNeeded: ->
