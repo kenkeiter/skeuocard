@@ -47,12 +47,15 @@ class Skeuocard
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
-    @_conformDOM()   # conform the DOM to match our styling requirements
+    @_applyBrowserFixes() # replace methods if necessary for specific browsers
+    @_conformDOM() # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
     @_createInputs() # create reconfigurable input views
     @_updateProductIfNeeded()
     @_flipToInvalidSide()
 
+  _applyBrowserFixes: ->
+    ua = navigator.userAgent
 
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
@@ -437,6 +440,46 @@ class Skeuocard
   bind: (args...)->
     @el.container.trigger(args...)
 
+    ## Browser Fix stuff
+
+  @browserFixes = {}
+
+  ###
+  # Register a new patch which will be applied for a matching userAgent.
+  ###
+  @_browserPatchMethods = {}
+  @registerBrowserPatch: (match, patchFunc)->
+    @_browserPatchMethods[match] = patchFunc
+    @_updateBrowserPatches()
+
+  @_updateBrowserPatches: ->
+    ua = navigator.userAgent
+    for m, patcher of @_browserPatchMethods
+      parts = m.split('/')
+      matcher = new RegExp(parts[1], parts[2])
+      if matcher.test(ua)
+        patcher(@)
+
+  @applyBrowserFixes: ->
+    ua = navigator.userAgent
+    for m, fix of @browserFixes
+      parts = m.split('/')
+      matcher = new RegExp(parts[1], parts[2])
+      if matcher.test(ua)
+        if fix.scripts?
+          for path in fix.scripts
+            script = $('<script>').attr(src: path, type: 'text/javascript')
+            script.appendTo($('body'))
+        if fix.styles?
+          for path in fix.styles
+            link = $('<link>').attr(rel: 'stylesheet', href: path)
+            link.appendTo($('body'))
+
+# Export the object.
+window.Skeuocard = Skeuocard
+# Bring in browser fixes.
+Skeuocard.applyBrowserFixes()
+
 ###
 Skeuocard::FlipTabView
 Handles rendering of the "flip button" control and its various warning and 
@@ -530,6 +573,10 @@ class Skeuocard::TextInputView
     zero = places - num.toString().length + 1
     return Array(zero).join("0") + num
 
+###
+# Skeuocard::SegmentedCardNumberInputView
+# Provides a reconfigurable segmented input view for credit card numbers.
+###
 class Skeuocard::SegmentedCardNumberInputView
   
   _digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -1031,9 +1078,6 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
 
   getValue: ->
     @el.val()
-
-# Export the object.
-window.Skeuocard = Skeuocard
 
 ###
 # Card Definitions

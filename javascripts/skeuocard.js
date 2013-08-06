@@ -70,12 +70,18 @@
         }
       };
       this.options = $.extend(optDefaults, opts);
+      this._applyBrowserFixes();
       this._conformDOM();
       this._setAcceptedCardProducts();
       this._createInputs();
       this._updateProductIfNeeded();
       this._flipToInvalidSide();
     }
+
+    Skeuocard.prototype._applyBrowserFixes = function() {
+      var ua;
+      return ua = navigator.userAgent;
+    };
 
     Skeuocard.prototype._conformDOM = function() {
       var el, fieldName, fieldValue, _ref, _ref1, _ref2,
@@ -570,9 +576,91 @@
       return (_ref = this.el.container).trigger.apply(_ref, args);
     };
 
+    Skeuocard.browserFixes = {};
+
+    /*
+      # Register a new patch which will be applied for a matching userAgent.
+    */
+
+
+    Skeuocard._browserPatchMethods = {};
+
+    Skeuocard.registerBrowserPatch = function(match, patchFunc) {
+      this._browserPatchMethods[match] = patchFunc;
+      return this._updateBrowserPatches();
+    };
+
+    Skeuocard._updateBrowserPatches = function() {
+      var m, matcher, parts, patcher, ua, _ref, _results;
+      ua = navigator.userAgent;
+      _ref = this._browserPatchMethods;
+      _results = [];
+      for (m in _ref) {
+        patcher = _ref[m];
+        parts = m.split('/');
+        matcher = new RegExp(parts[1], parts[2]);
+        if (matcher.test(ua)) {
+          _results.push(patcher(this));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    Skeuocard.applyBrowserFixes = function() {
+      var fix, link, m, matcher, parts, path, script, ua, _i, _len, _ref, _ref1, _results;
+      ua = navigator.userAgent;
+      _ref = this.browserFixes;
+      _results = [];
+      for (m in _ref) {
+        fix = _ref[m];
+        parts = m.split('/');
+        matcher = new RegExp(parts[1], parts[2]);
+        if (matcher.test(ua)) {
+          if (fix.scripts != null) {
+            _ref1 = fix.scripts;
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+              path = _ref1[_i];
+              script = $('<script>').attr({
+                src: path,
+                type: 'text/javascript'
+              });
+              script.appendTo($('body'));
+            }
+          }
+          if (fix.styles != null) {
+            _results.push((function() {
+              var _j, _len1, _ref2, _results1;
+              _ref2 = fix.styles;
+              _results1 = [];
+              for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                path = _ref2[_j];
+                link = $('<link>').attr({
+                  rel: 'stylesheet',
+                  href: path
+                });
+                _results1.push(link.appendTo($('body')));
+              }
+              return _results1;
+            })());
+          } else {
+            _results.push(void 0);
+          }
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
     return Skeuocard;
 
   })();
+
+  window.Skeuocard = Skeuocard;
+
+  Skeuocard.applyBrowserFixes();
 
   /*
   Skeuocard::FlipTabView
@@ -721,6 +809,12 @@
     return TextInputView;
 
   })();
+
+  /*
+  # Skeuocard::SegmentedCardNumberInputView
+  # Provides a reconfigurable segmented input view for credit card numbers.
+  */
+
 
   Skeuocard.prototype.SegmentedCardNumberInputView = (function() {
 
@@ -1407,8 +1501,6 @@
     return TextInputView;
 
   })(Skeuocard.prototype.TextInputView);
-
-  window.Skeuocard = Skeuocard;
 
   /*
   # Card Definitions
