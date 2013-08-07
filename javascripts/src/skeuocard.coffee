@@ -1190,6 +1190,18 @@ CCProducts[/^4[0-9]\d{2}/] =
     name: 'front'
     cvc: 'back'
 
+CCProducts[/^(62|88)/] =
+  companyName: "China UnionPay"
+  companyShortname: "unionpay"
+  cardNumberGrouping: [4,4,4,4]
+  expirationFormat: "MM/YY"
+  cvcLength: 3
+  layout:
+    number: 'front'
+    exp: 'front'
+    name: 'front'
+    cvc: 'back'
+
 CCProducts[/^5[1-5]/] =
   companyName: "Mastercard"
   companyShortname: "mastercard"
