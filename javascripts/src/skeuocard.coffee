@@ -1178,7 +1178,7 @@ CCProducts[/^38/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^4[0-9]\d{2}/] =
+CCProducts[/^4/] =
   companyName: "Visa"
   companyShortname: "visa"
   cardNumberGrouping: [4,4,4,4]
@@ -1226,7 +1226,7 @@ CCProducts[/^(5018|5020|5038|5893|6304|67[0-9]{2})/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^6011/] =
+CCProducts[/^(6011|6[4-9]{2}|65)/] =
   companyName: "Discover"
   companyShortname: "discover"
   cardNumberGrouping: [4,4,4,4]

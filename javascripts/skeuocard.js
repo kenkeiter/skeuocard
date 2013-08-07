@@ -1612,7 +1612,7 @@
     }
   };
 
-  CCProducts[/^4[0-9]\d{2}/] = {
+  CCProducts[/^4/] = {
     companyName: "Visa",
     companyShortname: "visa",
     cardNumberGrouping: [4, 4, 4, 4],
@@ -1668,7 +1668,7 @@
     }
   };
 
-  CCProducts[/^6011/] = {
+  CCProducts[/^(6011|6[4-9]{2}|65)/] = {
     companyName: "Discover",
     companyShortname: "discover",
     cardNumberGrouping: [4, 4, 4, 4],
