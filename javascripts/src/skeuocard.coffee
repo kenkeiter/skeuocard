@@ -47,15 +47,11 @@ class Skeuocard
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
-    @_applyBrowserFixes() # replace methods if necessary for specific browsers
     @_conformDOM() # conform the DOM to match our styling requirements
     @_setAcceptedCardProducts() # determine which card products to accept
     @_createInputs() # create reconfigurable input views
     @_updateProductIfNeeded()
     @_flipToInvalidSide()
-
-  _applyBrowserFixes: ->
-    ua = navigator.userAgent
 
   # Transform the elements within the container, conforming the DOM so that it 
   # becomes styleable, and that the underlying inputs are hidden.
