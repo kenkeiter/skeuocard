@@ -1,0 +1,23 @@
+{
+        "name": "skeuocard",
+        "keywords": ["credit", "card", "skeuomorphism"],
+        "description": "Skeuocard progressively enhances credit card inputs to provide a skeuomorphic interface.",
+        "version": "0.1.0",
+        "license": "The MIT License (MIT)",
+        "readmeFilename": "README.md",
+        "repository": {
+                "type": "git",
+                "url": "git://github.com:kenkeiter/skeuocard.git"
+        },
+        "main": [
+                "styles/skeuocard.reset.css",
+                "styles/skeuocard.css",
+                "javascripts/vendor/css_browser_selector.js",
+                "javascripts/skeuocard.js"
+        ],
+        "ignore": [
+                "Procfile",
+                "index.html",
+                "screenshot.png"
+        ]
+}
