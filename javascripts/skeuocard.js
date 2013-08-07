@@ -1612,7 +1612,7 @@
     }
   };
 
-  CCProducts[/^4[0-9]\d{2}/] = {
+  CCProducts[/^4/] = {
     companyName: "Visa",
     companyShortname: "visa",
     cardNumberGrouping: [4, 4, 4, 4],
@@ -1626,7 +1626,21 @@
     }
   };
 
-  CCProducts[/^5[0-8]\d{2}/] = {
+  CCProducts[/^(62|88)/] = {
+    companyName: "China UnionPay",
+    companyShortname: "unionpay",
+    cardNumberGrouping: [4, 4, 4, 4],
+    expirationFormat: "MM/YY",
+    cvcLength: 3,
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
+  };
+
+  CCProducts[/^5[1-5]/] = {
     companyName: "Mastercard",
     companyShortname: "mastercard",
     cardNumberGrouping: [4, 4, 4, 4],
@@ -1640,7 +1654,21 @@
     }
   };
 
-  CCProducts[/^6011/] = {
+  CCProducts[/^(5018|5020|5038|5893|6304|67[0-9]{2})/] = {
+    companyName: "Maestro (MasterCard)",
+    companyShortname: "maestro",
+    cardNumberGrouping: [4, 4, 4, 4],
+    expirationFormat: "MM/YY",
+    cvcLength: 3,
+    layout: {
+      number: 'front',
+      exp: 'front',
+      name: 'front',
+      cvc: 'back'
+    }
+  };
+
+  CCProducts[/^(6011|6[4-9]{2}|65)/] = {
     companyName: "Discover",
     companyShortname: "discover",
     cardNumberGrouping: [4, 4, 4, 4],
