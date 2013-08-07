@@ -58,6 +58,12 @@ $sprite-front-height: 93.6em;
       margin-left: 0.4em;
     }
   }
+
+  &.unaccepted .cc-number input{
+    outline: none;
+    @include vendor-prefix(box-shadow, 0 0 10px $color-invalid);
+    @include vendor-prefix(transition, box-shadow linear 0.15s);
+  }
 }
 
 // *****************************************************************************

@@ -170,6 +170,18 @@
       width: 14em; }
   .skeuocard.js .cc-number input + input {
     margin-left: 0.4em; }
+.skeuocard.js.unaccepted .cc-number input {
+  outline: none;
+  box-shadow: 0 0 10px #ff655a;
+  -webkit-box-shadow: 0 0 10px #ff655a;
+  -ms-box-shadow: 0 0 10px #ff655a;
+  -moz-box-shadow: 0 0 10px #ff655a;
+  -o-box-shadow: 0 0 10px #ff655a;
+  transition: box-shadow linear 0.15s;
+  -webkit-transition: box-shadow linear 0.15s;
+  -ms-transition: box-shadow linear 0.15s;
+  -moz-transition: box-shadow linear 0.15s;
+  -o-transition: box-shadow linear 0.15s; }
 
 .skeuocard.card-product .face.front, .skeuocard.product-visa .face.front, .skeuocard.product-amex .face.front, .skeuocard.product-dinersclubintl .face.front, .skeuocard.product-mastercard .face.front, .skeuocard.product-discover .face.front {
   background-repeat: no-repeat, no-repeat;

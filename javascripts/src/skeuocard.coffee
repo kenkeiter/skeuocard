@@ -221,12 +221,13 @@ class Skeuocard
     # Render card product layout changes.
     if @_cardProductNeedsLayout is true
       # Update product-specific details
-      if @product isnt undefined
+      if @product isnt undefined and @product?.companyShortname in @options.acceptedCardProducts
         # change the design and layout of the card to match the matched prod.
         @_log("[render]", "Activating product", @product)
         @el.container.removeClass (index, css)=>
           (css.match(/\b(product|issuer)-\S+/g) || []).join(' ')
         @el.container.addClass("product-#{@product.companyShortname}")
+        @el.container.removeClass('unaccepted')
         if @product.issuerShortname?
           @el.container.addClass("issuer-#{@product.issuerShortname}")
         # Adjust underlying card type to match detected type
@@ -268,6 +269,10 @@ class Skeuocard
           (css.match(/\bproduct-\S+/g) || []).join(' ')
         @el.container.removeClass (index, css)=>
           (css.match(/\bissuer-\S+/g) || []).join(' ')
+        @el.container.removeClass('unaccepted')
+        if @product? and not (@product?.companyShortname in @options.acceptedCardProducts)
+          @_log("#{@product?.companyShortname} matched, but not accepted.")
+          @el.container.addClass('unaccepted')
       @_cardProductNeedsLayout = false
 
     @_log("Validation state:", @_validationState)
@@ -408,7 +413,7 @@ class Skeuocard
     @trigger('faceDidBecomeVisible.skeuocard', [@, targetFace])
 
   getProductForNumber: (num)->
-    for m, d of @acceptedCardProducts
+    for m, d of CCProducts
       parts = m.split('/')
       matcher = new RegExp(parts[1], parts[2])
       if matcher.test(num)

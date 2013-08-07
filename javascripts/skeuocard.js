@@ -70,18 +70,12 @@
         }
       };
       this.options = $.extend(optDefaults, opts);
-      this._applyBrowserFixes();
       this._conformDOM();
       this._setAcceptedCardProducts();
       this._createInputs();
       this._updateProductIfNeeded();
       this._flipToInvalidSide();
     }
-
-    Skeuocard.prototype._applyBrowserFixes = function() {
-      var ua;
-      return ua = navigator.userAgent;
-    };
 
     Skeuocard.prototype._conformDOM = function() {
       var el, fieldName, fieldValue, _ref, _ref1, _ref2,
@@ -277,16 +271,17 @@
     };
 
     Skeuocard.prototype.render = function() {
-      var container, el, fieldName, inputEl, sel, surfaceName, _hiddenFaceFilled, _hiddenFaceValid, _oppositeFace, _ref, _visibleFaceFilled, _visibleFaceValid,
+      var container, el, fieldName, inputEl, sel, surfaceName, _hiddenFaceFilled, _hiddenFaceValid, _oppositeFace, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _visibleFaceFilled, _visibleFaceValid,
         _this = this;
       this._log("*** start rendering ***");
       if (this._cardProductNeedsLayout === true) {
-        if (this.product !== void 0) {
+        if (this.product !== void 0 && (_ref = (_ref1 = this.product) != null ? _ref1.companyShortname : void 0, __indexOf.call(this.options.acceptedCardProducts, _ref) >= 0)) {
           this._log("[render]", "Activating product", this.product);
           this.el.container.removeClass(function(index, css) {
             return (css.match(/\b(product|issuer)-\S+/g) || []).join(' ');
           });
           this.el.container.addClass("product-" + this.product.companyShortname);
+          this.el.container.removeClass('unaccepted');
           if (this.product.issuerShortname != null) {
             this.el.container.addClass("issuer-" + this.product.issuerShortname);
           }
@@ -302,9 +297,9 @@
             maxlength: this.product.cvcLength,
             placeholder: new Array(this.product.cvcLength + 1).join(this.options.cardNumberPlaceholderChar)
           });
-          _ref = this.product.layout;
-          for (fieldName in _ref) {
-            surfaceName = _ref[fieldName];
+          _ref2 = this.product.layout;
+          for (fieldName in _ref2) {
+            surfaceName = _ref2[fieldName];
             sel = surfaceName === 'front' ? 'surfaceFront' : 'surfaceBack';
             container = this.el[sel];
             inputEl = this._inputViews[fieldName].el;
@@ -334,6 +329,11 @@
           this.el.container.removeClass(function(index, css) {
             return (css.match(/\bissuer-\S+/g) || []).join(' ');
           });
+          this.el.container.removeClass('unaccepted');
+          if ((this.product != null) && !(_ref3 = (_ref4 = this.product) != null ? _ref4.companyShortname : void 0, __indexOf.call(this.options.acceptedCardProducts, _ref3) >= 0)) {
+            this._log("" + ((_ref5 = this.product) != null ? _ref5.companyShortname : void 0) + " matched, but not accepted.");
+            this.el.container.addClass('unaccepted');
+          }
         }
         this._cardProductNeedsLayout = false;
       }
@@ -526,10 +526,9 @@
     };
 
     Skeuocard.prototype.getProductForNumber = function(num) {
-      var d, issuer, m, matcher, parts, _ref;
-      _ref = this.acceptedCardProducts;
-      for (m in _ref) {
-        d = _ref[m];
+      var d, issuer, m, matcher, parts;
+      for (m in CCProducts) {
+        d = CCProducts[m];
         parts = m.split('/');
         matcher = new RegExp(parts[1], parts[2]);
         if (matcher.test(num)) {
