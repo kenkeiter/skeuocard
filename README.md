@@ -12,7 +12,7 @@ Skeuocard takes a standard credit card input form and partially transforms its D
 
 ### Bower
 
-If you have Bower then you can simply:
+If you have [Bower](http://bower.io) then you can simply:
 
 ```bash
 $ bower install skeuocard
