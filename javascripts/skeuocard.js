@@ -1654,7 +1654,7 @@
     }
   };
 
-  CCProducts[/^(5020|5038|6390|[6700-6799])/] = {
+  CCProducts[/^(5018|5020|5038|5893|6304|67[0-9]{2})/] = {
     companyName: "Maestro (MasterCard)",
     companyShortname: "maestro",
     cardNumberGrouping: [4, 4, 4, 4],
