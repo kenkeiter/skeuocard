@@ -8,7 +8,19 @@ For more on the theory behind Skeuocard, check out the blog post that started it
 
 ## Usage
 
-Skeuocard takes a standard credit card input form and partially transforms its DOM, removing non-essential elements, while leaving the underlying inputs alone. In order to use Skeuocard in your checkout page, you'll need to link the necessary style sheets and scripts, and make sure any asset dependenceis are at the right paths.
+Skeuocard takes a standard credit card input form and partially transforms its DOM, removing non-essential elements, while leaving the underlying inputs alone. In order to use Skeuocard in your checkout page, you'll need to do one of two things.
+
+### Bower
+
+If you have Bower then you can simply:
+
+```bash
+$ bower install skeuocard
+```
+
+### Manually
+
+Or you can link the necessary style sheets and scripts, and make sure any asset dependenceis are at the right paths.
 
 ```html
 <head>
