@@ -1190,9 +1190,21 @@ CCProducts[/^4[0-9]\d{2}/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^5[0-8]\d{2}/] =
+CCProducts[/^5[1-5]/] =
   companyName: "Mastercard"
   companyShortname: "mastercard"
+  cardNumberGrouping: [4,4,4,4]
+  expirationFormat: "MM/YY"
+  cvcLength: 3
+  layout:
+    number: 'front'
+    exp: 'front'
+    name: 'front'
+    cvc: 'back'
+
+CCProducts[/^(5020|5038|6390|[6700-6799])/] =
+  companyName: "Maestro (MasterCard)"
+  companyShortname: "maestro"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
   cvcLength: 3
