@@ -197,6 +197,25 @@
       }
     };
 
+    Skeuocard.prototype._handleFieldTab = function(e) {
+      var backFieldEls, currentFieldEl, frontFieldEls, _currentFace, _oppositeFace;
+      if (e.which === 9) {
+        currentFieldEl = $(e.currentTarget);
+        _oppositeFace = this.visibleFace === 'front' ? 'surfaceBack' : 'surfaceFront';
+        _currentFace = this.visibleFace === 'front' ? 'surfaceFront' : 'surfaceBack';
+        backFieldEls = this.el[_oppositeFace].find('input');
+        frontFieldEls = this.el[_currentFace].find('input');
+        if (this.visibleFace === 'front' && this.isFaceFilled('front') && backFieldEls.length > 0 && frontFieldEls.index(currentFieldEl) === -1) {
+          this.flip();
+          backFieldEls.first().focus();
+        }
+        if (this.visibleFace === 'back' && e.shiftKey) {
+          this.flip();
+          return frontFieldEls.last().focus();
+        }
+      }
+    };
+
     Skeuocard.prototype._createInputs = function() {
       var _this = this;
       this._inputViews.number = new this.SegmentedCardNumberInputView();
@@ -235,6 +254,7 @@
         _this._setUnderlyingValue('cvc', $(e.target).val());
         return _this._updateValidationStateForInputView('cvc');
       });
+      this.el.container.delegate("input", "keyup keydown", this._handleFieldTab.bind(this));
       this._inputViews.number.setValue(this._getUnderlyingValue('number'));
       this._inputViews.exp.setValue(this._getUnderlyingValue('exp'));
       this._inputViews.name.el.val(this._getUnderlyingValue('name'));

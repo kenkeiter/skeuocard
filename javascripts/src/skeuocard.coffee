@@ -156,6 +156,23 @@ class Skeuocard
         @render()
         @trigger('productDidChange.skeuocard', [@, @productShortname, matchedProductIdentifier])
 
+  _handleFieldTab: (e)->
+    if e.which is 9
+      currentFieldEl = $(e.currentTarget)
+      _oppositeFace = if @visibleFace is 'front' then 'surfaceBack' else 'surfaceFront'
+      _currentFace = if @visibleFace is 'front' then 'surfaceFront' else 'surfaceBack'
+      backFieldEls = @el[_oppositeFace].find('input')
+      frontFieldEls = @el[_currentFace].find('input')
+      if @visibleFace is 'front' and
+        @isFaceFilled('front') and
+        backFieldEls.length > 0 and
+        frontFieldEls.index(currentFieldEl) is -1
+          @flip()
+          backFieldEls.first().focus()
+      if @visibleFace is 'back' and e.shiftKey
+        @flip()
+        frontFieldEls.last().focus()
+
   # Create the new inputs, and attach them to their appropriate card face els.
   _createInputs: ->
     @_inputViews.number = new @SegmentedCardNumberInputView()
@@ -191,6 +208,8 @@ class Skeuocard
     @_inputViews.cvc.bind "keyup", (e)=>
       @_setUnderlyingValue('cvc', $(e.target).val())
       @_updateValidationStateForInputView('cvc')
+
+    @el.container.delegate "input", "keyup keydown", @_handleFieldTab.bind(@)
 
     # setup default values; when render is called, these will be picked up
     @_inputViews.number.setValue @_getUnderlyingValue('number')
