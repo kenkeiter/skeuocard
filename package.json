@@ -1,0 +1,9 @@
+{
+  "name": "Skeuocard",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-sass": "~0.4.1"
+  }
+}

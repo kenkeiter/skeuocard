@@ -154,20 +154,21 @@
   position: absolute;
   display: block;
   left: 1.8em;
-  top: 8.05em; }
+  top: 7.05em; }
   .skeuocard.js .cc-number input {
+    padding: 4px;
     color: #333;
     background-color: #fff;
     font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
     font-size: 1.5em; }
     .skeuocard.js .cc-number input.group4 {
-      width: 3.2em; }
+      width: 3.4em; }
     .skeuocard.js .cc-number input.group5 {
       width: 3.8em; }
     .skeuocard.js .cc-number input.group6 {
       width: 4.6em; }
     .skeuocard.js .cc-number input.group19 {
-      width: 14em; }
+      width: 14.2em; }
   .skeuocard.js .cc-number input + input {
     margin-left: 0.4em; }
 
@@ -271,7 +272,7 @@
     background-image: url("../images/products/visa-back.png"), url("../images/products/generic-back.png"); }
   .skeuocard.product-visa .cc-number {
     left: 1.8em;
-    top: 8.05em; }
+    top: 7.05em; }
   .skeuocard.product-visa .cc-exp {
     left: 10.9em;
     top: 11.2em;
@@ -336,7 +337,7 @@
   background-image: url("../images/products/visa-back.png"), url("../images/products/generic-back.png"); }
 .skeuocard.product-dinersclubintl .cc-number {
   left: 1.8em;
-  top: 8.05em; }
+  top: 7.05em; }
 .skeuocard.product-dinersclubintl .cc-name {
   left: 1.8em;
   top: 11.5em; }
@@ -354,7 +355,7 @@
   background-image: url("../images/products/visa-back.png"), url("../images/products/generic-back.png"); }
 .skeuocard.product-mastercard .cc-number {
   left: 1.8em;
-  top: 8.05em; }
+  top: 7.05em; }
 .skeuocard.product-mastercard .cc-name {
   left: 2.5em;
   top: 12.2em; }
@@ -372,7 +373,7 @@
   background-image: url("../images/products/visa-back.png"), url("../images/products/generic-back.png"); }
 .skeuocard.product-discover .cc-number {
   left: 1.8em;
-  top: 8.05em; }
+  top: 7.05em; }
 .skeuocard.product-discover .cc-name {
   left: 1.55em;
   top: 13.575em; }

@@ -547,11 +547,16 @@ class Skeuocard::SegmentedCardNumberInputView
     @el = $('<fieldset>')
     @el.delegate "input", "keypress", @_handleGroupKeyPress.bind(@)
     @el.delegate "input", "keydown", @_handleGroupKeyDown.bind(@)
-    @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
+    # @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
     @el.delegate "input", "paste", @_handleGroupPaste.bind(@)
     @el.delegate "input", "change", @_handleGroupChange.bind(@)
 
   _handleGroupKeyDown: (e)->
+    # Artificial keyUp event for dat feeling of key responsiveness
+    setTimeout =>
+      @_handleGroupKeyUp(e)
+    , 0
+    
     # If this is called with the control or meta key, defer to another handler
     if e.ctrlKey or e.metaKey
       return @_handleModifiedKeyDown(e)
@@ -571,12 +576,12 @@ class Skeuocard::SegmentedCardNumberInputView
     return true
 
   _handleGroupKeyUp: (e)->
-    inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
+    inputGroupEl = $(currentTarget)
     selectionEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
-    
-    nextInputEl = inputGroupEl.nextAll('input')
+  
+    nextInputEl = inputGroupEl.nextAll('input') if e.which >= 48 && e.which <= 57
 
     if e.ctrlKey or e.metaKey
       return false # skip control keys
@@ -644,17 +649,17 @@ class Skeuocard::SegmentedCardNumberInputView
 
   _beginSelectAll: ->
     # remember the previous grouping, regroup into one, and select all.
-    if @_state.selectingAll is false
-      @_state.selectingAll = true
-      @_state.lastGrouping = @options.groupings
-      @_state.lastValue = @getValue()
-      @setGroupings(@optDefaults.groupings)
-      @el.addClass('selecting-all')
-      fieldEl = @el.find("input")
-      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
-    else
-      fieldEl = @el.find("input")
-      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    # if @_state.selectingAll is false
+    @_state.selectingAll = true
+    @_state.lastGrouping = @options.groupings
+    @_state.lastValue = @getValue()
+    @setGroupings(@optDefaults.groupings)
+    @el.addClass('selecting-all')
+    fieldEl = @el.find("input")
+    fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    # else
+    #   fieldEl = @el.find("input")
+    #   fieldEl[0].setSelectionRange(0, fieldEl.val().length)
 
   _endSelectAll: ->
     if @_state.selectingAll
