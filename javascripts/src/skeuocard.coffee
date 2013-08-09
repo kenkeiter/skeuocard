@@ -996,9 +996,10 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
 
   isValid: ->
     @isFilled() and
-      ((@date.getFullYear() == @options.currentDate.getFullYear() and
-        @date.getMonth() >= @options.currentDate.getMonth()) or
-        @date.getFullYear() > @options.currentDate.getFullYear())
+      (((@date.getFullYear() == @options.currentDate.getFullYear() and
+         @date.getMonth() >= @options.currentDate.getMonth()) or
+         @date.getFullYear() > @options.currentDate.getFullYear()) and
+         @date.getMonth() <= 12)
 
 
 class Skeuocard::TextInputView extends Skeuocard::TextInputView
