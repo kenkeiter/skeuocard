@@ -547,11 +547,16 @@ class Skeuocard::SegmentedCardNumberInputView
     @el = $('<fieldset>')
     @el.delegate "input", "keypress", @_handleGroupKeyPress.bind(@)
     @el.delegate "input", "keydown", @_handleGroupKeyDown.bind(@)
-    @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
+    # @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
     @el.delegate "input", "paste", @_handleGroupPaste.bind(@)
     @el.delegate "input", "change", @_handleGroupChange.bind(@)
 
   _handleGroupKeyDown: (e)->
+    # Artificial keyUp event for UX goodness
+    setTimeout =>
+      @_handleGroupKeyUp(e)
+    , 0
+    
     # If this is called with the control or meta key, defer to another handler
     if e.ctrlKey or e.metaKey
       return @_handleModifiedKeyDown(e)
@@ -571,6 +576,7 @@ class Skeuocard::SegmentedCardNumberInputView
     return true
 
   _handleGroupKeyUp: (e)->
+    console.log "foo"
     inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
     selectionEnd = currentTarget.selectionEnd

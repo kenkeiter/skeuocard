@@ -9,6 +9,7 @@
 @exports [window.Skeuocard]
 */
 
+
 (function() {
   var CCIssuers, CCProducts, Skeuocard,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -743,13 +744,16 @@
       this.el = $('<fieldset>');
       this.el.delegate("input", "keypress", this._handleGroupKeyPress.bind(this));
       this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
-      this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
       this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
       return this.el.delegate("input", "change", this._handleGroupChange.bind(this));
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
-      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, selectionEnd;
+      var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, selectionEnd,
+        _this = this;
+      setTimeout(function() {
+        return _this._handleGroupKeyUp(e);
+      }, 0);
       if (e.ctrlKey || e.metaKey) {
         return this._handleModifiedKeyDown(e);
       }
@@ -769,6 +773,7 @@
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyUp = function(e) {
       var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, selectionEnd, _ref;
+      console.log("foo");
       inputGroupEl = $(e.currentTarget);
       currentTarget = e.currentTarget;
       selectionEnd = currentTarget.selectionEnd;
