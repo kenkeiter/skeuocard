@@ -773,12 +773,13 @@
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyUp = function(e) {
       var currentTarget, inputGroupEl, inputMaxLength, nextInputEl, selectionEnd, _ref;
-      console.log("foo");
-      inputGroupEl = $(e.currentTarget);
       currentTarget = e.currentTarget;
+      inputGroupEl = $(currentTarget);
       selectionEnd = currentTarget.selectionEnd;
       inputMaxLength = currentTarget.maxLength;
-      nextInputEl = inputGroupEl.nextAll('input');
+      if (e.which >= 48 && e.which <= 57) {
+        nextInputEl = inputGroupEl.nextAll('input');
+      }
       if (e.ctrlKey || e.metaKey) {
         return false;
       }
@@ -868,18 +869,13 @@
 
     SegmentedCardNumberInputView.prototype._beginSelectAll = function() {
       var fieldEl;
-      if (this._state.selectingAll === false) {
-        this._state.selectingAll = true;
-        this._state.lastGrouping = this.options.groupings;
-        this._state.lastValue = this.getValue();
-        this.setGroupings(this.optDefaults.groupings);
-        this.el.addClass('selecting-all');
-        fieldEl = this.el.find("input");
-        return fieldEl[0].setSelectionRange(0, fieldEl.val().length);
-      } else {
-        fieldEl = this.el.find("input");
-        return fieldEl[0].setSelectionRange(0, fieldEl.val().length);
-      }
+      this._state.selectingAll = true;
+      this._state.lastGrouping = this.options.groupings;
+      this._state.lastValue = this.getValue();
+      this.setGroupings(this.optDefaults.groupings);
+      this.el.addClass('selecting-all');
+      fieldEl = this.el.find("input");
+      return fieldEl[0].setSelectionRange(0, fieldEl.val().length);
     };
 
     SegmentedCardNumberInputView.prototype._endSelectAll = function() {

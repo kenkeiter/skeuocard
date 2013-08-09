@@ -43,16 +43,17 @@ $sprite-front-height: 93.6em;
     display: block; 
     //left:36px;
     left: 1.8em;
-    top: 8.05em;
+    top: 7.05em;
     input{
+      padding: 4px;
       color: #333;
       background-color: #fff;
       font-family: $cc-field-family;
       font-size: 1.5em;
-      &.group4{ width: 3.2em; }
+      &.group4{ width: 3.4em; }
       &.group5{ width: 3.8em; }
       &.group6{ width: 4.6em; }
-      &.group19{ width: 14em; }
+      &.group19{ width: 14.2em; }
     }
     input + input {
       margin-left: 0.4em;
@@ -151,7 +152,7 @@ $sprite-front-height: 93.6em;
 
   .cc-number{
     left: 1.8em; 
-    top: 8.05em;
+    top: 7.05em;
   }
 
   .cc-exp{
@@ -284,7 +285,7 @@ $sprite-front-height: 93.6em;
   }
   .cc-number{
     left: 1.8em;
-    top: 8.05em;
+    top: 7.05em;
   }
   .cc-name{
     left: 1.8em;
@@ -316,7 +317,7 @@ $sprite-front-height: 93.6em;
 
   .cc-number{
     left: 1.8em;
-    top: 8.05em;
+    top: 7.05em;
   }
 
   .cc-name{
@@ -351,7 +352,7 @@ $sprite-front-height: 93.6em;
 
   .cc-number{
     left: 1.8em;
-    top: 8.05em;
+    top: 7.05em;
   }
 
   .cc-name{

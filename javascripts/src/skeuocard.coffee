@@ -576,13 +576,12 @@ class Skeuocard::SegmentedCardNumberInputView
     return true
 
   _handleGroupKeyUp: (e)->
-    console.log "foo"
-    inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
+    inputGroupEl = $(currentTarget)
     selectionEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
-    
-    nextInputEl = inputGroupEl.nextAll('input')
+  
+    nextInputEl = inputGroupEl.nextAll('input') if e.which >= 48 && e.which <= 57
 
     if e.ctrlKey or e.metaKey
       return false # skip control keys
@@ -650,17 +649,17 @@ class Skeuocard::SegmentedCardNumberInputView
 
   _beginSelectAll: ->
     # remember the previous grouping, regroup into one, and select all.
-    if @_state.selectingAll is false
-      @_state.selectingAll = true
-      @_state.lastGrouping = @options.groupings
-      @_state.lastValue = @getValue()
-      @setGroupings(@optDefaults.groupings)
-      @el.addClass('selecting-all')
-      fieldEl = @el.find("input")
-      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
-    else
-      fieldEl = @el.find("input")
-      fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    # if @_state.selectingAll is false
+    @_state.selectingAll = true
+    @_state.lastGrouping = @options.groupings
+    @_state.lastValue = @getValue()
+    @setGroupings(@optDefaults.groupings)
+    @el.addClass('selecting-all')
+    fieldEl = @el.find("input")
+    fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+    # else
+    #   fieldEl = @el.find("input")
+    #   fieldEl[0].setSelectionRange(0, fieldEl.val().length)
 
   _endSelectAll: ->
     if @_state.selectingAll

@@ -16,10 +16,8 @@ module.exports = (grunt) ->
     watch:
       update:
         files: [
-          "./javascripts/src/skeuocard.coffee",
-          "./styles/src/demo.scss",
-          "./styles/src/skeuocard.scss",
-          "./styles/src/skeuocard.reset.scss"]
+          "./javascripts/src/**/*.*",
+          "./styles/src/**/*.*"]
         tasks: [
           "coffee",
           "sass"
