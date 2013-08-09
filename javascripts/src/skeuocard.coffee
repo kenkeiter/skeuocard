@@ -552,7 +552,7 @@ class Skeuocard::SegmentedCardNumberInputView
     @el.delegate "input", "change", @_handleGroupChange.bind(@)
 
   _handleGroupKeyDown: (e)->
-    # Artificial keyUp event for UX goodness
+    # Artificial keyUp event for dat feeling of key responsiveness
     setTimeout =>
       @_handleGroupKeyUp(e)
     , 0
