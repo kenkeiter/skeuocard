@@ -12,7 +12,7 @@
 class Skeuocard
   
   constructor: (el, opts = {})->
-    @el = {container: $(el), underlyingFields: {}}
+    @el = container: $(el), underlyingFields: {}
     @_inputViews = {}
     @_tabViews = {}
     @product = undefined
@@ -1106,48 +1106,28 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
 # List of credit card products by matching prefix.
 CCProducts = {}
 
-CCProducts[/^30[0-5][0-9]/] =
+CCProducts[/^(36|38|30[0-5])/] =
   companyName: "Diners Club"
   companyShortname: "dinersclubintl"
   cardNumberGrouping: [4,6,4]
+  cardNumberLength: [14]
   expirationFormat: "MM/YY"
   cvcLength: 3
+  validateLuhn: true
   layout:
     number: 'front'
     exp: 'front'
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^3095/] =
-  companyName: "Diners Club International"
-  companyShortname: "dinersclubintl"
-  cardNumberGrouping: [4,6,4]
-  expirationFormat: "MM/YY"
-  cvcLength: 3
-  layout:
-    number: 'front'
-    exp: 'front'
-    name: 'front'
-    cvc: 'back'
-
-CCProducts[/^36\d{2}/] =
-  companyName: "Diners Club International"
-  companyShortname: "dinersclubintl"
-  cardNumberGrouping: [4,6,4]
-  expirationFormat: "MM/YY"
-  cvcLength: 3
-  layout:
-    number: 'front'
-    exp: 'front'
-    name: 'front'
-    cvc: 'back'
-
-CCProducts[/^35\d{2}/] =
+CCProducts[/^35/] =
   companyName: "JCB"
   companyShortname: "jcb"
   cardNumberGrouping: [4,4,4,4]
+  cardNumberLength: [16]
   expirationFormat: "MM/YY"
   cvcLength: 3
+  validateLuhn: true
   layout:
     number: 'front'
     exp: 'front'
@@ -1158,19 +1138,23 @@ CCProducts[/^3[47]/] =
   companyName: "American Express"
   companyShortname: "amex"
   cardNumberGrouping: [4,6,5]
+  cardNumberLength: [15]
   expirationFormat: "MM/YY"
   cvcLength: 4
+  validateLuhn: true
   layout:
     number: 'front'
     exp: 'front'
     name: 'front'
     cvc: 'front'
 
-CCProducts[/^38/] =
-  companyName: "Hipercard"
-  companyShortname: "hipercard"
+CCProducts[/^(6706|6771|6709)/] =
+  companyName: "Laser Card Services Ltd."
+  companyShortname: "laser"
   cardNumberGrouping: [4,4,4,4]
+  cardNumberLength: [16..19]
   expirationFormat: "MM/YY"
+  validateLuhn: true
   cvcLength: 3
   layout:
     number: 'front'
@@ -1182,7 +1166,9 @@ CCProducts[/^4/] =
   companyName: "Visa"
   companyShortname: "visa"
   cardNumberGrouping: [4,4,4,4]
+  cardNumberLength: [13..16]
   expirationFormat: "MM/YY"
+  validateLuhn: true
   cvcLength: 3
   layout:
     number: 'front'
@@ -1193,8 +1179,10 @@ CCProducts[/^4/] =
 CCProducts[/^(62|88)/] =
   companyName: "China UnionPay"
   companyShortname: "unionpay"
-  cardNumberGrouping: [4,4,4,4]
+  cardNumberGrouping: [19]
+  cardNumberLength: [16..19]
   expirationFormat: "MM/YY"
+  validateLuhn: false
   cvcLength: 3
   layout:
     number: 'front'
@@ -1206,7 +1194,9 @@ CCProducts[/^5[1-5]/] =
   companyName: "Mastercard"
   companyShortname: "mastercard"
   cardNumberGrouping: [4,4,4,4]
+  cardNumberLength: [16]
   expirationFormat: "MM/YY"
+  validateLuhn: true
   cvcLength: 3
   layout:
     number: 'front'
@@ -1214,11 +1204,13 @@ CCProducts[/^5[1-5]/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^(5018|5020|5038|5893|6304|67[0-9]{2})/] =
+CCProducts[/^(5018|5020|5038|6304|6759|676[1-3])/] =
   companyName: "Maestro (MasterCard)"
   companyShortname: "maestro"
   cardNumberGrouping: [4,4,4,4]
+  cardNumberLength: [12..19]
   expirationFormat: "MM/YY"
+  validateLuhn: true
   cvcLength: 3
   layout:
     number: 'front'
@@ -1226,11 +1218,12 @@ CCProducts[/^(5018|5020|5038|5893|6304|67[0-9]{2})/] =
     name: 'front'
     cvc: 'back'
 
-CCProducts[/^(6011|6[4-9]{2}|65)/] =
+CCProducts[/^(6011|65|64[4-9]|622)/] =
   companyName: "Discover"
   companyShortname: "discover"
   cardNumberGrouping: [4,4,4,4]
   expirationFormat: "MM/YY"
+  validateLuhn: true
   cvcLength: 3
   layout:
     number: 'front'
