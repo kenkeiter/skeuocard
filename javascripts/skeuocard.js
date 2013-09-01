@@ -54,7 +54,6 @@
         expYearInputSelector: '[name="cc_exp_year"]',
         nameInputSelector: '[name="cc_name"]',
         cvcInputSelector: '[name="cc_cvc"]',
-        issuers: {},
         initialValues: {},
         validationState: {},
         strings: {
