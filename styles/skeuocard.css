@@ -67,12 +67,6 @@
     -moz-transform: rotateY(180deg);
     -o-transform: rotateY(180deg);
     transform: rotateY(180deg); }
-  .skeuocard.js.valid .card-body .face {
-    box-shadow: 0 0 10px #00cfa7;
-    -webkit-box-shadow: 0 0 10px #00cfa7;
-    -ms-box-shadow: 0 0 10px #00cfa7;
-    -moz-box-shadow: 0 0 10px #00cfa7;
-    -o-box-shadow: 0 0 10px #00cfa7; }
   .skeuocard.js .flip-tab {
     position: absolute;
     -webkit-border-radius: 3.55em;
@@ -95,6 +89,9 @@
       color: #fff;
       font-size: 1.0em;
       line-height: 1.2em; }
+    .skeuocard.js .flip-tab p strong {
+      color: #fff;
+      font-weight: bold; }
     .skeuocard.js .flip-tab.front {
       right: -1.25em;
       top: 1em; }
@@ -117,6 +114,21 @@
     .skeuocard.js .flip-tab.valid-anim.back {
       background-position: 0.6em 0.6em; }
       .skeuocard.js .flip-tab.valid-anim.back p {
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.6em; }
+  .skeuocard.js .flip-tab.warn-anim {
+    background: #ff655a url("../images/card-invalid-indicator.png") no-repeat;
+    background-size: 2.3em 2.3em; }
+    .skeuocard.js .flip-tab.warn-anim.front {
+      background-position: 10.08em 0.7em; }
+      .skeuocard.js .flip-tab.warn-anim.front p {
+        margin-right: 2.9em;
+        margin-left: 1.25em;
+        margin-top: 0.6em; }
+    .skeuocard.js .flip-tab.warn-anim.back {
+      background-position: 0.6em 0.6em; }
+      .skeuocard.js .flip-tab.warn-anim.back p {
         margin-right: 1.25em;
         margin-left: 2.9em;
         margin-top: 0.6em; }
@@ -150,6 +162,12 @@
   background-image: url("../images/products/generic-back.png");
   background-repeat: no-repeat;
   background-size: cover; }
+.skeuocard.js .face.valid {
+  box-shadow: 0 0 10px #00cfa7;
+  -webkit-box-shadow: 0 0 10px #00cfa7;
+  -ms-box-shadow: 0 0 10px #00cfa7;
+  -moz-box-shadow: 0 0 10px #00cfa7;
+  -o-box-shadow: 0 0 10px #00cfa7; }
 .skeuocard.js .cc-number {
   position: absolute;
   display: block;
@@ -233,19 +251,19 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: transparent;
   border: none; }
-.skeuocard.card-product .invalid, .skeuocard.product-visa .invalid, .skeuocard.product-unionpay .invalid, .skeuocard.product-amex .invalid, .skeuocard.product-dinersclubintl .invalid, .skeuocard.product-mastercard .invalid, .skeuocard.product-maestro .invalid, .skeuocard.product-discover .invalid {
+
+.skeuocard.card-product .face.filled .invalid, .skeuocard.product-visa .face.filled .invalid, .skeuocard.product-unionpay .face.filled .invalid, .skeuocard.product-amex .face.filled .invalid, .skeuocard.product-dinersclubintl .face.filled .invalid, .skeuocard.product-mastercard .face.filled .invalid, .skeuocard.product-maestro .face.filled .invalid, .skeuocard.product-discover .face.filled .invalid {
+  outline: none;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
-  border-radius: 5px; }
-.skeuocard.card-product .invalid, .skeuocard.product-visa .invalid, .skeuocard.product-unionpay .invalid, .skeuocard.product-amex .invalid, .skeuocard.product-dinersclubintl .invalid, .skeuocard.product-mastercard .invalid, .skeuocard.product-maestro .invalid, .skeuocard.product-discover .invalid {
-  outline: none;
+  border-radius: 5px;
   box-shadow: 0 0 10px #ff655a;
   transition: box-shadow linear 0.15s;
   -webkit-transition: box-shadow linear 0.15s;
   -ms-transition: box-shadow linear 0.15s;
   -moz-transition: box-shadow linear 0.15s;
   -o-transition: box-shadow linear 0.15s; }
-  .skeuocard.card-product .invalid input:focus, .skeuocard.product-visa .invalid input:focus, .skeuocard.product-unionpay .invalid input:focus, .skeuocard.product-amex .invalid input:focus, .skeuocard.product-dinersclubintl .invalid input:focus, .skeuocard.product-mastercard .invalid input:focus, .skeuocard.product-maestro .invalid input:focus, .skeuocard.product-discover .invalid input:focus {
+  .skeuocard.card-product .face.filled .invalid input:focus, .skeuocard.product-visa .face.filled .invalid input:focus, .skeuocard.product-unionpay .face.filled .invalid input:focus, .skeuocard.product-amex .face.filled .invalid input:focus, .skeuocard.product-dinersclubintl .face.filled .invalid input:focus, .skeuocard.product-mastercard .face.filled .invalid input:focus, .skeuocard.product-maestro .face.filled .invalid input:focus, .skeuocard.product-discover .face.filled .invalid input:focus {
     border: 1px solid blue;
     outline: none;
     border-radius: 3px;

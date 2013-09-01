@@ -38,6 +38,10 @@ $sprite-front-height: 93.6em;
     background-size: cover;
   }
 
+  .face.valid{
+    @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
+  }
+
   .cc-number{
     position: absolute;
     display: block; 
@@ -125,20 +129,19 @@ $sprite-front-height: 93.6em;
     background-color: transparent;
     border: none;
   }
-  .invalid{
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-  }
-  .invalid{
+}
+
+.skeuocard.card-product .face.filled .invalid{
+  outline: none;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px $color-invalid;
+  @include vendor-prefix(transition, box-shadow linear 0.15s);
+  input:focus{
+    border: 1px solid blue;
     outline: none;
-    box-shadow: 0 0 10px $color-invalid;
-    @include vendor-prefix(transition, box-shadow linear 0.15s);
-    input:focus{
-      border: 1px solid blue;
-      outline: none;
-      @include vendor-prefix(border-radius, 3px);
-    }
+    @include vendor-prefix(border-radius, 3px);
   }
 }
 
