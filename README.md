@@ -35,7 +35,7 @@ Or you can link the necessary style sheets and scripts, and make sure any asset 
 
 Make sure your credit card inputs are within their own containing element (most likely a `<div>`). In the example below, the `name` attribute of the inputs is significant because Skeuocard needs to determine which inputs should remain intact and be used to store the underlying card values.
 
-Side note: If you'd like to use different input `name`s or selectors, you can specify those at instantiation.
+Side note: If you'd like to use different input `name`s or selectors, you can specify those at instantiation. See the "Changing Underlying Value Selectors" section, below.
 
 ```html
 <div class="credit-card-input no-js" id="skeuocard">
@@ -45,17 +45,21 @@ Side note: If you'd like to use different input `name`s or selectors, you can sp
     <option value="visa">Visa</option>
     <option value="discover">Discover</option>
     <option value="mastercard">MasterCard</option>
+    <option value="maestro">Maestro</option>
+    <option value="unionpay">China UnionPay</option>
     <option value="amex">American Express</option>
     <option value="dinersclubintl">Diners Club</option>
   </select>
   <label for="cc_number">Card Number</label>
-  <input type="text" name="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
-  <label for="cc_exp">Expiration Date (mm/yy)</label>
-  <input type="text" name="cc_exp" placeholder="00/00">
+  <input type="text" name="cc_number" id="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19">
+  <label for="cc_exp_month">Expiration Month</label>
+  <input type="text" name="cc_exp_month" id="cc_exp_month" placeholder="00">
+  <label for="cc_exp_year">Expiration Year</label>
+  <input type="text" name="cc_exp_year" id="cc_exp_year" placeholder="00">
   <label for="cc_name">Cardholder's Name</label>
-  <input type="text" name="cc_name" placeholder="John Doe">
+  <input type="text" name="cc_name" id="cc_name" placeholder="John Doe">
   <label for="cc_cvc">Card Validation Code</label>
-  <input type="text" name="cc_cvc" placeholder="XXX" maxlength="3" size="3">
+  <input type="text" name="cc_cvc" id="cc_cvc" placeholder="123" maxlength="3" size="3">
 </div>
 ```
 
@@ -93,7 +97,8 @@ Alternately, you can instantiate your Skeuocard instance with an `initialValues`
 new Skeuocard($("#skeuocard"), {
   initialValues: {
     number: "4111111111111111",
-    exp: "01-03-2016",
+    expMonth: "1",
+    expYear: "2016"
     name: "James Doe",
     cvc: "123"
   }
@@ -129,7 +134,8 @@ By default, Skeuocard sets the following default selectors to match the  underly
 
 * `typeInputSelector: [name="cc_type"]`
 * `numberInputSelector: [name="cc_number"]`
-* `expInputSelector: [name="cc_exp"]`
+* `expMonthInputSelector: [name="cc_exp_month"]`
+* `expYearInputSelector: [name="cc_exp_year"]`
 * `nameInputSelector: [name="cc_name"]`
 * `cvcInputSelector: [name="cc_cvc"]`
 
@@ -143,27 +149,28 @@ new Skeuocard($("#skeuocard"), {
 
 #### Using the Server's Current Date
 
-If you're smart, you probably won't want to use the client's local `Date` to validate against when checking expiration. You can specify a `Date` to check against at instantiation by providing the `currentDate` option, like so:
+If you're smart, you probably won't want to use the client's local `Date` to validate against when checking expiration. You can specify a `Date` to check against at instantiation by setting `currentDate` on the Skeuocard class like so:
 
 ```javascript
-new Skeuocard($("#skeuocard"), {
-  currentDate: new Date(day, month, year)
-});
+Skeuocard.currentDate = new Date(day, month, year);
 ```
+
+By default, Skeuocard will automatically use the client's local Date.
 
 #### Specifying Accepted Card Products
 
 Only accept Visa and AmEx? No worries. Skeuocard has you covered. You can specify accepted card types with an options argument, or in the underlying form itself.
 
-To limit your accepted card products, simply add or remove `<option>`s from your type `<select>` where either the `value` attribute matches the shortname of the product (see the example below), or the `data-card-product-shortname` attribute is set to the shortname of the product (if your value needs to be different for legacy purposes).
+To limit your accepted card products, simply add or remove `<option>`s from your type `<select>` where either the `value` attribute matches the shortname of the product (see the example below), or the `data-sc-type` attribute is set to the shortname of the product (if your `value` needs to be different for legacy purposes).
 
 ```html
-<select class="field cc-type" name="cc_type">
+<select name="cc_type">
   <option value="">...</option>
   <option value="visa">Visa</option>
-  <option value="discover">Discover</option>
   <option value="mastercard">MasterCard</option>
-  <option value="american_express" data-card-product-shortname="amex">American Express</option>
+  <option value="maestro">Maestro</option>
+  <option value="amex">American Express</option>
+  <option value="diners" data-sc-type="dinersclubintl">Diners Club</option>
 </select>
 ```
 
@@ -179,38 +186,26 @@ new Skeuocard($("#skeuocard"), {
 
 Progressive enhancement was really important to me when creating this plugin. I wanted to make sure that a potential purchase opportunity would never be denied by a failure in Skeuocard, so I chose to take an approach which would leave the users with a functional, styled form in the event that Skeuocard fails.
 
-You can style your un-enhanced form elements in whichever way you wish. When Skeuocard is instantiated, it will automatically add both the `.skeuocard` and `.js` classes to the container, which will match the selectors necessary to style the card input properly.
+You can style your un-enhanced form elements in whichever way you wish. When Skeuocard is instantiated, it will automatically add both the `skeuocard` and `js` classes to the container, which will match the selectors necessary to style the card input properly.
 
 #### Checking Validity
 
-At some point or another, you're going to want your user to submit your purchase form -- so how do you determine if the credit card input they provided is valid? There are two ways of doing this with Skeuocard: first off, you can check to see if the card has the `.invalid` class applied to it, like so:
+At some point or another, you're going to want your user to submit your purchase form -- so how do you determine if the credit card input they provided is valid? While there are several ways of doing this, there's one recommended way:
 
 ```javascript
-$('#myform').on('submit', function(){
-  if($('#skeuocard').has('.invalid')){
-    return false; // not a valid card; don't allow submission
-  }else{
-    return true; // looks good!
-  }
-})
+card.isValid() // => Boolean
 ```
 
-Alternately, you can bind an event handler to the container element, and watch for `validationStateDidChange.skeuocard` events, like so:
-
-```javascript
-$('#skeuocard').bind('validationStateDidChange.skeuocard', function(evt, card, validationState){
-  console.log("Validation state just changed to:", validationState.number && validationState.exp && validationState.name && validationState.cvc)
-});
-```
-
-#### Specifying Validity at Instantiation
+#### Showing Errors at Instantiation
 
 Sometimes you'll want to indicate a problem with the card to the user at instantiation -- for example, if the card number (after having been submitted to your payment processor) is determined to be incorrect. You can do this one of two ways: by adding the `invalid` class to your underlying `number` form field at instantiation, or by passing an initial `validationState` argument with your options.
 
 Applying the `invalid` class to the invalid field:
 
 ```html
-<input class="cc-cvc invalid" type="text" name="cc_cvc" placeholder="XXX" maxlength="3" size="3">
+...
+<input type="text" name="cc_number" id="cc_number" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" size="19" class="invalid">
+...
 ```
 
 Providing a list of invalid fields at instantiation:
@@ -218,10 +213,10 @@ Providing a list of invalid fields at instantiation:
 ```javascript
 new Skeuocard($("#skeuocard"), {
   validationState: {
-    number: true,
+    number: false,
     exp: true,
     name: true,
-    cvc: false
+    cvc: true
   }
 });
 ```
@@ -234,28 +229,48 @@ You may wish to add a custom layout to support a card (BIN) specific to your loc
 
 You'll need to create a set of transparent PNG file containing any elements you wish to appear on the card faces. For an example, see any of the images in the `images/products/` folder. If you have Adobe Fireworks installed, the editable images are also included in `images/src/`.
 
-Skeuocard accepts an `issuers` option upon instantion. The `issuers` option should be an object whose keys are regexes which match the BIN, and whose value is an object describing the issuer and layout features. When the issuer's regex matches the entered card number, a css class is added to the container in the format `issuer-<issuerShortname>`, which you will use to match and style the container to match your issuer.
+For an example of how to style a card, see `styles/_cards.scss`.
+
+Once you have created your images and the appropriate CSS styling, you will need to create a new CardProduct or variation of an existing card product. Lets say that we're matching a new type of gift card with a BIN (9123) that doesn't match any of the pre-defined credit card providers:
 
 ```javascript
-var myIssuers = {}
-myIssuers[/^414720/] = {
-  issuingAuthority: "Chase",
-  issuerName: "Chase Sapphire Card",
-  issuerShortname: "chase-sapphire",
+// Create a new CardProduct instance, and register it with Skeuocard.
+Skeuocard.CardProduct.create({
+  pattern: /^9123/,                     // match all cards starting with 9123
+  companyName: "Fancy Gift Card Inc.",
+  companyShortname: "fancycard",        // this will be the card type
+  cardNumberGrouping: [4,4,4,4],        // how the number input should group
+  cardNumberLength: [14],               // array of valid card number lengths
+  expirationFormat: "MM/YY",            // format of the date field
+  cvcLength: 3,                         // the length of the CVC
+  validateLuhn: true,                   // validate using the Luhn algorithm?
   layout: {
     number: 'front',
-    exp: 'back',
+    exp: 'front',
     name: 'front',
     cvc: 'back'
   }
-}
-
-new Skeuocard($("#skeuocard"), {
-  issuers: myIssuers
 });
 ```
 
-For an example of how to style a card, see `styles/_cards.scss`.
+Now, lets say that we'd like to recognize and apply a layout for a Visa card with a specific BIN. First, we'd select the matching card product, and then add a variant, which will extend it:
+
+```javascript
+// find the existing Visa product
+var visaProduct = Skeuocard.CardProduct.firstMatchingShortname('visa');
+// register a new variation of the Visa product
+visaProduct.createVariation({
+  pattern: /^414720/,
+  issuingAuthority: "Chase",
+  issuerName: "Chase Sapphire Card",
+  issuerShortname: "chase-sapphire",
+  layout:
+    number: 'front',
+    exp: 'front',
+    name: 'front',
+    cvc: 'front'
+});
+```
 
 #### Design Customization
 

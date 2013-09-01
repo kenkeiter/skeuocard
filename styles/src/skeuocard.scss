@@ -100,12 +100,6 @@ $color-valid: #00CFA7;
     }
   }
 
-  &.valid{
-    .card-body .face{
-      @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
-    }
-  }
-
   .flip-tab{
     position: absolute;
     -webkit-border-radius: 3.55em;
@@ -124,6 +118,10 @@ $color-valid: #00CFA7;
       font-size: 1.0em;
       line-height: 1.2em;
     }
+    p strong{
+      color: #fff;
+      font-weight: bold;
+    }
     &.front{
       right: -1.25em;
       top: 1em;
@@ -140,6 +138,26 @@ $color-valid: #00CFA7;
     background-size: 2.3em 2.3em;
     &.front{
       background-position: 10.05em 0.6em;
+      p{
+        margin-right: 2.9em;
+        margin-left: 1.25em;
+        margin-top: 0.6em;
+      }
+    }
+    &.back{
+      background-position: 0.6em 0.6em;
+      p{
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.6em;
+      }
+    }
+  }
+  .flip-tab.warn-anim{
+    background: $color-invalid url('../images/card-invalid-indicator.png') no-repeat;
+    background-size: 2.3em 2.3em;
+    &.front{
+      background-position: 10.08em 0.7em;
       p{
         margin-right: 2.9em;
         margin-left: 1.25em;
