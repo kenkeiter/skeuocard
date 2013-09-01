@@ -495,6 +495,10 @@
       return (_ref = this.el.underlyingFields[field]) != null ? _ref.val() : void 0;
     };
 
+    Skeuocard.prototype.isValid = function() {
+      return !this.el.front.hasClass('invalid') && !this.el.back.hasClass('invalid');
+    };
+
     return Skeuocard;
 
   })();

@@ -405,6 +405,9 @@ class Skeuocard
   _getUnderlyingValue: (field)->
     @el.underlyingFields[field]?.val()
 
+  isValid: ->
+    not @el.front.hasClass('invalid') and not @el.back.hasClass('invalid')
+
 
 # Export the object.
 window.Skeuocard = Skeuocard
