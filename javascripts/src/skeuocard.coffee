@@ -39,9 +39,9 @@ class Skeuocard
       initialValues: {}
       validationState: {}
       strings:
-        hiddenFaceFillPrompt: "<strong>Click here</strong> to <br />fill in the other side."
+        hiddenFaceFillPrompt: "<strong>Click here</strong> to <br>fill in the other side."
         hiddenFaceErrorWarning: "There's a problem on the other side."
-        hiddenFaceSwitchPrompt: "Forget something?<br /> Flip the card over."
+        hiddenFaceSwitchPrompt: "Forget something?<br> Flip the card over."
     @options = $.extend(optDefaults, opts)
     
     # initialize the card
@@ -231,12 +231,12 @@ class Skeuocard
         @_setUnderlyingValue('expYear',  newDate.getFullYear())
 
     @_inputViews.name.bind "keyup valueChanged", (e, input)=>
-      value = $(e.target).val()
+      value = input.getValue()
       @_setUnderlyingValue('name', value)
       @_updateValidation('name', value)
 
     @_inputViews.cvc.bind "keyup valueChanged", (e, input)=>
-      value = $(e.target).val()
+      value = input.getValue()
       @_setUnderlyingValue('cvc', value)
       @_updateValidation('cvc', value)
 
@@ -246,6 +246,7 @@ class Skeuocard
     @_tabViews.back.el.click => @flip()
 
   _handleFieldTab: (e)->
+    ###
     if e.which is 9
       currentFieldEl = $(e.currentTarget)
       _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
@@ -261,6 +262,7 @@ class Skeuocard
       if @visibleFace is 'back' and e.shiftKey
         @flip()
         frontFieldEls.last().focus()
+    ###
 
   _updateValidation: (fieldName, newValue)->
     return false unless @product?
@@ -354,7 +356,7 @@ class Skeuocard
       destFace = product?.attrs.layout[fieldName] || null
       if destFace?
         if not @el[destFace].has(view.el).length > 0
-          console.log("Need to move", fieldName, "to", destFace)
+          @_log("Moving", fieldName, "to", destFace)
           viewEl = view.el.detach()
           viewEl.appendTo(@el[destFace])
         @_inputViewsByFace[destFace].push view
@@ -380,10 +382,9 @@ class Skeuocard
     targetFace = if @visibleFace is 'front' then 'back' else 'front'
     @trigger('faceWillBecomeVisible.skeuocard', [@, targetFace])
     @visibleFace = targetFace
-    #@render()
     @el.cardBody.toggleClass('flip')
     surfaceName = if @visibleFace is 'front' then 'front' else 'back'
-    @el[surfaceName].find('input').first().focus()
+    @el[surfaceName].find('.cc-field').not('.filled').find('input').first().focus()
     @trigger('faceDidBecomeVisible.skeuocard', [@, targetFace])
 
   # Set a value in the underlying form.
@@ -445,35 +446,27 @@ class Skeuocard::FlipTabView
     @_state.opposingFaceValid = isValid if face isnt @face
 
     if @_state.opposingFaceValid
-      @prompt @options.strings.hiddenFaceSwitchPrompt, true
+      @prompt @options.strings.hiddenFaceSwitchPrompt
     else
       if @_state.opposingFaceFilled
-        @warn @options.strings.hiddenFaceErrorWarning, true 
+        @warn @options.strings.hiddenFaceErrorWarning 
       else
-        @warn @options.strings.hiddenFaceFillPrompt, true
+        @warn @options.strings.hiddenFaceFillPrompt
 
   _setText: (text)->
-    @el.find('p').html(text)
+    @el.find('p').first().html(text)
 
-  warn: (message, withAnimation = false)->
+  warn: (message)->
     @_resetClasses()
+    @_setText(message)
     @el.addClass('warn')
-    @_setText(message)
-    if withAnimation
-      @el.removeClass('warn-anim')
-      @el.addClass('warn-anim')
 
-  prompt: (message, withAnimation = false)->
+  prompt: (message)->
     @_resetClasses()
-    @el.addClass('prompt')
     @_setText(message)
-    if withAnimation
-      @el.removeClass('valid-anim')
-      @el.addClass('valid-anim')
+    @el.addClass('prompt')
 
   _resetClasses: ->
-    @el.removeClass('valid-anim')
-    @el.removeClass('warn-anim')
     @el.removeClass('warn')
     @el.removeClass('prompt')
 
@@ -482,54 +475,6 @@ class Skeuocard::FlipTabView
 
   hide: ->
     @el.hide()
-
-###
-Skeuocard::TextInputView
-###
-class Skeuocard::TextInputView
-
-  bind: (args...)->
-    @el.bind(args...)
-
-  trigger: (args...)->
-    @el.trigger(args...)
-
-  _getFieldCaretPosition: (el)->
-    input = el.get(0)
-    if input.selectionEnd?
-      return input.selectionEnd
-    else if document.selection
-      input.focus()
-      sel = document.selection.createRange()
-      selLength = document.selection.createRange().text.length
-      sel.moveStart('character', -input.value.length)
-      return selLength
-
-  _setFieldCaretPosition: (el, pos)->
-    input = el.get(0)
-    if input.createTextRange?
-      range = input.createTextRange()
-      range.move "character", pos
-      range.select()
-    else if input.selectionStart?
-      input.focus()
-      input.setSelectionRange(pos, pos)
-
-  show: ->
-    @el.show()
-
-  hide: ->
-    @el.hide()
-
-  addClass: (args...)->
-    @el.addClass(args...)
-
-  removeClass: (args...)->
-    @el.removeClass(args...)
-
-  _zeroPadNumber: (num, places)->
-    zero = places - num.toString().length + 1
-    return Array(zero).join("0") + num
 
 ###
 # Skeuocard::SegmentedCardNumberInputView
@@ -816,7 +761,7 @@ class Skeuocard::SegmentedCardNumberInputView
 ###
 Skeuocard::ExpirationInputView
 ###
-class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
+class Skeuocard::ExpirationInputView
   constructor: (opts = {})->
     # setup option defaults
     opts.pattern ||= "MM/YY"
@@ -831,6 +776,12 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
     @el.delegate "input", "keyup", (e)=> @_onKeyUp(e)
     @el.delegate "input", "focus", (e)=> @el.addClass('focus')
     @el.delegate "input", "blur", (e)=> @el.removeClass('focus')
+
+  bind: (args...)->
+    @el.bind(args...)
+
+  trigger: (args...)->
+    @el.trigger(args...)
 
   _getFieldCaretPosition: (el)->
     input = el.get(0)
@@ -889,6 +840,10 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
         @el.append(sep)
     @groupEls = @el.find('input')
     @_updateFieldValues() if @date?
+
+  _zeroPadNumber: (num, places)->
+    zero = places - num.toString().length + 1
+    return Array(zero).join("0") + num
 
   _updateFieldValues: ->
     currentDate = @date
@@ -1004,10 +959,16 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
   _inputGroupEls: ->
     @el.find("input")
 
+  show: ->
+    @el.show()
+
+  hide: ->
+    @el.hide()
+
 ###
 Skeuocard::TextInputView
 ###
-class Skeuocard::TextInputView extends Skeuocard::TextInputView
+class Skeuocard::TextInputView
   constructor: (opts)->
     @el = $('<div>')
     @inputEl = $("<input>").attr
@@ -1019,6 +980,9 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
     @options = opts
     @el.delegate "input", "focus", (e)=> @el.addClass('focus')
     @el.delegate "input", "blur", (e)=> @el.removeClass('focus')
+    @el.delegate "input", "keyup", (e)=>
+      e.stopPropagation()
+      @trigger('keyup', [@])
 
   clear: ->
     @inputEl.val("")
@@ -1031,6 +995,18 @@ class Skeuocard::TextInputView extends Skeuocard::TextInputView
 
   getValue: ->
     @inputEl.val()
+
+  bind: (args...)->
+    @el.bind(args...)
+
+  trigger: (args...)->
+    @el.trigger(args...)
+  
+  show: ->
+    @el.show()
+
+  hide: ->
+    @el.hide()
 
 ###
 Skeuocard::CardProduct
