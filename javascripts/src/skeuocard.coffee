@@ -353,9 +353,10 @@ class Skeuocard
     for fieldName, view of @_inputViews
       destFace = product?.attrs.layout[fieldName] || null
       if destFace?
-        if not @el[destFace].has(view.el)
+        if not @el[destFace].has(view.el).length > 0
+          console.log("Need to move", fieldName, "to", destFace)
           viewEl = view.el.detach()
-          viewEl.appendTo(@el.container[destFace])
+          viewEl.appendTo(@el[destFace])
         @_inputViewsByFace[destFace].push view
         view.show()
       else if fieldName isnt 'number' # never hide number
@@ -379,7 +380,7 @@ class Skeuocard
     targetFace = if @visibleFace is 'front' then 'back' else 'front'
     @trigger('faceWillBecomeVisible.skeuocard', [@, targetFace])
     @visibleFace = targetFace
-    @render()
+    #@render()
     @el.cardBody.toggleClass('flip')
     surfaceName = if @visibleFace is 'front' then 'front' else 'back'
     @el[surfaceName].find('input').first().focus()
@@ -566,11 +567,16 @@ class Skeuocard::SegmentedCardNumberInputView
 
   _buildDOM: ->
     @el = $('<fieldset>')
+    @el.addClass('cc-field')
     @el.delegate "input", "keypress", @_handleGroupKeyPress.bind(@)
     @el.delegate "input", "keydown",  @_handleGroupKeyDown.bind(@)
     @el.delegate "input", "keyup",    @_handleGroupKeyUp.bind(@)
     @el.delegate "input", "paste",    @_handleGroupPaste.bind(@)
     @el.delegate "input", "change",   @_handleGroupChange.bind(@)
+    @el.delegate "input", "focus", (e)=>
+      @el.addClass('focus')
+    @el.delegate "input", "blur", (e)=>
+      @el.removeClass('focus')
 
   _handleGroupKeyDown: (e)->
     # If this is called with the control or meta key, defer to another handler
@@ -820,8 +826,11 @@ class Skeuocard::ExpirationInputView extends Skeuocard::TextInputView
     @date = null
     # create dom container
     @el = $("<fieldset>")
+    @el.addClass('cc-field')
     @el.delegate "input", "keydown", (e)=> @_onKeyDown(e)
     @el.delegate "input", "keyup", (e)=> @_onKeyUp(e)
+    @el.delegate "input", "focus", (e)=> @el.addClass('focus')
+    @el.delegate "input", "blur", (e)=> @el.removeClass('focus')
 
   _getFieldCaretPosition: (el)->
     input = el.get(0)
@@ -1000,23 +1009,28 @@ Skeuocard::TextInputView
 ###
 class Skeuocard::TextInputView extends Skeuocard::TextInputView
   constructor: (opts)->
-    @el = $("<input>").attr
+    @el = $('<div>')
+    @inputEl = $("<input>").attr
       type: 'text'
       placeholder: opts.placeholder
       class: opts.class
+    @el.append @inputEl
+    @el.addClass 'cc-field'
     @options = opts
+    @el.delegate "input", "focus", (e)=> @el.addClass('focus')
+    @el.delegate "input", "blur", (e)=> @el.removeClass('focus')
 
   clear: ->
-    @el.val("")
+    @inputEl.val("")
 
   attr: (args...)->
-    @el.attr(args...)
+    @inputEl.attr(args...)
 
   setValue: (newValue)->
-    @el.val(newValue)
+    @inputEl.val(newValue)
 
   getValue: ->
-    @el.val()
+    @inputEl.val()
 
 ###
 Skeuocard::CardProduct

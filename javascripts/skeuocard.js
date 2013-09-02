@@ -426,9 +426,10 @@
         view = _ref[fieldName];
         destFace = (product != null ? product.attrs.layout[fieldName] : void 0) || null;
         if (destFace != null) {
-          if (!this.el[destFace].has(view.el)) {
+          if (!this.el[destFace].has(view.el).length > 0) {
+            console.log("Need to move", fieldName, "to", destFace);
             viewEl = view.el.detach();
-            viewEl.appendTo(this.el.container[destFace]);
+            viewEl.appendTo(this.el[destFace]);
           }
           this._inputViewsByFace[destFace].push(view);
           view.show();
@@ -460,7 +461,6 @@
       targetFace = this.visibleFace === 'front' ? 'back' : 'front';
       this.trigger('faceWillBecomeVisible.skeuocard', [this, targetFace]);
       this.visibleFace = targetFace;
-      this.render();
       this.el.cardBody.toggleClass('flip');
       surfaceName = this.visibleFace === 'front' ? 'front' : 'back';
       this.el[surfaceName].find('input').first().focus();
@@ -733,12 +733,20 @@
     }
 
     SegmentedCardNumberInputView.prototype._buildDOM = function() {
+      var _this = this;
       this.el = $('<fieldset>');
+      this.el.addClass('cc-field');
       this.el.delegate("input", "keypress", this._handleGroupKeyPress.bind(this));
       this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
       this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
       this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
-      return this.el.delegate("input", "change", this._handleGroupChange.bind(this));
+      this.el.delegate("input", "change", this._handleGroupChange.bind(this));
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      return this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
+      });
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
@@ -1072,11 +1080,18 @@
       this.options = opts;
       this.date = null;
       this.el = $("<fieldset>");
+      this.el.addClass('cc-field');
       this.el.delegate("input", "keydown", function(e) {
         return _this._onKeyDown(e);
       });
       this.el.delegate("input", "keyup", function(e) {
         return _this._onKeyUp(e);
+      });
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
       });
     }
 
@@ -1303,30 +1318,40 @@
     __extends(TextInputView, _super);
 
     function TextInputView(opts) {
-      this.el = $("<input>").attr({
+      var _this = this;
+      this.el = $('<div>');
+      this.inputEl = $("<input>").attr({
         type: 'text',
         placeholder: opts.placeholder,
         "class": opts["class"]
       });
+      this.el.append(this.inputEl);
+      this.el.addClass('cc-field');
       this.options = opts;
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
+      });
     }
 
     TextInputView.prototype.clear = function() {
-      return this.el.val("");
+      return this.inputEl.val("");
     };
 
     TextInputView.prototype.attr = function() {
       var args, _ref;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).attr.apply(_ref, args);
+      return (_ref = this.inputEl).attr.apply(_ref, args);
     };
 
     TextInputView.prototype.setValue = function(newValue) {
-      return this.el.val(newValue);
+      return this.inputEl.val(newValue);
     };
 
     TextInputView.prototype.getValue = function() {
-      return this.el.val();
+      return this.inputEl.val();
     };
 
     return TextInputView;
