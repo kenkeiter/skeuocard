@@ -299,8 +299,8 @@ class Skeuocard
   _updateValidationForFace: (face)->
     fieldsFilled = (iv.el.hasClass('filled') for iv in @_inputViewsByFace[face]).every(Boolean)
     fieldsValid  = (iv.el.hasClass('valid') for iv in @_inputViewsByFace[face]).every(Boolean)
-    
-    isFilled = (fieldsFilled and @product?) or @_state['initiallyFilled']
+
+    isFilled = (fieldsFilled and @product?) or (@_state['initiallyFilled'] or false)
     isValid  = fieldsValid and @product?
 
     fillStateChanged = @_state["#{face}Filled"] isnt isFilled
@@ -537,9 +537,19 @@ class Skeuocard::TextInputView
 class Skeuocard::SegmentedCardNumberInputView
   
   _digits: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-  _arrowKeys: {left: 37, up: 38, right: 39, down: 40}
-  _specialKeys: [8, 9, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 
-                  45, 46, 91, 93, 144, 145, 224]
+  
+  _keys:
+    backspace: 8
+    tab: 9
+    enter: 13
+    del: 46
+    arrowLeft: 37
+    arrowUp: 38
+    arrowRight: 39
+    arrowDown: 40
+    arrows: [37..40]
+
+  _specialKeys: [8, 9, 13, 46, 37, 38, 39, 40]
 
   constructor: (opts = {})->
     @optDefaults = 
@@ -555,79 +565,105 @@ class Skeuocard::SegmentedCardNumberInputView
   _buildDOM: ->
     @el = $('<fieldset>')
     @el.delegate "input", "keypress", @_handleGroupKeyPress.bind(@)
-    @el.delegate "input", "keydown", @_handleGroupKeyDown.bind(@)
-    @el.delegate "input", "keyup", @_handleGroupKeyUp.bind(@)
-    @el.delegate "input", "paste", @_handleGroupPaste.bind(@)
-    @el.delegate "input", "change", @_handleGroupChange.bind(@)
+    @el.delegate "input", "keydown",  @_handleGroupKeyDown.bind(@)
+    @el.delegate "input", "keyup",    @_handleGroupKeyUp.bind(@)
+    @el.delegate "input", "paste",    @_handleGroupPaste.bind(@)
+    @el.delegate "input", "change",   @_handleGroupChange.bind(@)
+    @el.delegate "input", "blur",     @_handleGroupBlur.bind(@)
+
+  _handleGroupBlur: (e)->
+    if @_state.selectingAll
+      @_endSelectAll()
 
   _handleGroupKeyDown: (e)->
     # If this is called with the control or meta key, defer to another handler
-    if e.ctrlKey or e.metaKey
-      return @_handleModifiedKeyDown(e)
+    return @_handleModifiedKeyDown(e) if e.ctrlKey or e.metaKey
 
     inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
-    selectionEnd = currentTarget.selectionEnd
+    cursorPos = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
 
     prevInputEl = inputGroupEl.prevAll('input')
     nextInputEl = inputGroupEl.nextAll('input')
 
-    if e.which is 8 and prevInputEl.length > 0
-      @_focusField(prevInputEl.first(), 'end') if selectionEnd is 0
-
-    # Allow the event to propagate, and otherwise be happy
-    return true
-
-  _handleGroupKeyUp: (e)->
-    inputGroupEl = $(e.currentTarget)
-    currentTarget = e.currentTarget # get rid of that e.
-    selectionEnd = currentTarget.selectionEnd
-    inputMaxLength = currentTarget.maxLength
-    
-    nextInputEl = inputGroupEl.nextAll('input')
-
-    if e.ctrlKey or e.metaKey
-      return false # skip control keys
-
-    if e.which in [37,38,39,40]
-      @_endSelectAll() if @_state.selectingAll
-
     switch e.which
-      when @_arrowKeys.left
-        @_focusField(inputGroupEl.prev(), 'end') if selectionEnd is 0
-      when @_arrowKeys.right
-        @_focusField(inputGroupEl.next(), 'start') if selectionEnd is inputMaxLength
-      when @_arrowKeys.up
-        @_focusField(inputGroupEl.next(), 'start')
+      # handle backspace
+      when @_keys.backspace
+        if prevInputEl.length > 0 and cursorPos is 0
+          @_focusField(prevInputEl.first(), 'end')
+      # handle up arrow
+      when @_keys.arrowUp
+        if cursorPos is inputMaxLength
+          @_focusField(inputGroupEl, 'start')
+        else
+          @_focusField(inputGroupEl.prev(), 'end')
         e.preventDefault()
-      when @_arrowKeys.down
-        @_focusField(inputGroupEl.prev(), 'start')
+      # handle down arrow
+      when @_keys.arrowDown
+        if cursorPos is inputMaxLength
+          @_focusField(inputGroupEl.next(), 'start')
+        else
+          @_focusField(inputGroupEl, 'end')
         e.preventDefault()
+      # handle left arrow
+      when @_keys.arrowLeft
+        if cursorPos is 0
+          @_focusField(inputGroupEl.prev(), 'end')
+          e.preventDefault()
+      # handle right arrow
+      when @_keys.arrowRight
+        if cursorPos is inputMaxLength
+          @_focusField(inputGroupEl.next(), 'start')
+          e.preventDefault()
       else
-        if selectionEnd is inputMaxLength
+        if not (e.which in @_specialKeys) and cursorPos is inputMaxLength
           if nextInputEl.length isnt 0
             @_focusField(nextInputEl.first(), 'start')
-          else
-            e.preventDefault()
-
-    @trigger('change', [@])
+    # Allow the event to propagate, and otherwise be happy
     return true
 
   _handleGroupKeyPress: (e)->
     inputGroupEl = $(e.currentTarget)
-    currentTarget = e.currentTarget # get rid of that e.
-    selectionEnd = currentTarget.selectionEnd
-    inputMaxLength = currentTarget.maxLength
     isDigit = (String.fromCharCode(e.which) in @_digits)
     
-    nextInputEl = inputGroupEl.nextAll('input')
+    return true if e.ctrlKey or e.metaKey
+    return true if e.which is 0
 
-    if e.ctrlKey or e.metaKey or (e.which in @_specialKeys) or isDigit
+    if (not e.shiftKey and (e.which in @_specialKeys)) or isDigit
       return true
     else
       e.preventDefault()
       return false
+
+  _handleGroupKeyUp: (e)->
+    inputGroupEl = $(e.currentTarget)
+    currentTarget = e.currentTarget # get rid of that e.
+    cursorPos = currentTarget.selectionEnd
+    inputMaxLength = currentTarget.maxLength
+    
+    nextInputEl = inputGroupEl.nextAll('input')
+
+    return true if e.ctrlKey or e.metaKey # ignore control keys
+    
+    if @_state.selectingAll
+      @_endSelectAll() if (e.which in @_specialKeys)
+
+    if not (e.which in @_specialKeys) 
+      if cursorPos is inputMaxLength and nextInputEl.length isnt 0
+        @_focusField(nextInputEl.first(), 'start')
+
+    unless e.shiftKey and (e.which in @_specialKeys)
+      @trigger('change', [@])
+
+    return true
+
+  _handleModifiedKeyDown: (e)->
+    char = String.fromCharCode(e.which)
+    switch char
+      when 'a', 'A'
+        @_beginSelectAll()
+        e.preventDefault()
 
   _handleGroupPaste: (e)->
     # clean and re-split the value
@@ -637,13 +673,6 @@ class Skeuocard::SegmentedCardNumberInputView
       @setValue(newValue)
       @trigger('change', [@])
     , 50
-
-  _handleModifiedKeyDown: (e)->
-    char = String.fromCharCode(e.which)
-    switch char
-      when 'A'
-        @_beginSelectAll()
-        e.preventDefault()
   
   _handleGroupChange: (e)->
     e.stopPropagation()
@@ -652,27 +681,26 @@ class Skeuocard::SegmentedCardNumberInputView
     @el.find("input:focus")
 
   _beginSelectAll: ->
-    # remember the previous grouping, regroup into one, and select all.
-    if @_state.selectingAll is false
-      @_state.selectingAll = true
+    unless @el.hasClass('selecting-all')
       @_state.lastGrouping = @options.groupings
-      @_state.lastValue = @getValue()
+      @_state.lastLength = @getValue().length
       @setGroupings(@optDefaults.groupings)
       @el.addClass('selecting-all')
       fieldEl = @el.find("input")
       fieldEl[0].setSelectionRange(0, fieldEl.val().length)
+      @_state.selectingAll = true
     else
       fieldEl = @el.find("input")
       fieldEl[0].setSelectionRange(0, fieldEl.val().length)
 
   _endSelectAll: ->
-    if @_state.selectingAll
-      if @_state.lastValue is @getValue()
-        @setGroupings(@_state.lastGrouping)
-      else
-        @_focusField(@el.find('input').last(), 'end')
-      @el.removeClass('selecting-all')
+    if @el.hasClass('selecting-all')
+      # if the value hasn't been changed while selecting all, restore grouping
       @_state.selectingAll = false
+      # restore groupings if length is the same
+      if @_state.lastLength is @getValue().length
+        @setGroupings(@_state.lastGrouping)
+      @el.removeClass('selecting-all')
 
   # figure out what position in the overall value we're at given a selection
   _indexInValueAtFieldSelection: (field)->
