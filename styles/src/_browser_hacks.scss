@@ -1,6 +1,19 @@
+/*
+IE Fixes
+*/
 .ie10 .skeuocard{
   .cc-number input{
     ::-ms-clear { display: none !important; }
+  }
+}
+
+/*
+Firefox Fixes
+*/
+.firefox .skeuocard.js {
+  input:focus{
+    outline: none;
+    @include vendor-prefix(box-shadow, 0 0 4px $color-field-glow);
   }
 }
 
@@ -9,7 +22,7 @@ Fix for issue with Chrome in which no GPU acceleration will mess with
 backface visibility in 3d transforms
 see: https://code.google.com/p/chromium/issues/detail?id=127844 
 */
-.chrome.win .skeuocard {
+.chrome .skeuocard {
   @media screen and (-webkit-transform-3d: 0) {
     .card-body .face{
       -webkit-transition-property: -webkit-transform, opacity;
