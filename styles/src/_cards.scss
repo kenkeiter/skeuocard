@@ -46,7 +46,7 @@ $sprite-front-height: 93.6em;
     input{
       border: none;
       outline: none;
-      @include vendor-prefix(border-radius, 3px);
+      @include vendor-prefix(border-radius, 0px);
       @include vendor-prefix(box-shadow, inset 1px 1px 1px 1px #ccc);
       background-color: rgba(255, 255, 255, 0.6);
       -webkit-transition: background-color 300ms ease;

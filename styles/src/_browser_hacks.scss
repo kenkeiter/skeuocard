@@ -5,12 +5,15 @@ IE Fixes
   .cc-number input{
     ::-ms-clear { display: none !important; }
   }
+  .flip-tab{
+    @include vendor-prefix(transition, none);
+  }
 }
 
 /*
 Firefox Fixes
 */
-.firefox .skeuocard.js {
+.firefox .skeuocard.js, .ie10 .skeuocard.js {
   input:focus{
     outline: none;
     @include vendor-prefix(box-shadow, 0 0 4px $color-field-glow);

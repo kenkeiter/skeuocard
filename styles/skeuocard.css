@@ -102,40 +102,36 @@
       top: 1em; }
       .skeuocard.js .flip-tab.back:hover {
         left: -1.8em; }
-  .skeuocard.js .flip-tab.valid-anim {
+  .skeuocard.js .flip-tab.prompt {
     background: #00cfa7 url("../images/card-valid-anim.gif") no-repeat;
     background-size: 2.3em 2.3em; }
-    .skeuocard.js .flip-tab.valid-anim.front {
+    .skeuocard.js .flip-tab.prompt.front {
       background-position: 10.05em 0.6em; }
-      .skeuocard.js .flip-tab.valid-anim.front p {
+      .skeuocard.js .flip-tab.prompt.front p {
         margin-right: 2.9em;
         margin-left: 1.25em;
         margin-top: 0.6em; }
-    .skeuocard.js .flip-tab.valid-anim.back {
+    .skeuocard.js .flip-tab.prompt.back {
       background-position: 0.6em 0.6em; }
-      .skeuocard.js .flip-tab.valid-anim.back p {
+      .skeuocard.js .flip-tab.prompt.back p {
         margin-right: 1.25em;
         margin-left: 2.9em;
         margin-top: 0.6em; }
-  .skeuocard.js .flip-tab.warn-anim {
+  .skeuocard.js .flip-tab.warn {
     background: #ff655a url("../images/card-invalid-indicator.png") no-repeat;
     background-size: 2.3em 2.3em; }
-    .skeuocard.js .flip-tab.warn-anim.front {
+    .skeuocard.js .flip-tab.warn.front {
       background-position: 10.08em 0.7em; }
-      .skeuocard.js .flip-tab.warn-anim.front p {
+      .skeuocard.js .flip-tab.warn.front p {
         margin-right: 2.9em;
         margin-left: 1.25em;
         margin-top: 0.6em; }
-    .skeuocard.js .flip-tab.warn-anim.back {
+    .skeuocard.js .flip-tab.warn.back {
       background-position: 0.6em 0.6em; }
-      .skeuocard.js .flip-tab.warn-anim.back p {
+      .skeuocard.js .flip-tab.warn.back p {
         margin-right: 1.25em;
         margin-left: 2.9em;
         margin-top: 0.6em; }
-  .skeuocard.js .flip-tab.prompt {
-    background-color: #00cfa7; }
-  .skeuocard.js .flip-tab.warn {
-    background-color: #ff655a; }
 
 .skeuocard.js {
   /* 
@@ -164,11 +160,11 @@
   .skeuocard.js .cc-field input {
     border: none;
     outline: none;
-    border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -ms-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -o-border-radius: 3px;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -ms-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -o-border-radius: 0px;
     box-shadow: inset 1px 1px 1px 1px #cccccc;
     -webkit-box-shadow: inset 1px 1px 1px 1px #cccccc;
     -ms-box-shadow: inset 1px 1px 1px 1px #cccccc;
@@ -503,11 +499,17 @@ IE Fixes
 */
 .ie10 .skeuocard .cc-number input ::-ms-clear {
   display: none !important; }
+.ie10 .skeuocard .flip-tab {
+  transition: none;
+  -webkit-transition: none;
+  -ms-transition: none;
+  -moz-transition: none;
+  -o-transition: none; }
 
 /*
 Firefox Fixes
 */
-.firefox .skeuocard.js input:focus {
+.firefox .skeuocard.js input:focus, .ie10 .skeuocard.js input:focus {
   outline: none;
   box-shadow: 0 0 4px #0096de;
   -webkit-box-shadow: 0 0 4px #0096de;
