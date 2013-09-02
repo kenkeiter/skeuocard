@@ -102,104 +102,157 @@
       top: 1em; }
       .skeuocard.js .flip-tab.back:hover {
         left: -1.8em; }
-  .skeuocard.js .flip-tab.valid-anim {
+  .skeuocard.js .flip-tab.prompt {
     background: #00cfa7 url("../images/card-valid-anim.gif") no-repeat;
     background-size: 2.3em 2.3em; }
-    .skeuocard.js .flip-tab.valid-anim.front {
+    .skeuocard.js .flip-tab.prompt.front {
       background-position: 10.05em 0.6em; }
-      .skeuocard.js .flip-tab.valid-anim.front p {
+      .skeuocard.js .flip-tab.prompt.front p {
         margin-right: 2.9em;
         margin-left: 1.25em;
         margin-top: 0.6em; }
-    .skeuocard.js .flip-tab.valid-anim.back {
+    .skeuocard.js .flip-tab.prompt.back {
       background-position: 0.6em 0.6em; }
-      .skeuocard.js .flip-tab.valid-anim.back p {
+      .skeuocard.js .flip-tab.prompt.back p {
         margin-right: 1.25em;
         margin-left: 2.9em;
         margin-top: 0.6em; }
-  .skeuocard.js .flip-tab.warn-anim {
+  .skeuocard.js .flip-tab.warn {
     background: #ff655a url("../images/card-invalid-indicator.png") no-repeat;
     background-size: 2.3em 2.3em; }
-    .skeuocard.js .flip-tab.warn-anim.front {
+    .skeuocard.js .flip-tab.warn.front {
       background-position: 10.08em 0.7em; }
-      .skeuocard.js .flip-tab.warn-anim.front p {
+      .skeuocard.js .flip-tab.warn.front p {
         margin-right: 2.9em;
         margin-left: 1.25em;
         margin-top: 0.6em; }
-    .skeuocard.js .flip-tab.warn-anim.back {
+    .skeuocard.js .flip-tab.warn.back {
       background-position: 0.6em 0.6em; }
-      .skeuocard.js .flip-tab.warn-anim.back p {
+      .skeuocard.js .flip-tab.warn.back p {
         margin-right: 1.25em;
         margin-left: 2.9em;
         margin-top: 0.6em; }
-  .skeuocard.js .flip-tab.prompt {
-    background-color: #00cfa7; }
-  .skeuocard.js .flip-tab.warn {
-    background-color: #ff655a; }
 
-.skeuocard.js input {
-  border: none;
-  outline: none;
-  border-radius: 3px;
-  -webkit-border-radius: 3px;
-  -ms-border-radius: 3px;
-  -moz-border-radius: 3px;
-  -o-border-radius: 3px; }
-.skeuocard.js input:focus {
-  outline: none;
-  box-shadow: 0 0 10px #0096de;
-  -webkit-box-shadow: 0 0 10px #0096de;
-  -ms-box-shadow: 0 0 10px #0096de;
-  -moz-box-shadow: 0 0 10px #0096de;
-  -o-box-shadow: 0 0 10px #0096de; }
-.skeuocard.js .face.front {
-  background-color: #eee;
-  background-image: url("../images/products/generic-front.png"), url("../images/card-front-background.png");
-  background-repeat: no-repeat;
-  background-size: cover; }
-.skeuocard.js .face.back {
-  background-color: #eee;
-  background-image: url("../images/products/generic-back.png");
-  background-repeat: no-repeat;
-  background-size: cover; }
-.skeuocard.js .face.valid {
-  box-shadow: 0 0 10px #00cfa7;
-  -webkit-box-shadow: 0 0 10px #00cfa7;
-  -ms-box-shadow: 0 0 10px #00cfa7;
-  -moz-box-shadow: 0 0 10px #00cfa7;
-  -o-box-shadow: 0 0 10px #00cfa7; }
-.skeuocard.js .cc-number {
-  position: absolute;
-  display: block;
-  left: 1.8em;
-  top: 8.05em; }
-  .skeuocard.js .cc-number input {
-    color: #333;
-    background-color: #fff;
-    font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
-    font-size: 1.5em; }
-    .skeuocard.js .cc-number input.group4 {
-      width: 3.2em; }
-    .skeuocard.js .cc-number input.group5 {
-      width: 3.8em; }
-    .skeuocard.js .cc-number input.group6 {
-      width: 4.6em; }
-    .skeuocard.js .cc-number input.group19 {
-      width: 14em; }
-  .skeuocard.js .cc-number input + input {
-    margin-left: 0.4em; }
-.skeuocard.js.unaccepted .cc-number input {
-  outline: none;
-  box-shadow: 0 0 10px #ff655a;
-  -webkit-box-shadow: 0 0 10px #ff655a;
-  -ms-box-shadow: 0 0 10px #ff655a;
-  -moz-box-shadow: 0 0 10px #ff655a;
-  -o-box-shadow: 0 0 10px #ff655a;
-  transition: box-shadow linear 0.15s;
-  -webkit-transition: box-shadow linear 0.15s;
-  -ms-transition: box-shadow linear 0.15s;
-  -moz-transition: box-shadow linear 0.15s;
-  -o-transition: box-shadow linear 0.15s; }
+.skeuocard.js {
+  /* 
+  1. If a field (or group) has focus, regardless of whether it's filled, the 
+     inputs should look like inputs.
+  2. Focused inputs within a focused field or group should look focused.
+  3. An un-filled field should always look editable.
+  4. Filled, valid fields should be flat until hover.
+  */ }
+  .skeuocard.js .face.front {
+    background-color: #eee;
+    background-image: url("../images/products/generic-front.png"), url("../images/card-front-background.png");
+    background-repeat: no-repeat;
+    background-size: cover; }
+  .skeuocard.js .face.back {
+    background-color: #eee;
+    background-image: url("../images/products/generic-back.png");
+    background-repeat: no-repeat;
+    background-size: cover; }
+  .skeuocard.js .face.valid {
+    box-shadow: 0 0 10px #00cfa7;
+    -webkit-box-shadow: 0 0 10px #00cfa7;
+    -ms-box-shadow: 0 0 10px #00cfa7;
+    -moz-box-shadow: 0 0 10px #00cfa7;
+    -o-box-shadow: 0 0 10px #00cfa7; }
+  .skeuocard.js .cc-field input {
+    border: none;
+    outline: none;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -ms-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -o-border-radius: 0px;
+    box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -webkit-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -ms-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -moz-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -o-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    background-color: rgba(255, 255, 255, 0.6);
+    -webkit-transition: background-color 300ms ease;
+    -moz-transition: background-color 300ms ease;
+    -ms-transition: background-color 300ms ease;
+    -o-transition: background-color 300ms ease;
+    transition: background-color 300ms ease; }
+  .skeuocard.js .cc-field input:focus {
+    outline: 3px auto #0096de;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -ms-box-shadow: none;
+    -moz-box-shadow: none;
+    -o-box-shadow: none; }
+  .skeuocard.js .cc-field.filled.valid:not(.focus) input {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -ms-box-shadow: none;
+    -moz-box-shadow: none;
+    -o-box-shadow: none;
+    background-color: transparent; }
+  .skeuocard.js .cc-field.filled:hover:not(.focus) input {
+    box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -webkit-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -ms-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -moz-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    -o-box-shadow: inset 1px 1px 1px 1px #cccccc;
+    background-color: rgba(255, 255, 255, 0.6); }
+  .skeuocard.js .face.filled .cc-field.invalid {
+    /*
+    &:after{
+      display: inline-block;
+      width: 1.575em;
+      height: 1.25em;
+      content: "";
+      background: url('../images/error-pointer.png') no-repeat center center;
+      background-size: 1.575em 1.25em;
+      padding-left: 4px;
+    }
+    */ }
+    .skeuocard.js .face.filled .cc-field.invalid input {
+      box-shadow: inset 0px 0px 2px 1px #ff655a;
+      -webkit-box-shadow: inset 0px 0px 2px 1px #ff655a;
+      -ms-box-shadow: inset 0px 0px 2px 1px #ff655a;
+      -moz-box-shadow: inset 0px 0px 2px 1px #ff655a;
+      -o-box-shadow: inset 0px 0px 2px 1px #ff655a;
+      border: 1px solid #ff655a; }
+    .skeuocard.js .face.filled .cc-field.invalid input:focus {
+      box-shadow: none;
+      -webkit-box-shadow: none;
+      -ms-box-shadow: none;
+      -moz-box-shadow: none;
+      -o-box-shadow: none; }
+  .skeuocard.js .cc-number {
+    position: absolute;
+    display: block;
+    left: 1.8em;
+    top: 8.05em; }
+    .skeuocard.js .cc-number input {
+      color: #333;
+      font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+      font-size: 1.5em; }
+      .skeuocard.js .cc-number input.group4 {
+        width: 3.2em; }
+      .skeuocard.js .cc-number input.group5 {
+        width: 3.8em; }
+      .skeuocard.js .cc-number input.group6 {
+        width: 4.6em; }
+      .skeuocard.js .cc-number input.group19 {
+        width: 14em; }
+    .skeuocard.js .cc-number input + input {
+      margin-left: 0.4em; }
+  .skeuocard.js.unaccepted .cc-number input {
+    outline: none;
+    box-shadow: 0 0 10px #ff655a;
+    -webkit-box-shadow: 0 0 10px #ff655a;
+    -ms-box-shadow: 0 0 10px #ff655a;
+    -moz-box-shadow: 0 0 10px #ff655a;
+    -o-box-shadow: 0 0 10px #ff655a;
+    transition: box-shadow linear 0.15s;
+    -webkit-transition: box-shadow linear 0.15s;
+    -ms-transition: box-shadow linear 0.15s;
+    -moz-transition: box-shadow linear 0.15s;
+    -o-transition: box-shadow linear 0.15s; }
 
 .skeuocard.card-product .face.front, .skeuocard.product-visa .face.front, .skeuocard.product-unionpay .face.front, .skeuocard.product-amex .face.front, .skeuocard.product-dinersclubintl .face.front, .skeuocard.product-mastercard .face.front, .skeuocard.product-maestro .face.front, .skeuocard.product-discover .face.front, .skeuocard.product-jcb .face.front {
   background-repeat: no-repeat, no-repeat;
@@ -208,14 +261,7 @@
   background-repeat: no-repeat, no-repeat;
   background-size: cover, cover; }
 .skeuocard.card-product .cc-number, .skeuocard.product-visa .cc-number, .skeuocard.product-unionpay .cc-number, .skeuocard.product-amex .cc-number, .skeuocard.product-dinersclubintl .cc-number, .skeuocard.product-mastercard .cc-number, .skeuocard.product-maestro .cc-number, .skeuocard.product-discover .cc-number, .skeuocard.product-jcb .cc-number {
-  background-color: transparent;
   padding: 0.1em; }
-  .skeuocard.card-product .cc-number input, .skeuocard.product-visa .cc-number input, .skeuocard.product-unionpay .cc-number input, .skeuocard.product-amex .cc-number input, .skeuocard.product-dinersclubintl .cc-number input, .skeuocard.product-mastercard .cc-number input, .skeuocard.product-maestro .cc-number input, .skeuocard.product-discover .cc-number input, .skeuocard.product-jcb .cc-number input {
-    color: #333;
-    background-color: transparent;
-    border: none; }
-  .skeuocard.card-product .cc-number input:focus, .skeuocard.product-visa .cc-number input:focus, .skeuocard.product-unionpay .cc-number input:focus, .skeuocard.product-amex .cc-number input:focus, .skeuocard.product-dinersclubintl .cc-number input:focus, .skeuocard.product-mastercard .cc-number input:focus, .skeuocard.product-maestro .cc-number input:focus, .skeuocard.product-discover .cc-number input:focus, .skeuocard.product-jcb .cc-number input:focus {
-    background-color: rgba(255, 255, 255, 0.6); }
 .skeuocard.card-product .cc-exp, .skeuocard.product-visa .cc-exp, .skeuocard.product-unionpay .cc-exp, .skeuocard.product-amex .cc-exp, .skeuocard.product-dinersclubintl .cc-exp, .skeuocard.product-mastercard .cc-exp, .skeuocard.product-maestro .cc-exp, .skeuocard.product-discover .cc-exp, .skeuocard.product-jcb .cc-exp {
   position: absolute;
   display: block; }
@@ -225,8 +271,6 @@
     font-size: 1em;
     font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
     color: #333;
-    background-color: transparent;
-    border: none;
     text-align: center; }
     .skeuocard.card-product .cc-exp input.group2, .skeuocard.product-visa .cc-exp input.group2, .skeuocard.product-unionpay .cc-exp input.group2, .skeuocard.product-amex .cc-exp input.group2, .skeuocard.product-dinersclubintl .cc-exp input.group2, .skeuocard.product-mastercard .cc-exp input.group2, .skeuocard.product-maestro .cc-exp input.group2, .skeuocard.product-discover .cc-exp input.group2, .skeuocard.product-jcb .cc-exp input.group2, .skeuocard.card-product .cc-exp .separator.group2, .skeuocard.product-visa .cc-exp .separator.group2, .skeuocard.product-unionpay .cc-exp .separator.group2, .skeuocard.product-amex .cc-exp .separator.group2, .skeuocard.product-dinersclubintl .cc-exp .separator.group2, .skeuocard.product-mastercard .cc-exp .separator.group2, .skeuocard.product-maestro .cc-exp .separator.group2, .skeuocard.product-discover .cc-exp .separator.group2, .skeuocard.product-jcb .cc-exp .separator.group2 {
       width: 2em; }
@@ -239,8 +283,6 @@
   display: block;
   font-size: 1em;
   font-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
-  background-color: transparent;
-  border: none;
   text-transform: uppercase; }
 .skeuocard.card-product .cc-cvc, .skeuocard.product-visa .cc-cvc, .skeuocard.product-unionpay .cc-cvc, .skeuocard.product-amex .cc-cvc, .skeuocard.product-dinersclubintl .cc-cvc, .skeuocard.product-mastercard .cc-cvc, .skeuocard.product-maestro .cc-cvc, .skeuocard.product-discover .cc-cvc, .skeuocard.product-jcb .cc-cvc {
   margin: 0;
@@ -248,29 +290,7 @@
   position: absolute;
   display: block;
   font-size: 1em;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background-color: transparent;
-  border: none; }
-
-.skeuocard.card-product .face.filled .invalid, .skeuocard.product-visa .face.filled .invalid, .skeuocard.product-unionpay .face.filled .invalid, .skeuocard.product-amex .face.filled .invalid, .skeuocard.product-dinersclubintl .face.filled .invalid, .skeuocard.product-mastercard .face.filled .invalid, .skeuocard.product-maestro .face.filled .invalid, .skeuocard.product-discover .face.filled .invalid, .skeuocard.product-jcb .face.filled .invalid {
-  outline: none;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px #ff655a;
-  transition: box-shadow linear 0.15s;
-  -webkit-transition: box-shadow linear 0.15s;
-  -ms-transition: box-shadow linear 0.15s;
-  -moz-transition: box-shadow linear 0.15s;
-  -o-transition: box-shadow linear 0.15s; }
-  .skeuocard.card-product .face.filled .invalid input:focus, .skeuocard.product-visa .face.filled .invalid input:focus, .skeuocard.product-unionpay .face.filled .invalid input:focus, .skeuocard.product-amex .face.filled .invalid input:focus, .skeuocard.product-dinersclubintl .face.filled .invalid input:focus, .skeuocard.product-mastercard .face.filled .invalid input:focus, .skeuocard.product-maestro .face.filled .invalid input:focus, .skeuocard.product-discover .face.filled .invalid input:focus, .skeuocard.product-jcb .face.filled .invalid input:focus {
-    border: 1px solid blue;
-    outline: none;
-    border-radius: 3px;
-    -webkit-border-radius: 3px;
-    -ms-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -o-border-radius: 3px; }
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
 .skeuocard.product-visa {
   /*
@@ -472,10 +492,30 @@
 /* Preload face images */
 body:after {
   display: none;
-  content: url("../images/products/visa-front.png") url("../images/products/amex-front.png") url("../images/products/discover-front.png") url("../images/products/mastercard-front.png") url("../images/products/dinersclubintl-front.png") url("../images/products/discover-front.png") url("../images/products/jcb-front.png"); }
+  content: url("../images/products/visa-back.png") url("../images/products/visa-front.png") url("../images/products/amex-front.png") url("../images/products/discover-front.png") url("../images/products/mastercard-front.png") url("../images/products/dinersclubintl-front.png") url("../images/products/discover-front.png") url("../images/products/jcb-front.png"); }
 
+/*
+IE Fixes
+*/
 .ie10 .skeuocard .cc-number input ::-ms-clear {
   display: none !important; }
+.ie10 .skeuocard .flip-tab {
+  transition: none;
+  -webkit-transition: none;
+  -ms-transition: none;
+  -moz-transition: none;
+  -o-transition: none; }
+
+/*
+Firefox Fixes
+*/
+.firefox .skeuocard.js input:focus, .ie10 .skeuocard.js input:focus {
+  outline: none;
+  box-shadow: 0 0 4px #0096de;
+  -webkit-box-shadow: 0 0 4px #0096de;
+  -ms-box-shadow: 0 0 4px #0096de;
+  -moz-box-shadow: 0 0 4px #0096de;
+  -o-box-shadow: 0 0 4px #0096de; }
 
 /* 
 Fix for issue with Chrome in which no GPU acceleration will mess with 
@@ -483,16 +523,16 @@ backface visibility in 3d transforms
 see: https://code.google.com/p/chromium/issues/detail?id=127844 
 */
 @media screen and (-webkit-transform-3d: 0) {
-  .chrome.win .skeuocard .card-body .face {
+  .chrome .skeuocard .card-body .face {
     -webkit-transition-property: -webkit-transform, opacity;
     -webkit-transition-duration: 0.25s, 0;
     -webkit-transition-timing-function: ease-in-out,ease-in-out;
     -webkit-transition-delay: 0, 0; }
-  .chrome.win .skeuocard .card-body .face.back {
+  .chrome .skeuocard .card-body .face.back {
     opacity: 0; }
-  .chrome.win .skeuocard .card-body.flip .face.front {
+  .chrome .skeuocard .card-body.flip .face.front {
     -webkit-transform: rotateX(0deg) rotateY(-180deg);
     opacity: 0;
     z-index: -1; }
-  .chrome.win .skeuocard .card-body.flip .face.back {
+  .chrome .skeuocard .card-body.flip .face.back {
     opacity: 1; } }

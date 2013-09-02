@@ -15,9 +15,7 @@
 (function() {
   var $, Skeuocard, visaProduct,
     __slice = [].slice,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $ = jQuery;
 
@@ -57,9 +55,9 @@
         initialValues: {},
         validationState: {},
         strings: {
-          hiddenFaceFillPrompt: "<strong>Click here</strong> to <br />fill in the other side.",
+          hiddenFaceFillPrompt: "<strong>Click here</strong> to <br>fill in the other side.",
           hiddenFaceErrorWarning: "There's a problem on the other side.",
-          hiddenFaceSwitchPrompt: "Forget something?<br /> Flip the card over."
+          hiddenFaceSwitchPrompt: "Forget something?<br> Flip the card over."
         }
       };
       this.options = $.extend(optDefaults, opts);
@@ -281,13 +279,13 @@
       });
       this._inputViews.name.bind("keyup valueChanged", function(e, input) {
         var value;
-        value = $(e.target).val();
+        value = input.getValue();
         _this._setUnderlyingValue('name', value);
         return _this._updateValidation('name', value);
       });
       this._inputViews.cvc.bind("keyup valueChanged", function(e, input) {
         var value;
-        value = $(e.target).val();
+        value = input.getValue();
         _this._setUnderlyingValue('cvc', value);
         return _this._updateValidation('cvc', value);
       });
@@ -301,22 +299,24 @@
     };
 
     Skeuocard.prototype._handleFieldTab = function(e) {
-      var backFieldEls, currentFieldEl, frontFieldEls, _currentFace, _oppositeFace;
-      if (e.which === 9) {
-        currentFieldEl = $(e.currentTarget);
-        _oppositeFace = this.visibleFace === 'front' ? 'back' : 'front';
-        _currentFace = this.visibleFace === 'front' ? 'front' : 'back';
-        backFieldEls = this.el[_oppositeFace].find('input');
-        frontFieldEls = this.el[_currentFace].find('input');
-        if (this.visibleFace === 'front' && this.isFaceFilled('front') && backFieldEls.length > 0 && frontFieldEls.index(currentFieldEl) === -1) {
-          this.flip();
-          backFieldEls.first().focus();
-        }
-        if (this.visibleFace === 'back' && e.shiftKey) {
-          this.flip();
-          return frontFieldEls.last().focus();
-        }
-      }
+      /*
+          if e.which is 9
+            currentFieldEl = $(e.currentTarget)
+            _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
+            _currentFace = if @visibleFace is 'front' then 'front' else 'back'
+            backFieldEls = @el[_oppositeFace].find('input')
+            frontFieldEls = @el[_currentFace].find('input')
+            if @visibleFace is 'front' and
+              @isFaceFilled('front') and
+              backFieldEls.length > 0 and
+              frontFieldEls.index(currentFieldEl) is -1
+                @flip()
+                backFieldEls.first().focus()
+            if @visibleFace is 'back' and e.shiftKey
+              @flip()
+              frontFieldEls.last().focus()
+      */
+
     };
 
     Skeuocard.prototype._updateValidation = function(fieldName, newValue) {
@@ -426,9 +426,10 @@
         view = _ref[fieldName];
         destFace = (product != null ? product.attrs.layout[fieldName] : void 0) || null;
         if (destFace != null) {
-          if (!this.el[destFace].has(view.el)) {
+          if (!this.el[destFace].has(view.el).length > 0) {
+            this._log("Moving", fieldName, "to", destFace);
             viewEl = view.el.detach();
-            viewEl.appendTo(this.el.container[destFace]);
+            viewEl.appendTo(this.el[destFace]);
           }
           this._inputViewsByFace[destFace].push(view);
           view.show();
@@ -460,10 +461,9 @@
       targetFace = this.visibleFace === 'front' ? 'back' : 'front';
       this.trigger('faceWillBecomeVisible.skeuocard', [this, targetFace]);
       this.visibleFace = targetFace;
-      this.render();
       this.el.cardBody.toggleClass('flip');
       surfaceName = this.visibleFace === 'front' ? 'front' : 'back';
-      this.el[surfaceName].find('input').first().focus();
+      this.el[surfaceName].find('.cc-field').not('.filled').find('input').first().focus();
       return this.trigger('faceDidBecomeVisible.skeuocard', [this, targetFace]);
     };
 
@@ -552,49 +552,33 @@
         this._state.opposingFaceValid = isValid;
       }
       if (this._state.opposingFaceValid) {
-        return this.prompt(this.options.strings.hiddenFaceSwitchPrompt, true);
+        return this.prompt(this.options.strings.hiddenFaceSwitchPrompt);
       } else {
         if (this._state.opposingFaceFilled) {
-          return this.warn(this.options.strings.hiddenFaceErrorWarning, true);
+          return this.warn(this.options.strings.hiddenFaceErrorWarning);
         } else {
-          return this.warn(this.options.strings.hiddenFaceFillPrompt, true);
+          return this.warn(this.options.strings.hiddenFaceFillPrompt);
         }
       }
     };
 
     FlipTabView.prototype._setText = function(text) {
-      return this.el.find('p').html(text);
+      return this.el.find('p').first().html(text);
     };
 
-    FlipTabView.prototype.warn = function(message, withAnimation) {
-      if (withAnimation == null) {
-        withAnimation = false;
-      }
+    FlipTabView.prototype.warn = function(message) {
       this._resetClasses();
-      this.el.addClass('warn');
       this._setText(message);
-      if (withAnimation) {
-        this.el.removeClass('warn-anim');
-        return this.el.addClass('warn-anim');
-      }
+      return this.el.addClass('warn');
     };
 
-    FlipTabView.prototype.prompt = function(message, withAnimation) {
-      if (withAnimation == null) {
-        withAnimation = false;
-      }
+    FlipTabView.prototype.prompt = function(message) {
       this._resetClasses();
-      this.el.addClass('prompt');
       this._setText(message);
-      if (withAnimation) {
-        this.el.removeClass('valid-anim');
-        return this.el.addClass('valid-anim');
-      }
+      return this.el.addClass('prompt');
     };
 
     FlipTabView.prototype._resetClasses = function() {
-      this.el.removeClass('valid-anim');
-      this.el.removeClass('warn-anim');
       this.el.removeClass('warn');
       return this.el.removeClass('prompt');
     };
@@ -608,84 +592,6 @@
     };
 
     return FlipTabView;
-
-  })();
-
-  /*
-  Skeuocard::TextInputView
-  */
-
-
-  Skeuocard.prototype.TextInputView = (function() {
-
-    function TextInputView() {}
-
-    TextInputView.prototype.bind = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).bind.apply(_ref, args);
-    };
-
-    TextInputView.prototype.trigger = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).trigger.apply(_ref, args);
-    };
-
-    TextInputView.prototype._getFieldCaretPosition = function(el) {
-      var input, sel, selLength;
-      input = el.get(0);
-      if (input.selectionEnd != null) {
-        return input.selectionEnd;
-      } else if (document.selection) {
-        input.focus();
-        sel = document.selection.createRange();
-        selLength = document.selection.createRange().text.length;
-        sel.moveStart('character', -input.value.length);
-        return selLength;
-      }
-    };
-
-    TextInputView.prototype._setFieldCaretPosition = function(el, pos) {
-      var input, range;
-      input = el.get(0);
-      if (input.createTextRange != null) {
-        range = input.createTextRange();
-        range.move("character", pos);
-        return range.select();
-      } else if (input.selectionStart != null) {
-        input.focus();
-        return input.setSelectionRange(pos, pos);
-      }
-    };
-
-    TextInputView.prototype.show = function() {
-      return this.el.show();
-    };
-
-    TextInputView.prototype.hide = function() {
-      return this.el.hide();
-    };
-
-    TextInputView.prototype.addClass = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).addClass.apply(_ref, args);
-    };
-
-    TextInputView.prototype.removeClass = function() {
-      var args, _ref;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).removeClass.apply(_ref, args);
-    };
-
-    TextInputView.prototype._zeroPadNumber = function(num, places) {
-      var zero;
-      zero = places - num.toString().length + 1;
-      return Array(zero).join("0") + num;
-    };
-
-    return TextInputView;
 
   })();
 
@@ -733,12 +639,20 @@
     }
 
     SegmentedCardNumberInputView.prototype._buildDOM = function() {
+      var _this = this;
       this.el = $('<fieldset>');
+      this.el.addClass('cc-field');
       this.el.delegate("input", "keypress", this._handleGroupKeyPress.bind(this));
       this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
       this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
       this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
-      return this.el.delegate("input", "change", this._handleGroupChange.bind(this));
+      this.el.delegate("input", "change", this._handleGroupChange.bind(this));
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      return this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
+      });
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
@@ -1059,9 +973,7 @@
   */
 
 
-  Skeuocard.prototype.ExpirationInputView = (function(_super) {
-
-    __extends(ExpirationInputView, _super);
+  Skeuocard.prototype.ExpirationInputView = (function() {
 
     function ExpirationInputView(opts) {
       var _this = this;
@@ -1072,13 +984,32 @@
       this.options = opts;
       this.date = null;
       this.el = $("<fieldset>");
+      this.el.addClass('cc-field');
       this.el.delegate("input", "keydown", function(e) {
         return _this._onKeyDown(e);
       });
       this.el.delegate("input", "keyup", function(e) {
         return _this._onKeyUp(e);
       });
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
+      });
     }
+
+    ExpirationInputView.prototype.bind = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).bind.apply(_ref, args);
+    };
+
+    ExpirationInputView.prototype.trigger = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).trigger.apply(_ref, args);
+    };
 
     ExpirationInputView.prototype._getFieldCaretPosition = function(el) {
       var input, sel, selLength;
@@ -1155,6 +1086,12 @@
       if (this.date != null) {
         return this._updateFieldValues();
       }
+    };
+
+    ExpirationInputView.prototype._zeroPadNumber = function(num, places) {
+      var zero;
+      zero = places - num.toString().length + 1;
+      return Array(zero).join("0") + num;
     };
 
     ExpirationInputView.prototype._updateFieldValues = function() {
@@ -1289,49 +1226,89 @@
       return this.el.find("input");
     };
 
+    ExpirationInputView.prototype.show = function() {
+      return this.el.show();
+    };
+
+    ExpirationInputView.prototype.hide = function() {
+      return this.el.hide();
+    };
+
     return ExpirationInputView;
 
-  })(Skeuocard.prototype.TextInputView);
+  })();
 
   /*
   Skeuocard::TextInputView
   */
 
 
-  Skeuocard.prototype.TextInputView = (function(_super) {
-
-    __extends(TextInputView, _super);
+  Skeuocard.prototype.TextInputView = (function() {
 
     function TextInputView(opts) {
-      this.el = $("<input>").attr({
+      var _this = this;
+      this.el = $('<div>');
+      this.inputEl = $("<input>").attr({
         type: 'text',
         placeholder: opts.placeholder,
         "class": opts["class"]
       });
+      this.el.append(this.inputEl);
+      this.el.addClass('cc-field');
       this.options = opts;
+      this.el.delegate("input", "focus", function(e) {
+        return _this.el.addClass('focus');
+      });
+      this.el.delegate("input", "blur", function(e) {
+        return _this.el.removeClass('focus');
+      });
+      this.el.delegate("input", "keyup", function(e) {
+        e.stopPropagation();
+        return _this.trigger('keyup', [_this]);
+      });
     }
 
     TextInputView.prototype.clear = function() {
-      return this.el.val("");
+      return this.inputEl.val("");
     };
 
     TextInputView.prototype.attr = function() {
       var args, _ref;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      return (_ref = this.el).attr.apply(_ref, args);
+      return (_ref = this.inputEl).attr.apply(_ref, args);
     };
 
     TextInputView.prototype.setValue = function(newValue) {
-      return this.el.val(newValue);
+      return this.inputEl.val(newValue);
     };
 
     TextInputView.prototype.getValue = function() {
-      return this.el.val();
+      return this.inputEl.val();
+    };
+
+    TextInputView.prototype.bind = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).bind.apply(_ref, args);
+    };
+
+    TextInputView.prototype.trigger = function() {
+      var args, _ref;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      return (_ref = this.el).trigger.apply(_ref, args);
+    };
+
+    TextInputView.prototype.show = function() {
+      return this.el.show();
+    };
+
+    TextInputView.prototype.hide = function() {
+      return this.el.hide();
     };
 
     return TextInputView;
 
-  })(Skeuocard.prototype.TextInputView);
+  })();
 
   /*
   Skeuocard::CardProduct

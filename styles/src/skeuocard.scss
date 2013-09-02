@@ -133,7 +133,7 @@ $color-valid: #00CFA7;
       &:hover{ left: -1.8em; }
     }
   }
-  .flip-tab.valid-anim{
+  .flip-tab.prompt{
     background: $color-valid url('../images/card-valid-anim.gif') no-repeat;
     background-size: 2.3em 2.3em;
     &.front{
@@ -153,7 +153,7 @@ $color-valid: #00CFA7;
       }
     }
   }
-  .flip-tab.warn-anim{
+  .flip-tab.warn{
     background: $color-invalid url('../images/card-invalid-indicator.png') no-repeat;
     background-size: 2.3em 2.3em;
     &.front{
@@ -172,12 +172,6 @@ $color-valid: #00CFA7;
         margin-top: 0.6em;
       }
     }
-  }
-  .flip-tab.prompt{
-    background-color: $color-valid;
-  }
-  .flip-tab.warn{
-    background-color: $color-invalid;
   }
 
 }
