@@ -708,10 +708,12 @@
       arrowUp: 38,
       arrowRight: 39,
       arrowDown: 40,
-      arrows: [37, 38, 39, 40]
+      arrows: [37, 38, 39, 40],
+      command: 16,
+      alt: 17
     };
 
-    SegmentedCardNumberInputView.prototype._specialKeys = [8, 9, 13, 46, 37, 38, 39, 40];
+    SegmentedCardNumberInputView.prototype._specialKeys = [8, 9, 13, 46, 37, 38, 39, 40, 16, 17];
 
     function SegmentedCardNumberInputView(opts) {
       if (opts == null) {
@@ -736,35 +738,29 @@
       this.el.delegate("input", "keydown", this._handleGroupKeyDown.bind(this));
       this.el.delegate("input", "keyup", this._handleGroupKeyUp.bind(this));
       this.el.delegate("input", "paste", this._handleGroupPaste.bind(this));
-      this.el.delegate("input", "change", this._handleGroupChange.bind(this));
-      return this.el.delegate("input", "blur", this._handleGroupBlur.bind(this));
-    };
-
-    SegmentedCardNumberInputView.prototype._handleGroupBlur = function(e) {
-      if (this._state.selectingAll) {
-        return this._endSelectAll();
-      }
+      return this.el.delegate("input", "change", this._handleGroupChange.bind(this));
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyDown = function(e) {
-      var currentTarget, cursorPos, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, _ref;
+      var currentTarget, cursorEnd, cursorStart, inputGroupEl, inputMaxLength, nextInputEl, prevInputEl, _ref;
       if (e.ctrlKey || e.metaKey) {
         return this._handleModifiedKeyDown(e);
       }
       inputGroupEl = $(e.currentTarget);
       currentTarget = e.currentTarget;
-      cursorPos = currentTarget.selectionEnd;
+      cursorStart = currentTarget.selectionStart;
+      cursorEnd = currentTarget.selectionEnd;
       inputMaxLength = currentTarget.maxLength;
       prevInputEl = inputGroupEl.prevAll('input');
       nextInputEl = inputGroupEl.nextAll('input');
       switch (e.which) {
         case this._keys.backspace:
-          if (prevInputEl.length > 0 && cursorPos === 0) {
+          if (prevInputEl.length > 0 && cursorEnd === 0) {
             this._focusField(prevInputEl.first(), 'end');
           }
           break;
         case this._keys.arrowUp:
-          if (cursorPos === inputMaxLength) {
+          if (cursorEnd === inputMaxLength) {
             this._focusField(inputGroupEl, 'start');
           } else {
             this._focusField(inputGroupEl.prev(), 'end');
@@ -772,7 +768,7 @@
           e.preventDefault();
           break;
         case this._keys.arrowDown:
-          if (cursorPos === inputMaxLength) {
+          if (cursorEnd === inputMaxLength) {
             this._focusField(inputGroupEl.next(), 'start');
           } else {
             this._focusField(inputGroupEl, 'end');
@@ -780,22 +776,20 @@
           e.preventDefault();
           break;
         case this._keys.arrowLeft:
-          if (cursorPos === 0) {
+          if (cursorEnd === 0) {
             this._focusField(inputGroupEl.prev(), 'end');
             e.preventDefault();
           }
           break;
         case this._keys.arrowRight:
-          if (cursorPos === inputMaxLength) {
+          if (cursorEnd === inputMaxLength) {
             this._focusField(inputGroupEl.next(), 'start');
             e.preventDefault();
           }
           break;
         default:
-          if (!(_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0) && cursorPos === inputMaxLength) {
-            if (nextInputEl.length !== 0) {
-              this._focusField(nextInputEl.first(), 'start');
-            }
+          if (!(_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0) && (cursorStart === inputMaxLength && cursorEnd === inputMaxLength) && nextInputEl.length !== 0) {
+            this._focusField(nextInputEl.first(), 'start');
           }
       }
       return true;
@@ -813,18 +807,18 @@
       }
       if ((!e.shiftKey && (_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0)) || isDigit) {
         return true;
-      } else {
-        e.preventDefault();
-        return false;
       }
+      e.preventDefault();
+      return false;
     };
 
     SegmentedCardNumberInputView.prototype._handleGroupKeyUp = function(e) {
-      var currentTarget, cursorPos, inputGroupEl, inputMaxLength, nextInputEl, _ref, _ref1, _ref2;
+      var currentTarget, cursorEnd, cursorStart, inputGroupEl, inputMaxLength, nextInputEl, _ref, _ref1, _ref2;
       inputGroupEl = $(e.currentTarget);
       currentTarget = e.currentTarget;
-      cursorPos = currentTarget.selectionEnd;
       inputMaxLength = currentTarget.maxLength;
+      cursorStart = currentTarget.selectionStart;
+      cursorEnd = currentTarget.selectionEnd;
       nextInputEl = inputGroupEl.nextAll('input');
       if (e.ctrlKey || e.metaKey) {
         return true;
@@ -834,10 +828,8 @@
           this._endSelectAll();
         }
       }
-      if (!(_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0)) {
-        if (cursorPos === inputMaxLength && nextInputEl.length !== 0) {
-          this._focusField(nextInputEl.first(), 'start');
-        }
+      if (!(_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0) && !(e.shiftKey && e.which === this._keys.tab) && (cursorStart === inputMaxLength && cursorEnd === inputMaxLength) && nextInputEl.length !== 0) {
+        this._focusField(nextInputEl.first(), 'start');
       }
       if (!(e.shiftKey && (_ref2 = e.which, __indexOf.call(this._specialKeys, _ref2) >= 0))) {
         this.trigger('change', [this]);

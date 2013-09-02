@@ -548,8 +548,10 @@ class Skeuocard::SegmentedCardNumberInputView
     arrowRight: 39
     arrowDown: 40
     arrows: [37..40]
+    command: 16
+    alt: 17
 
-  _specialKeys: [8, 9, 13, 46, 37, 38, 39, 40]
+  _specialKeys: [8, 9, 13, 46, 37, 38, 39, 40, 16, 17]
 
   constructor: (opts = {})->
     @optDefaults = 
@@ -569,11 +571,6 @@ class Skeuocard::SegmentedCardNumberInputView
     @el.delegate "input", "keyup",    @_handleGroupKeyUp.bind(@)
     @el.delegate "input", "paste",    @_handleGroupPaste.bind(@)
     @el.delegate "input", "change",   @_handleGroupChange.bind(@)
-    @el.delegate "input", "blur",     @_handleGroupBlur.bind(@)
-
-  _handleGroupBlur: (e)->
-    if @_state.selectingAll
-      @_endSelectAll()
 
   _handleGroupKeyDown: (e)->
     # If this is called with the control or meta key, defer to another handler
@@ -581,7 +578,8 @@ class Skeuocard::SegmentedCardNumberInputView
 
     inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
-    cursorPos = currentTarget.selectionEnd
+    cursorStart = currentTarget.selectionStart
+    cursorEnd = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
 
     prevInputEl = inputGroupEl.prevAll('input')
@@ -590,36 +588,38 @@ class Skeuocard::SegmentedCardNumberInputView
     switch e.which
       # handle backspace
       when @_keys.backspace
-        if prevInputEl.length > 0 and cursorPos is 0
+        if prevInputEl.length > 0 and cursorEnd is 0
           @_focusField(prevInputEl.first(), 'end')
       # handle up arrow
       when @_keys.arrowUp
-        if cursorPos is inputMaxLength
+        if cursorEnd is inputMaxLength
           @_focusField(inputGroupEl, 'start')
         else
           @_focusField(inputGroupEl.prev(), 'end')
         e.preventDefault()
       # handle down arrow
       when @_keys.arrowDown
-        if cursorPos is inputMaxLength
+        if cursorEnd is inputMaxLength
           @_focusField(inputGroupEl.next(), 'start')
         else
           @_focusField(inputGroupEl, 'end')
         e.preventDefault()
       # handle left arrow
       when @_keys.arrowLeft
-        if cursorPos is 0
+        if cursorEnd is 0
           @_focusField(inputGroupEl.prev(), 'end')
           e.preventDefault()
       # handle right arrow
       when @_keys.arrowRight
-        if cursorPos is inputMaxLength
+        if cursorEnd is inputMaxLength
           @_focusField(inputGroupEl.next(), 'start')
           e.preventDefault()
       else
-        if not (e.which in @_specialKeys) and cursorPos is inputMaxLength
-          if nextInputEl.length isnt 0
+        if not (e.which in @_specialKeys) and 
+          (cursorStart is inputMaxLength and cursorEnd is inputMaxLength) and
+          nextInputEl.length isnt 0
             @_focusField(nextInputEl.first(), 'start')
+    
     # Allow the event to propagate, and otherwise be happy
     return true
 
@@ -632,15 +632,17 @@ class Skeuocard::SegmentedCardNumberInputView
 
     if (not e.shiftKey and (e.which in @_specialKeys)) or isDigit
       return true
-    else
-      e.preventDefault()
-      return false
+    
+    e.preventDefault()
+    return false
 
   _handleGroupKeyUp: (e)->
     inputGroupEl = $(e.currentTarget)
     currentTarget = e.currentTarget # get rid of that e.
-    cursorPos = currentTarget.selectionEnd
     inputMaxLength = currentTarget.maxLength
+
+    cursorStart = currentTarget.selectionStart
+    cursorEnd = currentTarget.selectionEnd
     
     nextInputEl = inputGroupEl.nextAll('input')
 
@@ -649,8 +651,10 @@ class Skeuocard::SegmentedCardNumberInputView
     if @_state.selectingAll
       @_endSelectAll() if (e.which in @_specialKeys)
 
-    if not (e.which in @_specialKeys) 
-      if cursorPos is inputMaxLength and nextInputEl.length isnt 0
+    if not (e.which in @_specialKeys) and 
+      not (e.shiftKey and e.which is @_keys.tab) and
+      (cursorStart is inputMaxLength and cursorEnd is inputMaxLength) and 
+      nextInputEl.length isnt 0
         @_focusField(nextInputEl.first(), 'start')
 
     unless e.shiftKey and (e.which in @_specialKeys)
