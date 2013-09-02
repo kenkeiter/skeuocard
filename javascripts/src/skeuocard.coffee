@@ -1166,7 +1166,7 @@ Skeuocard::CardProduct.create
   companyShortname: "jcb"
   cardNumberGrouping: [4,4,4,4]
   cardNumberLength: [16]
-  expirationFormat: "MM/YY"
+  expirationFormat: "MM/'YY"
   cvcLength: 3
   validateLuhn: true
   layout:
