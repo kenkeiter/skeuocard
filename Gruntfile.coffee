@@ -18,8 +18,17 @@ module.exports = (grunt) ->
 
     coffee:
       all:
+        options:
+          join: true
         files:
-          "./javascripts/skeuocard.js": "./javascripts/src/skeuocard.coffee"
+          "./javascripts/skeuocard.js": [
+            "./javascripts/src/Skeuocard.coffee",
+            "./javascripts/src/FlipTabView.coffee",
+            "./javascripts/src/SegmentedCardNumberInputView.coffee",
+            "./javascripts/src/ExpirationInputView.coffee",
+            "./javascripts/src/TextInputView.coffee",
+            "./javascripts/src/CardProduct.coffee"
+          ]
 
     sass:
       all:

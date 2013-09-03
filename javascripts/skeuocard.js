@@ -510,8 +510,6 @@
   Skeuocard::FlipTabView
   Handles rendering of the "flip button" control and its various warning and 
   prompt states.
-  
-  TODO: Rebuild this so that it observes events and contains its own logic.
   */
 
 
