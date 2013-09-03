@@ -394,7 +394,7 @@
 
 
     Skeuocard.prototype._renderProduct = function(product) {
-      var destFace, fieldName, view, viewEl, _ref,
+      var destFace, fieldName, focused, view, viewEl, _ref, _ref1,
         _this = this;
       this._log("[_renderProduct]", "Rendering product:", product);
       this.el.container.removeClass(function(index, css) {
@@ -416,25 +416,28 @@
           maxlength: product.attrs.cvcLength,
           placeholder: new Array(product.attrs.cvcLength + 1).join(this.options.cardNumberPlaceholderChar)
         });
-      }
-      this._inputViewsByFace = {
-        front: [],
-        back: []
-      };
-      _ref = this._inputViews;
-      for (fieldName in _ref) {
-        view = _ref[fieldName];
-        destFace = (product != null ? product.attrs.layout[fieldName] : void 0) || null;
-        if (destFace != null) {
-          if (!this.el[destFace].has(view.el).length > 0) {
-            this._log("Moving", fieldName, "to", destFace);
-            viewEl = view.el.detach();
-            viewEl.appendTo(this.el[destFace]);
+        this._inputViewsByFace = {
+          front: [],
+          back: []
+        };
+        _ref = product.attrs.layout;
+        for (fieldName in _ref) {
+          destFace = _ref[fieldName];
+          this._log("Moving", fieldName, "to", destFace);
+          focused = $('*:focus');
+          viewEl = this._inputViews[fieldName].el.detach();
+          viewEl.appendTo(this.el[destFace]);
+          focused.focus();
+          this._inputViewsByFace[destFace].push(this._inputViews[fieldName]);
+          this._inputViews[fieldName].show();
+        }
+      } else {
+        _ref1 = this._inputViews;
+        for (fieldName in _ref1) {
+          view = _ref1[fieldName];
+          if (fieldName !== 'number') {
+            view.hide();
           }
-          this._inputViewsByFace[destFace].push(view);
-          view.show();
-        } else if (fieldName !== 'number') {
-          view.hide();
         }
       }
       return product;
