@@ -1,19 +1,38 @@
-.ie10 .skeuocard{
+/*
+IE Fixes
+*/
+.ua-ie-10 .skeuocard.js{
   .cc-number input{
     ::-ms-clear { display: none !important; }
+  }
+  .flip-tab{
+    @include vendor-prefix(transition, none);
+  }
+}
+
+/*
+Firefox Fixes
+*/
+.ua-firefox .skeuocard.js, .ua-ie-10 .skeuocard.js {
+  input:focus{
+    outline: none;
+    @include vendor-prefix(box-shadow, 0 0 4px $color-field-glow);
   }
 }
 
 /* 
 Fix for issue with Chrome in which no GPU acceleration will mess with 
 backface visibility in 3d transforms
-see: https://code.google.com/p/chromium/issues/detail?id=127844 
+see: https://code.google.com/p/chromium/issues/detail?id=127844.
+
+Special thanks to @jarthod on Github for help debugging on Linux.
+See https://github.com/kenkeiter/skeuocard/issues/76 for more info.
 */
-.chrome.win .skeuocard {
+.ua-chrome .skeuocard {
   @media screen and (-webkit-transform-3d: 0) {
     .card-body .face{
       -webkit-transition-property: -webkit-transform, opacity;
-      -webkit-transition-duration: 0.25s, 0;
+      -webkit-transition-duration: 0.25s, 0.25s;
       -webkit-transition-timing-function:ease-in-out,ease-in-out;
       -webkit-transition-delay:0, 0;
     }
@@ -27,6 +46,7 @@ see: https://code.google.com/p/chromium/issues/detail?id=127844
     }
     .card-body.flip .face.back{
       opacity: 1;
+      z-index: 2;
     }
   }
 }

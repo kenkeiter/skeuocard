@@ -1,0 +1,19 @@
+{
+  "name": "Skeuocard",
+  "description": "A skeuomorphic credit-card input.",
+  "homepage": "http://github.com/kenkeiter/skeuocard",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ken Keiter",
+    "url": "http://kenkeiter.com/"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.4.4",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-sass": "~0.5.0",
+    "grunt-contrib-uglify": "~0.2.4",
+    "grunt-open": "~0.2.1",
+    "grunt-express": "~1.0.0-beta2"
+  }
+}

@@ -13,17 +13,6 @@ $sprite-front-height: 93.6em;
 // *****************************************************************************
 .skeuocard.js {
 
-  input{
-    border: none;
-    outline: none;
-    @include vendor-prefix(border-radius, 3px);
-  }
-
-  input:focus{
-    outline: none;
-    @include vendor-prefix(box-shadow, 0 0 10px $color-field-glow);
-  }
-
   .face.front {
     background-color: #eee;
     background-image: url('../images/products/generic-front.png'), $image-front-background;
@@ -38,15 +27,83 @@ $sprite-front-height: 93.6em;
     background-size: cover;
   }
 
+  .face.valid{
+    @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
+  }
+
+
+
+  /* 
+  1. If a field (or group) has focus, regardless of whether it's filled, the 
+     inputs should look like inputs.
+  2. Focused inputs within a focused field or group should look focused.
+  3. An un-filled field should always look editable.
+  4. Filled, valid fields should be flat until hover.
+  */
+
+  .cc-field{
+
+    input{
+      border: none;
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.6);
+      @include vendor-prefix(border-radius, 0px);
+      @include vendor-prefix(box-shadow, inset 1px 1px 1px 1px #ccc);
+      @include vendor-prefix(transition, background-color 300ms ease);
+    }
+
+    input:focus{
+      outline: 3px auto $color-field-glow;
+      @include vendor-prefix(box-shadow, none);
+    }
+
+    &.filled.valid:not(.focus){
+      input{
+        @include vendor-prefix(box-shadow, none);
+        background-color: transparent;
+      }
+    }
+
+    &.filled:hover:not(.focus){
+      input{
+        @include vendor-prefix(box-shadow, inset 1px 1px 1px 1px #ccc);
+        background-color: rgba(255, 255, 255, 0.6);
+      }
+    }
+
+  }
+
+  .face.filled .cc-field.invalid{
+    input{
+      @include vendor-prefix(box-shadow, inset 0px 0px 2px 1px $color-invalid);
+      border: 1px solid $color-invalid;
+    }
+    
+    input:focus{
+      @include vendor-prefix(box-shadow, none);
+    }
+
+    /*
+    &:after{
+      display: inline-block;
+      width: 1.575em;
+      height: 1.25em;
+      content: "";
+      background: url('../images/error-pointer.png') no-repeat center center;
+      background-size: 1.575em 1.25em;
+      padding-left: 4px;
+    }
+    */
+  }
+
   .cc-number{
     position: absolute;
     display: block; 
-    //left:36px;
     left: 1.8em;
     top: 8.05em;
+    padding: 0.1em;
     input{
       color: #333;
-      background-color: #fff;
       font-family: $cc-field-family;
       font-size: 1.5em;
       &.group4{ width: 3.2em; }
@@ -57,6 +114,43 @@ $sprite-front-height: 93.6em;
     input + input {
       margin-left: 0.4em;
     }
+  }
+
+  .cc-exp {
+    position: absolute; 
+    display: block; 
+    input, .separator {
+      margin: 0; padding: 0;
+      font-size: 1em;
+      font-family: $cc-field-family;
+      color: #333;
+      text-align: center;
+      &.group2{ width: 2em; }
+      &.group4{ width: 4em; }
+    }
+  }
+
+  .cc-name {
+    margin: 0; padding: 0;
+    position: absolute; 
+    display: block; 
+    font-size: 1em;
+    font-family: $cc-field-family;
+    text-transform: uppercase;
+  }
+
+  .cc-cvc {
+    margin: 0; padding: 0;
+    position: absolute; 
+    display: block; 
+    font-size: 1em;
+    font-family: $cc-label-family;
+  }
+
+  &.unaccepted .cc-number input{
+    outline: none;
+    @include vendor-prefix(box-shadow, 0 0 10px $color-invalid);
+    @include vendor-prefix(transition, box-shadow linear 0.15s);
   }
 }
 
@@ -73,67 +167,6 @@ $sprite-front-height: 93.6em;
     background-repeat: no-repeat, no-repeat;
     background-size: cover, cover;
   }
-  .cc-number {
-    background-color: transparent;
-    padding: 0.1em;
-    input{
-      color: #333;
-      background-color: transparent;
-      border: none;
-    }
-    input:focus{
-      background-color: rgba(255, 255, 255, 0.6);
-    }
-  }
-  .cc-exp {
-    position: absolute; 
-    display: block; 
-    input, .separator {
-      margin: 0; padding: 0;
-      font-size: 1em;
-      font-family: $cc-field-family;
-      color: #333;
-      background-color: transparent;
-      border: none;
-      text-align: center;
-      &.group2{ width: 2em; }
-      &.group4{ width: 4em; }
-    }
-  }
-  .cc-name {
-    margin: 0; padding: 0;
-    position: absolute; 
-    display: block; 
-    font-size: 1em;
-    font-family: $cc-field-family;
-    background-color: transparent;
-    border: none;
-    text-transform: uppercase;
-  }
-  .cc-cvc {
-    margin: 0; padding: 0;
-    position: absolute; 
-    display: block; 
-    font-size: 1em;
-    font-family: $cc-label-family;
-    background-color: transparent;
-    border: none;
-  }
-  .invalid{
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-  }
-  .invalid{
-    outline: none;
-    box-shadow: 0 0 10px $color-invalid;
-    @include vendor-prefix(transition, box-shadow linear 0.15s);
-    input:focus{
-      border: 1px solid blue;
-      outline: none;
-      @include vendor-prefix(border-radius, 3px);
-    }
-  }
 }
 
 // *****************************************************************************
@@ -145,6 +178,7 @@ $sprite-front-height: 93.6em;
   .face.front{
     background-image: url('../images/products/visa-front.png'), $image-front-background;
   }
+
   .face.back {
     background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
@@ -210,29 +244,42 @@ $sprite-front-height: 93.6em;
 
   }
 
-  /*
-  &.issuer-simple{
-    .face.front{
-      background-image: url('../images/issuers/visa-simple-front.png');
-    }
-    input, .separator {
-      color: #eee;
-      background-color: transparent;
-      text-shadow: 1px 1px 1px #bbb;
-      filter: dropshadow(color=#aaa, offx=1, offy=1);
-      border: none;
-      @include input-placeholder{ 
-        color: #fff; 
-        text-shadow: 1px 1px 1px #ccc;
-        filter: dropshadow(color=#ddd, offx=1, offy=1);
-      };
-    }
-    .cc-number{
-      background-color: transparent;
-    }
-  }
-  */
+}
 
+// *****************************************************************************
+// China UnionPay card layout
+// *****************************************************************************
+.skeuocard.product-unionpay {
+  @extend .skeuocard.card-product;
+
+  .face.front{
+    background-image: url('../images/products/unionpay-front.png'), $image-front-background;
+  }
+  .face.back {
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
+  }
+
+  .cc-number{
+    left: 1.8em; 
+    top: 8.05em;
+  }
+
+  .cc-exp{
+    left: 10.9em;
+    top: 11.2em;
+    width: 5em;
+  }
+
+  .cc-name{
+    left: 1.8em;
+    top: 13em;
+  }
+
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
+  }
 }
 
 // *****************************************************************************
@@ -337,6 +384,41 @@ $sprite-front-height: 93.6em;
 }
 
 // *****************************************************************************
+// Maestro card layout
+// *****************************************************************************
+.skeuocard.product-maestro {
+  @extend .skeuocard.card-product;
+
+  .face.front{
+    background-image: url('../images/products/maestro-front.png'), $image-front-background;
+  }
+  .face.back{
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
+  }
+
+  .cc-number{
+    left: 1.8em;
+    top: 8.05em;
+  }
+
+  .cc-name{
+    left: 2.5em;
+    top: 12.2em;
+  }
+
+  .cc-exp{
+    left: 11.5em;
+    top: 10.8em;
+  }
+
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
+  }
+}
+
+// *****************************************************************************
 // Discover card layout
 // *****************************************************************************
 .skeuocard.product-discover {
@@ -345,6 +427,7 @@ $sprite-front-height: 93.6em;
   .face.front{
     background-image: url('../images/products/discover-front.png'), $image-front-background;
   }
+
   .face.back{
     background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
@@ -363,6 +446,43 @@ $sprite-front-height: 93.6em;
     left: 13.15em;
     top: 11.61em;
   }
+
+  .cc-cvc{
+    top: 7.15em;
+    left: 18.1em;
+    width: 3em;
+  }
+}
+
+// *****************************************************************************
+// JCB card product
+// *****************************************************************************
+.skeuocard.product-jcb {
+  @extend .skeuocard.card-product;
+
+  .face.front{
+    background-image: url('../images/products/jcb-front.png'), $image-front-background;
+  }
+
+  .face.back{
+    background-image: url('../images/products/visa-back.png'), $image-generic-back;
+  }
+
+  .cc-number{
+    left: 1.8em;
+    top: 8.05em;
+  }
+
+  .cc-name{
+    left: 1.55em;
+    top: 13.575em;
+  }
+
+  .cc-exp{
+    left: 10.65em;
+    top: 11.50em;
+  }
+
   .cc-cvc{
     top: 7.15em;
     left: 18.1em;
@@ -373,9 +493,12 @@ $sprite-front-height: 93.6em;
 /* Preload face images */
 body:after{
     display:none;
-    content: url('../images/products/visa-front.png') 
+    content: url('../images/products/visa-back.png') // most use this
+             url('../images/products/visa-front.png') 
+             url('../images/products/unionpay-front.png') 
              url('../images/products/amex-front.png') 
              url('../images/products/discover-front.png') 
              url('../images/products/mastercard-front.png') 
-             url('../images/products/dinersclubintl-front.png');
+             url('../images/products/dinersclubintl-front.png')
+             url('../images/products/jcb-front.png');
 }
