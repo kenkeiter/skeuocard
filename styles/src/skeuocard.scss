@@ -47,7 +47,6 @@ $color-valid: #00CFA7;
       -webkit-backface-visibility: hidden;
       -moz-backface-visibility: hidden;
       backface-visibility: hidden;
-      -webkit-backface-visibility: visible;
       -webkit-backface-visibility: hidden;
       
       @include vendor-prefix(transform-style, preserve-3d);
