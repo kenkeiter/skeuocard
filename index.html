@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles/skeuocard.reset.css" />
     <link rel="stylesheet" href="styles/skeuocard.css" />
     <link rel="stylesheet" href="styles/demo.css">
-    <script src="javascripts/vendor/css_browser_selector.js"></script>
+    <script src="javascripts/vendor/cssua.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -102,8 +102,14 @@ Diners Club: 30951111111116
     <script>
 
       $(document).ready(function(){
-        if($('html').hasClass('ie10') || $('html').hasClass('webkit') || 
-           $('html').hasClass('firefox') || $('html').hasClass('opera')){
+        var isBrowserCompatible = 
+          $('html').hasClass('ua-ie-10') ||
+          $('html').hasClass('ua-webkit') ||
+          $('html').hasClass('ua-firefox') ||
+          $('html').hasClass('ua-opera') ||
+          $('html').hasClass('ua-chrome');
+
+        if(isBrowserCompatible){
           window.card = new Skeuocard($("#skeuocard"), {
             debug: true
           });

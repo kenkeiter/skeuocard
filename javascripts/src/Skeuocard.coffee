@@ -355,14 +355,20 @@ class Skeuocard
     
       # set visibility and re-layout fields
       @_inputViewsByFace = {front: [], back: []}
+      focused = $('*:focus') # allow restoration of focus upon re-attachment
       for fieldName, destFace of product.attrs.layout
         @_log("Moving", fieldName, "to", destFace)
-        focused = $('*:focus') # allow restoration of focus upon re-attachment
         viewEl = @_inputViews[fieldName].el.detach()
         viewEl.appendTo(@el[destFace])
-        focused.focus() # restore focus
         @_inputViewsByFace[destFace].push @_inputViews[fieldName]
         @_inputViews[fieldName].show()
+      # Restore focus. Use setTimeout to resolve IE10 issue.
+      setTimeout =>
+        fieldEl = focused.first()
+        fieldLength = fieldEl[0].maxLength
+        fieldEl.focus()
+        fieldEl[0].setSelectionRange(fieldLength, fieldLength)
+      , 10
     else
       for fieldName, view of @_inputViews
         view.hide() if fieldName isnt 'number'

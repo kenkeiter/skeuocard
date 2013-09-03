@@ -418,17 +418,23 @@
           front: [],
           back: []
         };
+        focused = $('*:focus');
         _ref = product.attrs.layout;
         for (fieldName in _ref) {
           destFace = _ref[fieldName];
           this._log("Moving", fieldName, "to", destFace);
-          focused = $('*:focus');
           viewEl = this._inputViews[fieldName].el.detach();
           viewEl.appendTo(this.el[destFace]);
-          focused.focus();
           this._inputViewsByFace[destFace].push(this._inputViews[fieldName]);
           this._inputViews[fieldName].show();
         }
+        setTimeout(function() {
+          var fieldEl, fieldLength;
+          fieldEl = focused.first();
+          fieldLength = fieldEl[0].maxLength;
+          fieldEl.focus();
+          return fieldEl[0].setSelectionRange(fieldLength, fieldLength);
+        }, 10);
       } else {
         _ref1 = this._inputViews;
         for (fieldName in _ref1) {
@@ -734,10 +740,8 @@
       if (e.ctrlKey || e.metaKey) {
         return true;
       }
-      if (this._state.selectingAll) {
-        if ((_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0)) {
-          this._endSelectAll();
-        }
+      if (this._state.selectingAll && (_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0) && e.which !== this._keys.command && e.which !== this._keys.alt) {
+        this._endSelectAll();
       }
       if (!(_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0) && !(e.shiftKey && e.which === this._keys.tab) && (cursorStart === inputMaxLength && cursorEnd === inputMaxLength) && nextInputEl.length !== 0) {
         this._focusField(nextInputEl.first(), 'start');
