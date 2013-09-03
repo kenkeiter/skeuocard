@@ -284,6 +284,7 @@ Skeuocard aims to gain better compatibility with older browsers, but for the tim
 * Safari (Mac)
 * Firefox > 18 (Mac, Win)
 * Mobile Safari (iOS)
+* Mobile Chrome (iOS/Android)
 * IE 10+ (Win)
 
 It's recommended that you selectively disable Skeuocard based upon browser version, to retain maximum compatibility. If you have an odd or obscure browser, and wish to submit a patch, that's always appreciated!
@@ -296,15 +297,34 @@ It's recommended that you selectively disable Skeuocard based upon browser versi
 
 Contributing to Skeuocard is pretty simple. Simply fork the project, make your changes in a branch, and submit a pull request.
 
-I'll do my best to keep an eye out for pull requests and triage any submitted issues.
+I'll do my best to keep an eye out for pull requests and triage any submitted issues. Please note that you MUST make changes on the src (.coffee, .scss) files, compile the changes with Grunt, and include any compiled changes in any pull requests you submit.
 
-#### Compiling SCSS and CoffeeScript
+#### Getting Up and Running
 
-We use SCSS and CoffeeScript to keep things short and easy. You should include compiled CSS and Javascript files in any pull requests you send. If you have [foreman](https://github.com/ddollar/foreman), [sass](http://sass-lang.com/), and [CoffeeScript](http://coffeescript.org/) installed, you can simply run
+Ensure that you have the following tools installed before continuing:
+  
+  * [NodeJS/NPM](http://nodejs.org/download/)
+  * [SASS](http://sass-lang.com/)
+  * [CoffeeScript](http://coffeescript.org/)
 
-    foreman start
+To begin working on Skeuocard, fork the repository to your Github account, and clone it to your machine. 
 
-from within your Skeuocard working directory, and it'll watch for changes and automatically re-compile the files.
+Once you have `cd`ed to your cloned `skeuocard` repository, you'll need to install the required Node packages:
+
+    $ npm install
+
+Once that's completed, simply run:
+
+    $ grunt
+
+Upon starting `grunt`, the following things will happen:
+
+* a development server will be started on `0.0.0.0:8000`;
+* `index.html` will be opened automatically in your browser;
+* grunt will begin watching for changes to source files, and setup live-reload
+* source files will be recompiled automatically when changes are made.
+
+Simply make your changes to the necessary source files (typically under the `src` directory of each directory in the project), commit the changes (including the compiled changes), and submit a pull request! 
 
 #### New Card Layouts & Graphics
 
