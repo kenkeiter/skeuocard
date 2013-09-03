@@ -246,23 +246,26 @@ class Skeuocard
     @_tabViews.back.el.click => @flip()
 
   _handleFieldTab: (e)->
-    ###
-    if e.which is 9
+    if e.which is 9 # tab
       currentFieldEl = $(e.currentTarget)
       _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
       _currentFace = if @visibleFace is 'front' then 'front' else 'back'
       backFieldEls = @el[_oppositeFace].find('input')
       frontFieldEls = @el[_currentFace].find('input')
+
       if @visibleFace is 'front' and
-        @isFaceFilled('front') and
+        @el.front.hasClass('filled') and
         backFieldEls.length > 0 and
-        frontFieldEls.index(currentFieldEl) is -1
+        frontFieldEls.index(currentFieldEl) is frontFieldEls.length-1 and
+        not e.shiftKey
           @flip()
           backFieldEls.first().focus()
+          e.preventDefault()
       if @visibleFace is 'back' and e.shiftKey
         @flip()
-        frontFieldEls.last().focus()
-    ###
+        backFieldEls.last().focus() # other side, now...
+        e.preventDefault()
+    return true
 
   _updateValidation: (fieldName, newValue)->
     return false unless @product?

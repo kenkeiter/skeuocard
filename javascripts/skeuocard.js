@@ -299,24 +299,25 @@
     };
 
     Skeuocard.prototype._handleFieldTab = function(e) {
-      /*
-          if e.which is 9
-            currentFieldEl = $(e.currentTarget)
-            _oppositeFace = if @visibleFace is 'front' then 'back' else 'front'
-            _currentFace = if @visibleFace is 'front' then 'front' else 'back'
-            backFieldEls = @el[_oppositeFace].find('input')
-            frontFieldEls = @el[_currentFace].find('input')
-            if @visibleFace is 'front' and
-              @isFaceFilled('front') and
-              backFieldEls.length > 0 and
-              frontFieldEls.index(currentFieldEl) is -1
-                @flip()
-                backFieldEls.first().focus()
-            if @visibleFace is 'back' and e.shiftKey
-              @flip()
-              frontFieldEls.last().focus()
-      */
-
+      var backFieldEls, currentFieldEl, frontFieldEls, _currentFace, _oppositeFace;
+      if (e.which === 9) {
+        currentFieldEl = $(e.currentTarget);
+        _oppositeFace = this.visibleFace === 'front' ? 'back' : 'front';
+        _currentFace = this.visibleFace === 'front' ? 'front' : 'back';
+        backFieldEls = this.el[_oppositeFace].find('input');
+        frontFieldEls = this.el[_currentFace].find('input');
+        if (this.visibleFace === 'front' && this.el.front.hasClass('filled') && backFieldEls.length > 0 && frontFieldEls.index(currentFieldEl) === frontFieldEls.length - 1 && !e.shiftKey) {
+          this.flip();
+          backFieldEls.first().focus();
+          e.preventDefault();
+        }
+        if (this.visibleFace === 'back' && e.shiftKey) {
+          this.flip();
+          backFieldEls.last().focus();
+          e.preventDefault();
+        }
+      }
+      return true;
     };
 
     Skeuocard.prototype._updateValidation = function(fieldName, newValue) {
