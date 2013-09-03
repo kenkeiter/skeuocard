@@ -13,7 +13,7 @@
     "styles/skeuocard.reset.css",
     "styles/skeuocard.css",
     "javascripts/vendor/css_browser_selector.js",
-    "javascripts/skeuocard.js"
+    "javascripts/skeuocard.js",
     "javascripts/skeuocard.min.js"
   ],
   "ignore": [
