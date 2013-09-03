@@ -45,4 +45,6 @@
     border-spacing: 0; }
   .skeuocard.js input, .skeuocard.js fieldset {
     line-height: normal;
-    height: auto; }
+    height: auto;
+    padding: 0px;
+    margin: 0px; }

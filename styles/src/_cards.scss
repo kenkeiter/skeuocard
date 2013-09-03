@@ -46,14 +46,10 @@ $sprite-front-height: 93.6em;
     input{
       border: none;
       outline: none;
+      background-color: rgba(255, 255, 255, 0.6);
       @include vendor-prefix(border-radius, 0px);
       @include vendor-prefix(box-shadow, inset 1px 1px 1px 1px #ccc);
-      background-color: rgba(255, 255, 255, 0.6);
-      -webkit-transition: background-color 300ms ease;
-         -moz-transition: background-color 300ms ease;
-          -ms-transition: background-color 300ms ease;
-           -o-transition: background-color 300ms ease;
-              transition: background-color 300ms ease;
+      @include vendor-prefix(transition, background-color 300ms ease);
     }
 
     input:focus{
@@ -105,6 +101,7 @@ $sprite-front-height: 93.6em;
     display: block; 
     left: 1.8em;
     top: 8.05em;
+    padding: 0.1em;
     input{
       color: #333;
       font-family: $cc-field-family;
@@ -117,6 +114,37 @@ $sprite-front-height: 93.6em;
     input + input {
       margin-left: 0.4em;
     }
+  }
+
+  .cc-exp {
+    position: absolute; 
+    display: block; 
+    input, .separator {
+      margin: 0; padding: 0;
+      font-size: 1em;
+      font-family: $cc-field-family;
+      color: #333;
+      text-align: center;
+      &.group2{ width: 2em; }
+      &.group4{ width: 4em; }
+    }
+  }
+
+  .cc-name {
+    margin: 0; padding: 0;
+    position: absolute; 
+    display: block; 
+    font-size: 1em;
+    font-family: $cc-field-family;
+    text-transform: uppercase;
+  }
+
+  .cc-cvc {
+    margin: 0; padding: 0;
+    position: absolute; 
+    display: block; 
+    font-size: 1em;
+    font-family: $cc-label-family;
   }
 
   &.unaccepted .cc-number input{
@@ -139,37 +167,6 @@ $sprite-front-height: 93.6em;
     background-repeat: no-repeat, no-repeat;
     background-size: cover, cover;
   }
-  .cc-number {
-    padding: 0.1em;
-  }
-  .cc-exp {
-    position: absolute; 
-    display: block; 
-    input, .separator {
-      margin: 0; padding: 0;
-      font-size: 1em;
-      font-family: $cc-field-family;
-      color: #333;
-      text-align: center;
-      &.group2{ width: 2em; }
-      &.group4{ width: 4em; }
-    }
-  }
-  .cc-name {
-    margin: 0; padding: 0;
-    position: absolute; 
-    display: block; 
-    font-size: 1em;
-    font-family: $cc-field-family;
-    text-transform: uppercase;
-  }
-  .cc-cvc {
-    margin: 0; padding: 0;
-    position: absolute; 
-    display: block; 
-    font-size: 1em;
-    font-family: $cc-label-family;
-  }
 }
 
 // *****************************************************************************
@@ -181,6 +178,7 @@ $sprite-front-height: 93.6em;
   .face.front{
     background-image: url('../images/products/visa-front.png'), $image-front-background;
   }
+
   .face.back {
     background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
@@ -245,29 +243,6 @@ $sprite-front-height: 93.6em;
     }
 
   }
-
-  /*
-  &.issuer-simple{
-    .face.front{
-      background-image: url('../images/issuers/visa-simple-front.png');
-    }
-    input, .separator {
-      color: #eee;
-      background-color: transparent;
-      text-shadow: 1px 1px 1px #bbb;
-      filter: dropshadow(color=#aaa, offx=1, offy=1);
-      border: none;
-      @include input-placeholder{ 
-        color: #fff; 
-        text-shadow: 1px 1px 1px #ccc;
-        filter: dropshadow(color=#ddd, offx=1, offy=1);
-      };
-    }
-    .cc-number{
-      background-color: transparent;
-    }
-  }
-  */
 
 }
 
@@ -452,6 +427,7 @@ $sprite-front-height: 93.6em;
   .face.front{
     background-image: url('../images/products/discover-front.png'), $image-front-background;
   }
+
   .face.back{
     background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
@@ -470,6 +446,7 @@ $sprite-front-height: 93.6em;
     left: 13.15em;
     top: 11.61em;
   }
+
   .cc-cvc{
     top: 7.15em;
     left: 18.1em;
@@ -486,6 +463,7 @@ $sprite-front-height: 93.6em;
   .face.front{
     background-image: url('../images/products/jcb-front.png'), $image-front-background;
   }
+
   .face.back{
     background-image: url('../images/products/visa-back.png'), $image-generic-back;
   }
@@ -504,6 +482,7 @@ $sprite-front-height: 93.6em;
     left: 10.65em;
     top: 11.50em;
   }
+
   .cc-cvc{
     top: 7.15em;
     left: 18.1em;
@@ -516,10 +495,10 @@ body:after{
     display:none;
     content: url('../images/products/visa-back.png') // most use this
              url('../images/products/visa-front.png') 
+             url('../images/products/unionpay-front.png') 
              url('../images/products/amex-front.png') 
              url('../images/products/discover-front.png') 
              url('../images/products/mastercard-front.png') 
              url('../images/products/dinersclubintl-front.png')
-             url('../images/products/discover-front.png')
              url('../images/products/jcb-front.png');
 }
