@@ -102,14 +102,12 @@ $color-valid: #00CFA7;
 
   .flip-tab{
     position: absolute;
-    -webkit-border-radius: 3.55em;
-    border-radius: 3.55em;
-    cursor: pointer; cursor: hand;
-    height: 3.55em;
+    cursor: pointer;
     width: 13em;
     display: block;
     background: #666;
-    background-size: 1.375em 1.725em;
+    height: 3.55em;
+    @include vendor-prefix(border-radius, 3.55em);
     @include vendor-prefix(transition, all 0.25s ease);
     p{
       margin: 0.6em;
@@ -133,6 +131,7 @@ $color-valid: #00CFA7;
       &:hover{ left: -1.8em; }
     }
   }
+
   .flip-tab.prompt{
     background: $color-valid url('../images/card-valid-anim.gif') no-repeat;
     background-size: 2.3em 2.3em;
