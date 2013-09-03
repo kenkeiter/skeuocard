@@ -100,22 +100,14 @@ $color-valid: #00CFA7;
     }
   }
 
-  &.valid{
-    .card-body .face{
-      @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
-    }
-  }
-
   .flip-tab{
     position: absolute;
-    -webkit-border-radius: 3.55em;
-    border-radius: 3.55em;
-    cursor: pointer; cursor: hand;
-    height: 3.55em;
+    cursor: pointer;
     width: 13em;
     display: block;
     background: #666;
-    background-size: 1.375em 1.725em;
+    height: 3.55em;
+    @include vendor-prefix(border-radius, 3.55em);
     @include vendor-prefix(transition, all 0.25s ease);
     p{
       margin: 0.6em;
@@ -123,6 +115,10 @@ $color-valid: #00CFA7;
       color: #fff;
       font-size: 1.0em;
       line-height: 1.2em;
+    }
+    p strong{
+      color: #fff;
+      font-weight: bold;
     }
     &.front{
       right: -1.25em;
@@ -135,7 +131,8 @@ $color-valid: #00CFA7;
       &:hover{ left: -1.8em; }
     }
   }
-  .flip-tab.valid-anim{
+
+  .flip-tab.prompt{
     background: $color-valid url('../images/card-valid-anim.gif') no-repeat;
     background-size: 2.3em 2.3em;
     &.front{
@@ -155,11 +152,25 @@ $color-valid: #00CFA7;
       }
     }
   }
-  .flip-tab.prompt{
-    background-color: $color-valid;
-  }
   .flip-tab.warn{
-    background-color: $color-invalid;
+    background: $color-invalid url('../images/card-invalid-indicator.png') no-repeat;
+    background-size: 2.3em 2.3em;
+    &.front{
+      background-position: 10.08em 0.7em;
+      p{
+        margin-right: 2.9em;
+        margin-left: 1.25em;
+        margin-top: 0.6em;
+      }
+    }
+    &.back{
+      background-position: 0.6em 0.6em;
+      p{
+        margin-right: 1.25em;
+        margin-left: 2.9em;
+        margin-top: 0.6em;
+      }
+    }
   }
 
 }
