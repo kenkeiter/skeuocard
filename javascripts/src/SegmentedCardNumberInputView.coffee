@@ -121,8 +121,12 @@ class Skeuocard::SegmentedCardNumberInputView
 
     return true if e.ctrlKey or e.metaKey # ignore control keys
     
-    if @_state.selectingAll
-      @_endSelectAll() if (e.which in @_specialKeys)
+      
+    if @_state.selectingAll and 
+      (e.which in @_specialKeys) and 
+      e.which isnt @_keys.command and
+      e.which isnt @_keys.alt
+        @_endSelectAll()
 
     if not (e.which in @_specialKeys) and 
       not (e.shiftKey and e.which is @_keys.tab) and

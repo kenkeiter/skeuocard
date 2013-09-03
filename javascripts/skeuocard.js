@@ -740,10 +740,8 @@
       if (e.ctrlKey || e.metaKey) {
         return true;
       }
-      if (this._state.selectingAll) {
-        if ((_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0)) {
-          this._endSelectAll();
-        }
+      if (this._state.selectingAll && (_ref = e.which, __indexOf.call(this._specialKeys, _ref) >= 0) && e.which !== this._keys.command && e.which !== this._keys.alt) {
+        this._endSelectAll();
       }
       if (!(_ref1 = e.which, __indexOf.call(this._specialKeys, _ref1) >= 0) && !(e.shiftKey && e.which === this._keys.tab) && (cursorStart === inputMaxLength && cursorEnd === inputMaxLength) && nextInputEl.length !== 0) {
         this._focusField(nextInputEl.first(), 'start');
