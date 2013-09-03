@@ -19,7 +19,8 @@ class Skeuocard::FlipTabView
       @hide() unless newProduct?
 
   _faceStateChanged: (e, card, face, isFilled)->
-    @show() if isFilled is true
+    oppositeFace = if face is 'front' then 'back' else 'front'
+    @show() if isFilled is true and @card._inputViewsByFace[oppositeFace].length > 0
     @_state.opposingFaceFilled = isFilled if face isnt @face
     
     unless @_state.opposingFaceFilled is true

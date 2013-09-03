@@ -540,7 +540,9 @@
     }
 
     FlipTabView.prototype._faceStateChanged = function(e, card, face, isFilled) {
-      if (isFilled === true) {
+      var oppositeFace;
+      oppositeFace = face === 'front' ? 'back' : 'front';
+      if (isFilled === true && this.card._inputViewsByFace[oppositeFace].length > 0) {
         this.show();
       }
       if (face !== this.face) {
