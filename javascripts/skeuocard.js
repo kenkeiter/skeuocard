@@ -418,17 +418,23 @@
           front: [],
           back: []
         };
+        focused = $('*:focus');
         _ref = product.attrs.layout;
         for (fieldName in _ref) {
           destFace = _ref[fieldName];
           this._log("Moving", fieldName, "to", destFace);
-          focused = $('*:focus');
           viewEl = this._inputViews[fieldName].el.detach();
           viewEl.appendTo(this.el[destFace]);
-          focused.focus();
           this._inputViewsByFace[destFace].push(this._inputViews[fieldName]);
           this._inputViews[fieldName].show();
         }
+        setTimeout(function() {
+          var fieldEl, fieldLength;
+          fieldEl = focused.first();
+          fieldLength = fieldEl[0].maxLength;
+          fieldEl.focus();
+          return fieldEl[0].setSelectionRange(fieldLength, fieldLength);
+        }, 10);
       } else {
         _ref1 = this._inputViews;
         for (fieldName in _ref1) {
