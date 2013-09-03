@@ -49,7 +49,7 @@ module.exports = (grunt) ->
     watch:
       all:
         files: [
-          "./javascripts/src/skeuocard.coffee"
+          "./javascripts/src/*.coffee"
           "./styles/src/*.scss"
         ]
         tasks: ["coffee", "sass", "uglify"]
