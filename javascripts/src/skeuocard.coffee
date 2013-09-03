@@ -350,19 +350,19 @@ class Skeuocard
         maxlength: product.attrs.cvcLength
         placeholder: new Array(product.attrs.cvcLength + 1).join(@options.cardNumberPlaceholderChar)
     
-    # set visibility and layout of fields
-    @_inputViewsByFace = {front: [], back: []}
-    for fieldName, view of @_inputViews
-      destFace = product?.attrs.layout[fieldName] || null
-      if destFace?
-        if not @el[destFace].has(view.el).length > 0
-          @_log("Moving", fieldName, "to", destFace)
-          viewEl = view.el.detach()
-          viewEl.appendTo(@el[destFace])
-        @_inputViewsByFace[destFace].push view
-        view.show()
-      else if fieldName isnt 'number' # never hide number
-        view.hide()
+      # set visibility and re-layout fields
+      @_inputViewsByFace = {front: [], back: []}
+      for fieldName, destFace of product.attrs.layout
+        @_log("Moving", fieldName, "to", destFace)
+        focused = $('*:focus') # allow restoration of focus upon re-attachment
+        viewEl = @_inputViews[fieldName].el.detach()
+        viewEl.appendTo(@el[destFace])
+        focused.focus() # restore focus
+        @_inputViewsByFace[destFace].push @_inputViews[fieldName]
+        @_inputViews[fieldName].show()
+    else
+      for fieldName, view of @_inputViews
+        view.hide() if fieldName isnt 'number'
 
     return product
 
@@ -1278,7 +1278,7 @@ visaProduct.createVariation
   issuerName: "Chase Sapphire Card"
   issuerShortname: "chase-sapphire"
   layout:
+    name: 'front'
     number: 'front'
     exp: 'front'
-    name: 'front'
     cvc: 'front'
