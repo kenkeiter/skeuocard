@@ -1679,9 +1679,9 @@
     issuerName: "Chase Sapphire Card",
     issuerShortname: "chase-sapphire",
     layout: {
+      name: 'front',
       number: 'front',
       exp: 'front',
-      name: 'front',
       cvc: 'front'
     }
   });
