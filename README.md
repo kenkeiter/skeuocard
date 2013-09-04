@@ -22,7 +22,7 @@ $ bower install skeuocard
 
 ### Manually
 
-Or you can link the necessary style sheets and scripts, and make sure any asset dependenceis are at the right paths.
+Or you can link the necessary style sheets and scripts, and make sure any asset dependencies are at the right paths.
 
 ```html
 <head>
