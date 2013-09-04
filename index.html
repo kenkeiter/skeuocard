@@ -68,10 +68,13 @@
 
 <pre>
 Visa: 4111111111111111
-American Express: 371111111111114
-MasterCard: 5111111111111118
 Discover: 6011111111111117
-Diners Club: 30951111111116
+MasterCard: 5111111111111118
+Maestro: 5018111111111112
+JCB: 3511111111111119
+Union Pay: 6211111111111111
+American Express: 371111111111114
+Diners Club: 38111111111119
 </pre>
 
 <p>The numbers above will work with any expiration date (as long as it's in the future), any name, and any CVC code (the three or four digit verification code), since those are all validated on the server side upon authorization.</p>
@@ -111,7 +114,7 @@ Diners Club: 30951111111116
 
         if(isBrowserCompatible){
           window.card = new Skeuocard($("#skeuocard"), {
-            debug: true
+            debug: false
           });
         }
       });
