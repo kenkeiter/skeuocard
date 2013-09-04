@@ -1,6 +1,8 @@
-# Skeuocard (v1.0.0)
+# Skeuocard (v1.0.1)
 
 _Skeuocard_ is a re-think of the way we handle credit card input on the web. It progressively enhances credit card input forms so that the card inputs become skeuomorphic, facilitating accurate and fast card entry, and removing barriers to purchase.
+
+You can try it out at [http://kenkeiter.com/skeuocard](http://kenkeiter.com/skeuocard).
 
 For more on the theory behind Skeuocard, check out the blog post that started it all: [_"Redesigning Credit Card Inputs"_](http://kenkeiter.com/2013/07/21/redesigning-credit-card-inputs/) by [me (Ken Keiter)](http://kenkeiter.com/).
 
@@ -27,8 +29,8 @@ Or you can link the necessary style sheets and scripts, and make sure any asset 
   <!-- ... your CSS includes ... -->
   <link rel="stylesheet" href="styles/skeuocard.reset.css" />
   <link rel="stylesheet" href="styles/skeuocard.css" />
-  <script src="/javascripts/vendor/css_browser_selector.js"></script>
-  <script src="/javascripts/skeuocard.js"></script>
+  <link rel="stylesheet" href="styles/demo.css">
+  <script src="javascripts/vendor/cssua.min.js"></script>
   <!-- ... -->
 </head>
 ```
@@ -39,6 +41,9 @@ Side note: If you'd like to use different input `name`s or selectors, you can sp
 
 ```html
 <div class="credit-card-input no-js" id="skeuocard">
+  <p class="no-support-warning">
+    Either you have Javascript disabled, or you're using an unsupported browser, amigo! That's why you're seeing this old-school credit card input form instead of a fancy new Skeuocard. On the other hand, at least you know it gracefully degrades...
+  </p>
   <label for="cc_type">Card Type</label>
   <select name="cc_type">
     <option value="">...</option>
@@ -46,6 +51,7 @@ Side note: If you'd like to use different input `name`s or selectors, you can sp
     <option value="discover">Discover</option>
     <option value="mastercard">MasterCard</option>
     <option value="maestro">Maestro</option>
+    <option value="jcb">JCB</option>
     <option value="unionpay">China UnionPay</option>
     <option value="amex">American Express</option>
     <option value="dinersclubintl">Diners Club</option>
@@ -179,6 +185,16 @@ You can also optionally override this list by providing an array of accepted car
 ```javascript
 new Skeuocard($("#skeuocard"), {
   acceptedCardProducts: ['visa', 'amex']
+});
+```
+
+#### jQuery's noConflict Mode
+
+If you are using jQuery's `noConflict` mode, you'll need to instantiate your Skeuocard instance slightly differently than above:
+
+```javascript
+jQuery(document).ready(function(){
+  card = new Skeuocard(jQuery("#skeuocard"));
 });
 ```
 
