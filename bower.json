@@ -1,8 +1,12 @@
 {
   "name": "skeuocard",
-  "keywords": ["credit", "card", "skeuomorphism"],
+  "keywords": [
+    "credit",
+    "card",
+    "skeuomorphism"
+  ],
   "description": "Skeuocard progressively enhances credit card inputs to provide a skeuomorphic interface.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "The MIT License (MIT)",
   "readmeFilename": "README.md",
   "repository": {
@@ -12,14 +16,25 @@
   "main": [
     "styles/skeuocard.reset.css",
     "styles/skeuocard.css",
-    "javascripts/vendor/css_browser_selector.js",
-    "javascripts/skeuocard.js"
+    "javascripts/vendor/cssua.min.js",
+    "javascripts/vendor/demo.fix.js",
+    "javascripts/vendor/jquery-2.0.3.min.js",
+    "javascripts/skeuocard.js",
     "javascripts/skeuocard.min.js"
   ],
   "ignore": [
     "Gruntfile.coffee",
     "package.json",
     "index.html",
-    "screenshot.png"
+    "screenshot.png",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "homepage": "https://github.com/kenkeiter/skeuocard",
+  "authors": [
+    "Kenneth Keiter <ken@kenkeiter.com>"
   ]
 }
