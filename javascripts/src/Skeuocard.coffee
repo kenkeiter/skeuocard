@@ -293,11 +293,11 @@ class Skeuocard
     
     # If the valid state has changed, trigger events, and make styling changes.
     if validationStateChanged
-      @trigger "fieldValidationStateWillChange.skeuocard", [@, fieldName, isFilled]
+      @trigger "fieldValidationStateWillChange.skeuocard", [@, fieldName, isValid]
       @_inputViews[fieldName].el.toggleClass 'valid', isValid
       @_inputViews[fieldName].el.toggleClass 'invalid', not isValid
       @_state["#{fieldName}Valid"] = isValid
-      @trigger "fieldValidationStateDidChange.skeuocard", [@, fieldName, isFilled]
+      @trigger "fieldValidationStateDidChange.skeuocard", [@, fieldName, isValid]
 
     @_updateValidationForFace(@visibleFace)
 
@@ -355,7 +355,7 @@ class Skeuocard
     
       # set visibility and re-layout fields
       @_inputViewsByFace = {front: [], back: []}
-      focused = $('*:focus') # allow restoration of focus upon re-attachment
+      focused = $('input:focus') # allow restoration of focus upon re-attachment
       for fieldName, destFace of product.attrs.layout
         @_log("Moving", fieldName, "to", destFace)
         viewEl = @_inputViews[fieldName].el.detach()
@@ -364,10 +364,10 @@ class Skeuocard
         @_inputViews[fieldName].show()
       # Restore focus. Use setTimeout to resolve IE10 issue.
       setTimeout =>
-        fieldEl = focused.first()
-        fieldLength = fieldEl[0].maxLength
-        fieldEl.focus()
-        fieldEl[0].setSelectionRange(fieldLength, fieldLength)
+        if (fieldEl = focused.first())?
+          fieldLength = fieldEl[0].maxLength
+          fieldEl.focus()
+          fieldEl[0].setSelectionRange(fieldLength, fieldLength)
       , 10
     else
       for fieldName, view of @_inputViews

@@ -335,11 +335,11 @@
         this.trigger("fieldFillStateDidChange.skeuocard", [this, fieldName, isFilled]);
       }
       if (validationStateChanged) {
-        this.trigger("fieldValidationStateWillChange.skeuocard", [this, fieldName, isFilled]);
+        this.trigger("fieldValidationStateWillChange.skeuocard", [this, fieldName, isValid]);
         this._inputViews[fieldName].el.toggleClass('valid', isValid);
         this._inputViews[fieldName].el.toggleClass('invalid', !isValid);
         this._state["" + fieldName + "Valid"] = isValid;
-        this.trigger("fieldValidationStateDidChange.skeuocard", [this, fieldName, isFilled]);
+        this.trigger("fieldValidationStateDidChange.skeuocard", [this, fieldName, isValid]);
       }
       return this._updateValidationForFace(this.visibleFace);
     };
@@ -418,7 +418,7 @@
           front: [],
           back: []
         };
-        focused = $('*:focus');
+        focused = $('input:focus');
         _ref = product.attrs.layout;
         for (fieldName in _ref) {
           destFace = _ref[fieldName];
@@ -430,10 +430,11 @@
         }
         setTimeout(function() {
           var fieldEl, fieldLength;
-          fieldEl = focused.first();
-          fieldLength = fieldEl[0].maxLength;
-          fieldEl.focus();
-          return fieldEl[0].setSelectionRange(fieldLength, fieldLength);
+          if ((fieldEl = focused.first()) != null) {
+            fieldLength = fieldEl[0].maxLength;
+            fieldEl.focus();
+            return fieldEl[0].setSelectionRange(fieldLength, fieldLength);
+          }
         }, 10);
       } else {
         _ref1 = this._inputViews;
