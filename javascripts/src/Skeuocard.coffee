@@ -30,6 +30,7 @@ class Skeuocard
       acceptedCardProducts: null
       cardNumberPlaceholderChar: 'X'
       genericPlaceholder: "XXXX XXXX XXXX XXXX"
+      cardHolderPlaceholder: "YOUR NAME"
       typeInputSelector: '[name="cc_type"]'
       numberInputSelector: '[name="cc_number"]'
       expMonthInputSelector: '[name="cc_exp_month"]'
@@ -101,7 +102,7 @@ class Skeuocard
     @_inputViews =
       number: new @SegmentedCardNumberInputView()
       exp:    new @ExpirationInputView(currentDate: @options.currentDate)
-      name:   new @TextInputView(class: "cc-name", placeholder: "YOUR NAME")
+      name:   new @TextInputView(class: "cc-name", placeholder: @options.cardHolderPlaceholder)
       cvc:    new @TextInputView(class: "cc-cvc", placeholder: "XXX", requireMaxLength: true)
     # style and attach the number view to the DOM
     @_inputViews.number.el.addClass('cc-number')

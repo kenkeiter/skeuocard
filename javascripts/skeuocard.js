@@ -43,6 +43,7 @@
         acceptedCardProducts: null,
         cardNumberPlaceholderChar: 'X',
         genericPlaceholder: "XXXX XXXX XXXX XXXX",
+        cardHolderPlaceholder: "YOUR NAME",
         typeInputSelector: '[name="cc_type"]',
         numberInputSelector: '[name="cc_number"]',
         expMonthInputSelector: '[name="cc_exp_month"]',
@@ -134,7 +135,7 @@
         }),
         name: new this.TextInputView({
           "class": "cc-name",
-          placeholder: "YOUR NAME"
+          placeholder: this.options.cardHolderPlaceholder
         }),
         cvc: new this.TextInputView({
           "class": "cc-cvc",

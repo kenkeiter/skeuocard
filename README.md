@@ -121,9 +121,9 @@ $('[name="cc_number"]').val('4111111111111111').trigger('change')
 
 #### Changing Placeholder Strings
 
-You can change the character which Skeuocard uses as a placeholder for segmented card inputs, as well as the placeholder on the generic card view (visible when a card type has not been determined) by providing either of the following options at instantiation: `cardNumberPlaceholderChar` and `genericPlaceholder`.
+You can change the character which Skeuocard uses as a placeholder for segmented card inputs, as well as the placeholder on the generic card view (visible when a card type has not been determined) by providing either of the following options at instantiation: `cardNumberPlaceholderChar`, `genericPlaceholder` and `cardHolderPlaceholder`.
 
-`cardNumberPlaceholderChar` is used for filling only segmented inputs (i.e. "[XXXX] [XXXX] [XXXX] [XXXX]") and is by default set to `X`. The `genericPlaceholder` value is used when the card type has not yet been determined, and is by default set to `XXXX XXXX XXXX XXXX`.
+`cardNumberPlaceholderChar` is used for filling only segmented inputs (i.e. "[XXXX] [XXXX] [XXXX] [XXXX]") and is by default set to `X`. The `genericPlaceholder` value is used when the card type has not yet been determined, and is by default set to `XXXX XXXX XXXX XXXX`. `cardHolderPlaceholder` value is used for the name of the cardholder.
 
 ```javascript
 new Skeuocard($("#skeuocard"), {
