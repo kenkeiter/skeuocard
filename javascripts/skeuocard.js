@@ -95,7 +95,7 @@
     Skeuocard.prototype._conformDOM = function() {
       this.el.container.removeClass('no-js');
       this.el.container.addClass("skeuocard js");
-      this.el.container.find("> :not(input,select,textarea)").remove();
+      this.el.container.find("> :not(input,select,textarea)").hide();
       this.el.container.find("> input,select,textarea").hide();
       this.el.underlyingFields = {
         type: this.el.container.find(this.options.typeInputSelector),
