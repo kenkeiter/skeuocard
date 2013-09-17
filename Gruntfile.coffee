@@ -55,7 +55,7 @@ module.exports = (grunt) ->
         ]
         tasks: ["coffee", "sass", "uglify"]
         options:
-          livereload: true
+          livereload: 35728
 
 
   # Load plugins
