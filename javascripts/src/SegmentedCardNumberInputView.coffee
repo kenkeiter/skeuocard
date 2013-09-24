@@ -140,8 +140,8 @@ class Skeuocard::SegmentedCardNumberInputView
     return true
 
   _handleModifiedKeyDown: (e)->
-    char = String.fromCharCode(e.which)
-    switch char
+    chr = String.fromCharCode(e.which)
+    switch chr
       when 'a', 'A'
         @_beginSelectAll()
         e.preventDefault()
