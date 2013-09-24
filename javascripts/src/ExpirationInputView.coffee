@@ -48,10 +48,10 @@ class Skeuocard::ExpirationInputView
     groupings = []
     patternParts = pattern.split('')
     _currentLength = 0
-    for char, i in patternParts
+    for chr, i in patternParts
       _currentLength++
-      if patternParts[i+1] != char
-        groupings.push([_currentLength, char])
+      if patternParts[i+1] != chr
+        groupings.push([_currentLength, chr])
         _currentLength = 0
     @options.groupings = groupings
     @_setGroupings(@options.groupings)
