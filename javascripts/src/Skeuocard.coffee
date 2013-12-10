@@ -72,8 +72,9 @@ class Skeuocard
     @el.container.removeClass('no-js')
     @el.container.addClass("skeuocard js")
     # remove anything that's not an underlying form field
-    @el.container.find("> :not(input,select,textarea)").remove()
-    @el.container.find("> input,select,textarea").hide()
+    @inputs = @el.container.find(":input").detach();
+    @el.container.empty();
+    @inputs.hide().appendTo(@el.container);
     # Attach underlying form fields.
     @el.underlyingFields =
       type: @el.container.find(@options.typeInputSelector)
