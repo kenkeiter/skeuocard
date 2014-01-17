@@ -71,6 +71,8 @@ class Skeuocard
   _conformDOM: ->
     @el.container.removeClass('no-js')
     @el.container.addClass("skeuocard js")
+    if @options.twoFace
+      @el.container.addClass("two-face")
     # remove anything that's not an underlying form field
     @el.container.find("> :not(input,select,textarea)").remove()
     @el.container.find("> input,select,textarea").hide()

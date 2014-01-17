@@ -288,6 +288,17 @@ visaProduct.createVariation({
 });
 ```
 
+#### Two-Face Mode
+![Skeuocard two-face.](https://raw2.github.com/cvrabie/skeuocard/master/screenshot-two-face.png)
+
+You can make both faces of the card visible at the same time and disable the flip by simply adding the `two-face` class on the `skeuocard` element. You can also specify it in the initialization parameters.
+
+```javascript
+new Skeuocard($("#skeuocard"), {
+  twoFace: true
+});
+```
+
 #### Design Customization
 
 You might not like the way Skeuocard looks. That's easy to fix; CSS is used to style and position most elements in Skeuocard, with the exception of the card faces.

@@ -95,6 +95,9 @@
     Skeuocard.prototype._conformDOM = function() {
       this.el.container.removeClass('no-js');
       this.el.container.addClass("skeuocard js");
+      if (this.options.twoFace) {
+        this.el.container.addClass("two-face");
+      }
       this.el.container.find("> :not(input,select,textarea)").remove();
       this.el.container.find("> input,select,textarea").hide();
       this.el.underlyingFields = {

@@ -15,6 +15,10 @@
 
 $cc-face-width: 24.8em;
 $cc-face-height: 15.6em;
+$cc-two-face-pad-x: 4.2em;
+$cc-two-face-pad-y: 4.4em;
+$cc-two-face-width: $cc-face-width + $cc-two-face-pad-x;
+$cc-two-face-height: $cc-face-height + $cc-two-face-pad-y;
 
 $cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 $cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
@@ -80,7 +84,7 @@ $color-valid: #00CFA7;
       -o-transform: rotateY(-180deg);
       -ms-transform: rotateY(-180deg);
       transform: rotateY(-180deg);
-    }
+    }        
   }
 
   .card-body.flip {
@@ -173,6 +177,36 @@ $color-valid: #00CFA7;
     }
   }
 
+  &.two-face{
+    width: $cc-two-face-width;
+    height: $cc-two-face-height;
+
+    .card-body{
+      .face.back{
+        top: $cc-two-face-pad-y;
+        left: $cc-two-face-pad-x;
+
+        -webkit-transform: rotateY(0deg);
+        -moz-transform: rotateY(0deg);
+        -o-transform: rotateY(0deg);
+        -ms-transform: rotateY(0deg);
+        transform: rotateY(0deg);
+      }   
+      &.flip{
+        .face.front{
+          -webkit-transform: rotateY(0deg);
+          -moz-transform: rotateY(0deg);
+          -o-transform: rotateY(0deg);
+          -ms-transform: rotateY(0deg);
+          transform: rotateY(0deg);
+        }
+      }
+    }
+
+    .flip-tab{
+      display: none!important;
+    }
+  }
 }
 
 @import "_cards";
