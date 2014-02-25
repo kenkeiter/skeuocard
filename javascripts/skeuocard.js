@@ -504,7 +504,13 @@
     };
 
     Skeuocard.prototype.isValid = function() {
-      return !this.el.front.hasClass('invalid') && !this.el.back.hasClass('invalid');
+      if (this.product.faces === 'both') {
+        return !this.el.front.hasClass('invalid') && !this.el.back.hasClass('invalid');
+      } else if (this.product.faces === 'front') {
+        return !this.el.front.hasClass('invalid');
+      } else {
+        return !this.el.back.hasClass('invalid');
+      }
     };
 
     return Skeuocard;
@@ -1372,6 +1378,14 @@
         isFilled: this._isCardCVCFilled.bind(this),
         isValid: this._isCardCVCValid.bind(this)
       };
+      var faces = { front: 0, back: 0 }
+      for (k in attrs.layout) { faces[attrs.layout[k]] += 1; }
+      if (faces.front > 0 && faces.back > 0) {
+        this.faces = 'both';
+      } else {
+        this.faces = faces.front > 0 ? 'front' : 'back';
+      }
+
     }
 
     CardProduct.prototype.createVariation = function(attrs) {
