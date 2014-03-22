@@ -340,6 +340,18 @@
         this._inputViews[fieldName].el.toggleClass('invalid', !isValid);
         this._state["" + fieldName + "Valid"] = isValid;
         this.trigger("fieldValidationStateDidChange.skeuocard", [this, fieldName, isValid]);
+        if(isValid && this._state["cvcFilled"] != null) {
+    		if(this._state["expFilled"] != null &&  this._state["nameFilled"] != null && 
+    				this._state["cvcFilled"] != null) {
+    			if(this.options.validationSuccess != undefined) {
+    		       this.options.validationSuccess.call();
+    		       return this._updateValidationForFace(this.visibleFace);
+    			}
+    		}
+        }
+        if(this.options.validationFailed != undefined) {
+           this.options.validationFailed.call();
+        }
       }
       return this._updateValidationForFace(this.visibleFace);
     };
@@ -1685,3 +1697,4 @@
   });
 
 }).call(this);
+
