@@ -130,7 +130,7 @@ class Skeuocard
         @options.initialValues[fieldName] = @options.initialValues[fieldName].toString()
         @_setUnderlyingValue(fieldName, @options.initialValues[fieldName])
       # set a flag if any fields were initially filled
-      if @options.initialValues[fieldName].length > 0
+      if @options.initialValues[fieldName]?.length > 0
         @_state['initiallyFilled'] = true
       # import initial validation state
       unless @options.validationState[fieldName]?
@@ -146,17 +146,17 @@ class Skeuocard
         @options.acceptedCardProducts.push shortname
 
     # setup default values; when render is called, these will be picked up
-    if @options.initialValues.number.length > 0
+    if @options.initialValues.number?.length > 0
       @set 'number', @options.initialValues.number
     
-    if @options.initialValues.name.length > 0
+    if @options.initialValues.name?.length > 0
       @set 'name', @options.initialValues.name
 
-    if @options.initialValues.cvc.length > 0
+    if @options.initialValues.cvc?.length > 0
       @set 'cvc', @options.initialValues.cvc
 
-    if @options.initialValues.expYear.length > 0 and
-      @options.initialValues.expMonth.length > 0
+    if @options.initialValues.expYear?.length > 0 and
+      @options.initialValues.expMonth?.length > 0
         _initialExp = new Date parseInt(@options.initialValues.expYear),
                                parseInt(@options.initialValues.expMonth) - 1, 1
         @set 'exp', _initialExp
