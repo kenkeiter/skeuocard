@@ -161,6 +161,8 @@ If you're smart, you probably won't want to use the client's local `Date` to val
 Skeuocard.currentDate = new Date(year, month, day);
 ```
 
+Note that month is an integer from 0 - 11.
+
 By default, Skeuocard will automatically use the client's local Date.
 
 #### Specifying Accepted Card Products
