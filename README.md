@@ -104,7 +104,7 @@ new Skeuocard($("#skeuocard"), {
   initialValues: {
     number: "4111111111111111",
     expMonth: "1",
-    expYear: "2016"
+    expYear: "2016",
     name: "James Doe",
     cvc: "123"
   }
