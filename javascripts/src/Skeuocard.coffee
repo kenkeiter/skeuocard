@@ -27,6 +27,7 @@ class Skeuocard
     # configure default opts
     optDefaults = 
       debug: false
+      dontFocus: false
       acceptedCardProducts: null
       cardNumberPlaceholderChar: 'X'
       genericPlaceholder: "XXXX XXXX XXXX XXXX"
@@ -343,7 +344,8 @@ class Skeuocard
     @_setUnderlyingValue('type', product?.attrs.companyShortname || null)
     # reconfigure the number input groupings
     @_inputViews.number.setGroupings(product?.attrs.cardNumberGrouping || 
-                                     [@options.genericPlaceholder.length])
+                                     [@options.genericPlaceholder.length], @options.dontFocus)
+    delete @options.dontFocus
     if product?
       # reconfigure the expiration input groupings
       @_inputViews.exp.reconfigure

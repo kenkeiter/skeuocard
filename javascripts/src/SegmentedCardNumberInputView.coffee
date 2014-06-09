@@ -190,7 +190,7 @@ class Skeuocard::SegmentedCardNumberInputView
     offset += len for len, i in @options.groupings when i < groupingIndex
     return offset + field[0].selectionEnd
 
-  setGroupings: (groupings)->
+  setGroupings: (groupings, dontFocus)->
     # store the value and current caret position so we can reapply it
     _currentField = @_getFocusedField()
     _value = @getValue()
@@ -210,18 +210,18 @@ class Skeuocard::SegmentedCardNumberInputView
       @el.append(groupEl)
     @options.groupings = groupings
     @setValue(_value)
-    _currentField = @_focusFieldForValue([_caretPosition, _caretPosition])
+    _currentField = @_focusFieldForValue([_caretPosition, _caretPosition], dontFocus)
     if _currentField? and _currentField[0].selectionEnd is _currentField[0].maxLength
       @_focusField(_currentField.next(), 'start')
 
-  _focusFieldForValue: (place)->
+  _focusFieldForValue: (place, dontFocus)->
     value = @getValue()
     if place is 'start'
       field = @el.find('input').first()
-      @_focusField(field, place)
+      @_focusField(field, place) unless dontFocus
     else if place is 'end'
       field = @el.find('input').last()
-      @_focusField(field, place)
+      @_focusField(field, place) unless dontFocus
     else
       field = null
       fieldOffset = null
@@ -232,9 +232,9 @@ class Skeuocard::SegmentedCardNumberInputView
           fieldPosition = place[1] - _lastStartPos
         _lastStartPos += groupLength
       if field? and fieldPosition?
-        @_focusField(field, [fieldPosition, fieldPosition])
+        @_focusField(field, [fieldPosition, fieldPosition]) unless dontFocus
       else
-        @_focusField(@el.find('input'), 'end')
+        @_focusField(@el.find('input'), 'end') unless dontFocus
     return field
 
   _focusField: (field, place)->

@@ -1,16 +1,17 @@
-# Thanks to Jackson Gariety (https://github.com/jacksongariety/) for 
+# Thanks to Jackson Gariety (https://github.com/jacksongariety/) for
 # contributing the initial version of this Gruntfile.
 
 module.exports = (grunt) ->
+  path = require('path')
   # Configure plugins
   grunt.initConfig
-    
+
     express:
       all:
         options:
           port: 8000
           hostname: "0.0.0.0"
-          bases: ['.']
+          bases: [path.resolve(__dirname, '.')]
 
     open:
       all:
@@ -56,7 +57,7 @@ module.exports = (grunt) ->
         options:
           livereload: true
 
-  
+
   # Load plugins
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-contrib-coffee"
