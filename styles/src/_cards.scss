@@ -31,8 +31,6 @@ $sprite-front-height: 93.6em;
     @include vendor-prefix(box-shadow, 0 0 10px $color-valid);
   }
 
-
-
   /* 
   1. If a field (or group) has focus, regardless of whether it's filled, the 
      inputs should look like inputs.
@@ -487,6 +485,22 @@ $sprite-front-height: 93.6em;
     top: 7.15em;
     left: 18.1em;
     width: 3em;
+  }
+}
+
+.skeuocard.js.two-face, 
+.skeuocard.js.two-face.product-visa,
+.skeuocard.js.two-face.issuer-chase-sapphire,
+.skeuocard.js.two-face.product-dinersclubintl,
+.skeuocard.js.two-face.product-mastercard
+.skeuocard.js.two-face.product-maestro,
+.skeuocard.js.two-face.product-discover,
+.skeuocard.js.two-face.product-jcb{
+  .face.back {
+    background-image: url('../images/products/visa-back-two-face.png'), $image-generic-back;
+  }
+  .cc-cvc{      
+    top: 12.70em;
   }
 }
 
