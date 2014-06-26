@@ -1212,8 +1212,8 @@
       day = this.getRawValue('d') || 1;
       month = this.getRawValue('m');
       year = this.getRawValue('y');
-      if (month === 0 || year === 0) {
-        this.date = null;
+      if (month === 0 || month > 11 || year === 0) {
+        this.date = new Date(1900, 0, 1);
       } else {
         if (year < 2000) {
           year += 2000;
