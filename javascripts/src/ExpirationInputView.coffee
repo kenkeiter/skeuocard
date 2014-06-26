@@ -187,7 +187,7 @@ class Skeuocard::ExpirationInputView
     day = @getRawValue('d') || 1
     month = @getRawValue('m')
     year = @getRawValue('y')
-    if month is 0 or month > 11 or year is 0
+    if month is 0 or month > 12 or year is 0
       @date = new Date(1900, 0, 1)
     else
       year += 2000 if year < 2000
