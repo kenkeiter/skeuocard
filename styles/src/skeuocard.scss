@@ -1,3 +1,4 @@
+@import "variables";
 @import "util";
 
 /* Sizing is 1em = 20px */
@@ -13,19 +14,9 @@
   font-style: normal;
 }
 
-$cc-face-width: 24.8em;
-$cc-face-height: 15.6em;
-
-$cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
-
-$color-field-glow: #0096de;
-$color-invalid: #ff655a;
-$color-valid: #00CFA7;
-
 .skeuocard.js {
-  width: $cc-face-width;
-  height: $cc-face-height;
+  width: $card-face-width;
+  height: $card-face-height;
 
   -webkit-perspective: 1000;
   -moz-perspective: 1000;
@@ -60,8 +51,8 @@ $color-valid: #00CFA7;
       position: absolute;
       top: 0;
       left: 0;
-      width: $cc-face-width;
-      height: $cc-face-height;
+      width: $card-face-width;
+      height: $card-face-height;
       -webkit-border-radius: 1.15em;
       border-radius: 1.15em;
       background-color: #eee;
@@ -133,7 +124,7 @@ $color-valid: #00CFA7;
   }
 
   .flip-tab.prompt{
-    background: $color-valid url('../images/card-valid-anim.gif') no-repeat;
+    background: $color-valid $image-card-valid-anim no-repeat;
     background-size: 2.3em 2.3em;
     &.front{
       background-position: 10.05em 0.6em;
@@ -153,7 +144,7 @@ $color-valid: #00CFA7;
     }
   }
   .flip-tab.warn{
-    background: $color-invalid url('../images/card-invalid-indicator.png') no-repeat;
+    background: $color-invalid $image-card-invalid-indicator no-repeat;
     background-size: 2.3em 2.3em;
     &.front{
       background-position: 10.08em 0.7em;
