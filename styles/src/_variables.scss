@@ -1,0 +1,31 @@
+$card-face-width: 24.8em;
+$card-face-height: 15.6em;
+
+$sprite-front-height: 93.6em;
+
+$cc-label-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$cc-field-family: "ocraregular", "OCR A Std", "OCR A", Courier, "Courier New", monospace;
+
+$color-field-glow: #0096de;
+$color-invalid: #ff655a;
+$color-valid: #00CFA7;
+
+$image-front-background: url('../images/card-front-background.png');
+$image-generic-front: url('../images/products/generic-front.png');
+$image-generic-back: url('../images/products/generic-back.png');
+
+$image-visa-front: url('../images/products/visa-front.png');
+$image-visa-back: url('../images/products/visa-back.png');
+$image-visa-chase-sapphire: url('../images/issuers/visa-chase-sapphire.png');
+
+$image-unionpay-front: url('../images/products/unionpay-front.png');
+$image-amex-front: url('../images/products/amex-front.png');
+$image-dinersclubintl-front: url('../images/products/dinersclubintl-front.png');
+$image-mastercard-front: url('../images/products/mastercard-front.png');
+$image-maestro-front: url('../images/products/maestro-front.png');
+$image-discover-front: url('../images/products/discover-front.png');
+$image-jcb-front: url('../images/products/jcb-front.png');
+
+$image-card-valid-anim: url('../images/products/jcb-front.png');
+$image-card-invalid-indicator: url('../images/products/jcb-front.png');
+
