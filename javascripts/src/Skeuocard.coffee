@@ -180,6 +180,8 @@ class Skeuocard
     _expirationChange = (e)=>
       month = parseInt @_getUnderlyingValue('expMonth')
       year  = parseInt @_getUnderlyingValue('expYear')
+      if isNaN month then month = 1
+      if isNaN year then year = 0
       @_inputViews.exp.setValue new Date(year, month - 1)
       @render()
 
@@ -187,11 +189,11 @@ class Skeuocard
     @el.underlyingFields.expYear.bind "change", _expirationChange
 
     @el.underlyingFields.name.bind "change", (e)=> 
-      @_inputViews.exp.setValue @_getUnderlyingValue('name')
+      @_inputViews.name.setValue @_getUnderlyingValue('name')
       @render()
 
     @el.underlyingFields.cvc.bind "change", (e)=> 
-      @_inputViews.exp.setValue @_getUnderlyingValue('cvc')
+      @_inputViews.cvc.setValue @_getUnderlyingValue('cvc')
       @render()
 
     # bind change events to their underlying form elements
@@ -417,7 +419,7 @@ class Skeuocard
     @el.underlyingFields[field]?.val()
 
   isValid: ->
-    not @el.front.hasClass('invalid') and not @el.back.hasClass('invalid')
+    not @el.front.hasClass('invalid') and (not @el.back.hasClass('invalid') or @_inputViewsByFace.back.length < 1)
 
 
 # Export the object.
