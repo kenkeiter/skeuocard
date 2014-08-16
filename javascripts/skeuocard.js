@@ -510,7 +510,7 @@
     };
 
     Skeuocard.prototype.isValid = function() {
-      return !this.el.front.hasClass('invalid') && !this.el.back.hasClass('invalid');
+      return !this.el.front.hasClass('invalid') && (!this.el.back.hasClass('invalid') || this._inputViewsByFace.back.length < 1);
     };
 
     return Skeuocard;

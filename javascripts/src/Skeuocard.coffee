@@ -419,7 +419,7 @@ class Skeuocard
     @el.underlyingFields[field]?.val()
 
   isValid: ->
-    not @el.front.hasClass('invalid') and not @el.back.hasClass('invalid')
+    not @el.front.hasClass('invalid') and (not @el.back.hasClass('invalid') or @_inputViewsByFace.back.length < 1)
 
 
 # Export the object.
