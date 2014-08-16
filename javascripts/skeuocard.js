@@ -223,17 +223,23 @@
         var month, year;
         month = parseInt(_this._getUnderlyingValue('expMonth'));
         year = parseInt(_this._getUnderlyingValue('expYear'));
+        if (isNaN(month)) {
+          month = 1;
+        }
+        if (isNaN(year)) {
+          year = 0;
+        }
         _this._inputViews.exp.setValue(new Date(year, month - 1));
         return _this.render();
       };
       this.el.underlyingFields.expMonth.bind("change", _expirationChange);
       this.el.underlyingFields.expYear.bind("change", _expirationChange);
       this.el.underlyingFields.name.bind("change", function(e) {
-        _this._inputViews.exp.setValue(_this._getUnderlyingValue('name'));
+        _this._inputViews.name.setValue(_this._getUnderlyingValue('name'));
         return _this.render();
       });
       this.el.underlyingFields.cvc.bind("change", function(e) {
-        _this._inputViews.exp.setValue(_this._getUnderlyingValue('cvc'));
+        _this._inputViews.cvc.setValue(_this._getUnderlyingValue('cvc'));
         return _this.render();
       });
       this._inputViews.number.bind("change valueChanged", function(e, input) {
