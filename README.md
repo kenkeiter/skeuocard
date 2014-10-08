@@ -22,7 +22,7 @@ $ bower install skeuocard
 
 ### Manually
 
-Or you can link the necessary style sheets and scripts, and make sure any asset dependenceis are at the right paths.
+Or you can link the necessary style sheets and scripts, and make sure any asset dependencies are at the right paths.
 
 ```html
 <head>
@@ -93,6 +93,17 @@ new Skeuocard($("#skeuocard"), {
 });
 ```
 
+#### Turn off Focusing the Input by Default
+
+By default, when Skeuocard is initialized, the input field will be focused.  If you don't want this to happen (for example, if the skeuocard element is positioned below the fold and you want to prevent the browser from scrolling there), then pass `dontFocus: true` as an initialization option.
+
+```javascript
+new Skeuocard($("#skeuocard"), {
+  dontFocus: true
+});
+
+```
+
 #### Providing Initial Values
 
 Sometimes you'll need to pre-fill credit card information when you load the page. To do so, you can simply provide a `value` attribute for your form fields (or `<option selected ...>`, in the case of a `<select>`), and Skeuocard will pick up your initial values when instantiated.
@@ -104,7 +115,7 @@ new Skeuocard($("#skeuocard"), {
   initialValues: {
     number: "4111111111111111",
     expMonth: "1",
-    expYear: "2016"
+    expYear: "2016",
     name: "James Doe",
     cvc: "123"
   }
