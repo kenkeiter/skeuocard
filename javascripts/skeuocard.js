@@ -13,6 +13,7 @@
 (function() {
   var $, Skeuocard, visaProduct,
     __slice = [].slice,
+    __hasProp = {}.hasOwnProperty,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   $ = jQuery;
@@ -94,10 +95,9 @@
 
 
     Skeuocard.prototype._conformDOM = function() {
+      var elem, name, _ref, _ref1;
       this.el.container.removeClass('no-js');
       this.el.container.addClass("skeuocard js");
-      this.el.container.find("> :not(input,select,textarea)").remove();
-      this.el.container.find("> input,select,textarea").hide();
       this.el.underlyingFields = {
         type: this.el.container.find(this.options.typeInputSelector),
         number: this.el.container.find(this.options.numberInputSelector),
@@ -106,6 +106,20 @@
         name: this.el.container.find(this.options.nameInputSelector),
         cvc: this.el.container.find(this.options.cvcInputSelector)
       };
+      _ref = this.el.underlyingFields;
+      for (name in _ref) {
+        if (!__hasProp.call(_ref, name)) continue;
+        elem = _ref[name];
+        $(elem).detach();
+      }
+      this.el.container.find("> :not(input,select,textarea)").remove();
+      _ref1 = this.el.underlyingFields;
+      for (name in _ref1) {
+        if (!__hasProp.call(_ref1, name)) continue;
+        elem = _ref1[name];
+        $(elem).appendTo(this.el.container);
+      }
+      this.el.container.find("> input,select,textarea").hide();
       this.el.front = $("<div>").attr({
         "class": "face front"
       });
