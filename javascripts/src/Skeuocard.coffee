@@ -371,7 +371,8 @@ class Skeuocard
         @_inputViews[fieldName].show()
       # Restore focus. Use setTimeout to resolve IE10 issue.
       setTimeout =>
-        if (fieldEl = focused.first())?
+        fieldEl = focused.first()
+        if fieldEl.length
           fieldLength = fieldEl[0].maxLength
           fieldEl.focus()
           fieldEl[0].setSelectionRange(fieldLength, fieldLength)

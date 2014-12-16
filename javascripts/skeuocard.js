@@ -446,7 +446,8 @@
         }
         setTimeout(function() {
           var fieldEl, fieldLength;
-          if ((fieldEl = focused.first()) != null) {
+          fieldEl = focused.first();
+          if (fieldEl.length) {
             fieldLength = fieldEl[0].maxLength;
             fieldEl.focus();
             return fieldEl[0].setSelectionRange(fieldLength, fieldLength);
