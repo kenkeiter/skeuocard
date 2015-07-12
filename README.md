@@ -1,3 +1,11 @@
+# Looking for a new maintainer!
+
+Unfortunately, I haven't been able to find the time that I would like to dedicate to this project. Although it is still widely stable on most browsers, the internet is an inherently unstable place, and the usability of Skeuocard will deteriorate over time if not maintained and improved. To further the use of Skeuocard, **I'm looking for a new maintainer for the Skeuocard project.**
+
+To those of you that have submitted issues and pull requests: thank you so much for your time, attention to detail, and effort. I'm sorry that I haven't been able to return that. This was always meant to be at worst an experiment, and at best, a gift. I hope you enjoy Skeuocard, and I hope that we find a maintainer who can give this the attention your interest has demonstrated that it deserves.
+
+If you believe yourself or someone you know to be qualified, please reach out to me via email: [ken+skeuocard@kenkeiter.com](mailto:ken+skeuocard@kenkeiter.com).
+
 # Skeuocard (v1.0.3)
 
 _Skeuocard_ is a re-think of the way we handle credit card input on the web. It progressively enhances credit card input forms so that the card inputs become skeuomorphic, facilitating accurate and fast card entry, and removing barriers to purchase.
