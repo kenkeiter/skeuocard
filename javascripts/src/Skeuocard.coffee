@@ -72,9 +72,7 @@ class Skeuocard
   _conformDOM: ->
     @el.container.removeClass('no-js')
     @el.container.addClass("skeuocard js")
-    # remove anything that's not an underlying form field
-    @el.container.find("> :not(input,select,textarea)").remove()
-    @el.container.find("> input,select,textarea").hide()
+
     # Attach underlying form fields.
     @el.underlyingFields =
       type: @el.container.find(@options.typeInputSelector)
@@ -83,6 +81,13 @@ class Skeuocard
       expYear: @el.container.find(@options.expYearInputSelector)
       name: @el.container.find(@options.nameInputSelector)
       cvc: @el.container.find(@options.cvcInputSelector)
+
+    # remove anything that's not an underlying form field
+    $(elem).detach() for own name, elem of @el.underlyingFields
+    @el.container.find("> :not(input,select,textarea)").remove()
+    $(elem).appendTo(@el.container) for own name, elem of @el.underlyingFields
+    @el.container.find("> input,select,textarea").hide()
+
     # construct the necessary card elements
     @el.front    = $("<div>").attr(class: "face front")
     @el.back     = $("<div>").attr(class: "face back")
@@ -366,7 +371,8 @@ class Skeuocard
         @_inputViews[fieldName].show()
       # Restore focus. Use setTimeout to resolve IE10 issue.
       setTimeout =>
-        if (fieldEl = focused.first())?
+        fieldEl = focused.first()
+        if fieldEl.length
           fieldLength = fieldEl[0].maxLength
           fieldEl.focus()
           fieldEl[0].setSelectionRange(fieldLength, fieldLength)
