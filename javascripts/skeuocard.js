@@ -841,7 +841,7 @@
       for (_i = 0, _len = groupings.length; _i < _len; _i++) {
         groupLength = groupings[_i];
         groupEl = $("<input>").attr({
-          type: 'text',
+          type: 'number',
           pattern: '[0-9]*',
           size: groupLength,
           maxlength: groupLength,
@@ -1079,7 +1079,7 @@
         groupChar = group[1];
         if (__indexOf.call(fieldChars, groupChar) >= 0) {
           input = $('<input>').attr({
-            type: 'text',
+            type: 'number',
             pattern: '[0-9]*',
             placeholder: new Array(groupLength + 1).join(groupChar),
             maxlength: groupLength,
