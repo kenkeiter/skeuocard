@@ -1646,7 +1646,7 @@
   });
 
   Skeuocard.prototype.CardProduct.create({
-    pattern: /^(5018|5020|5038|6304|6759|676[1-3])/,
+    pattern: /^(5018|5020|5038|6304|6759|6711|676[1-3])/,
     companyName: "Maestro (MasterCard)",
     companyShortname: "maestro",
     cardNumberGrouping: [4, 4, 4, 4],
